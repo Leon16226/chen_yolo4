@@ -1,0 +1,10 @@
+train: /home/chen/PyTorch_YOLOv4s/VOCdevkit/images/train
+val: /home/chen/PyTorch_YOLOv4s/VOCdevkit/images/val
+test: /home/chen/PyTorch_YOLOv4s/VOCdevkit/images/val
+
+nc: 20
+
+
+names : ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus",
+           "car", "cat", "chair", "cow", "diningtable", "dog", "horse",
+           "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
