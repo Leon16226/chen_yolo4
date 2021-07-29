@@ -175,10 +175,6 @@ def train(hyp, opt, device, tb_writer=None):
         if tb_writer:
             tb_writer.add_histogram('classes', c, 0)
 
-        # Check anchors
-        #if not opt.noautoanchor:
-        #    check_anchors(dataset, model=model, thr=hyp['anchor_t'], imgsz=imgsz)
-
     # Start training
     t0 = time.time()
     nw = max(3 * nb, 1e3)  # number of warmup iterations, max(3 epochs, 1k iterations)
@@ -216,10 +212,6 @@ def train(hyp, opt, device, tb_writer=None):
                 dist.broadcast(indices, 0)
                 if rank != 0:
                     dataset.indices = indices.cpu().numpy()
-
-        # Update mosaic border
-        # b = int(random.uniform(0.25 * imgsz, 0.75 * imgsz + gs) // gs * gs)
-        # dataset.mosaic_border = [b - imgsz, -b]  # height, width borders
 
         mloss = torch.zeros(4, device=device)  # mean losses
         if rank != -1:
@@ -410,8 +402,6 @@ if __name__ == '__main__':
         if last and not opt.weights:
             print(f'Resuming training from {last}')
         opt.weights = last if opt.resume and not opt.weights else opt.weights
-    # if opt.local_rank == -1 or ("RANK" in os.environ and os.environ["RANK"] == "0"):
-    #     check_git_status()
 
     opt.hyp = opt.hyp or ('data/hyp.scratch.yaml')
     opt.data, opt.cfg, opt.hyp = check_file(opt.data), check_file(opt.cfg), check_file(opt.hyp)  # check files
