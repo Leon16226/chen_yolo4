@@ -30,8 +30,9 @@ from utils.torch_utils import init_seeds, ModelEMA, select_device, intersect_dic
 
 
 def train(hyp, opt, device, tb_writer=None):
+    # init
     print(f'Hyperparameters {hyp}')
-    log_dir = Path(tb_writer.log_dir) if tb_writer else Path(opt.logdir) / 'evolve'  # logging directory
+    log_dir = Path(opt.logdir) / 'evolve'  # logging directory
     wdir = str(log_dir / 'weights') + os.sep  # weights directory
     os.makedirs(wdir, exist_ok=True)
     last = wdir + 'last.pt'
@@ -75,7 +76,7 @@ def train(hyp, opt, device, tb_writer=None):
     accumulate = max(round(nbs / total_batch_size), 1)  # accumulate loss before optimizing
     hyp['weight_decay'] *= total_batch_size * accumulate / nbs  # scale weight_decay
 
-    pg0, pg1, pg2 = [], [], []  # optimizer parameter groups
+    pg0, pg1, pg2 = [], [], []  # optimizer parameter groups------------------------------------------------------------
     for k, v in dict(model.named_parameters()).items():
         if '.bias' in k:
             pg2.append(v)  # biases
@@ -98,7 +99,6 @@ def train(hyp, opt, device, tb_writer=None):
     # https://pytorch.org/docs/stable/_modules/torch/optim/lr_scheduler.html#OneCycleLR
     lf = lambda x: (((1 + math.cos(x * math.pi / epochs)) / 2) ** 1.0) * 0.8 + 0.2  # cosine
     scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lf)
-    # plot_lr_scheduler(optimizer, scheduler, epochs)
 
     # Resume
     start_epoch, best_fitness = 0, 0.0
@@ -142,7 +142,7 @@ def train(hyp, opt, device, tb_writer=None):
     if cuda and rank != -1:
         model = DDP(model, device_ids=[opt.local_rank], output_device=(opt.local_rank))
 
-    # Trainloader
+    # Trainloader-------------------------------------------------------------------------------------------------------
     dataloader, dataset = create_dataloader(train_path, imgsz, batch_size, gs, opt, hyp=hyp, augment=True,
                                             cache=opt.cache_images, rect=opt.rect, local_rank=rank,
                                             world_size=opt.world_size)
@@ -150,7 +150,7 @@ def train(hyp, opt, device, tb_writer=None):
     nb = len(dataloader)  # number of batches
     assert mlc < nc, 'Label class %g exceeds nc=%g in %s. Possible class labels are 0-%g' % (mlc, nc, opt.data, nc - 1)
 
-    # Testloader
+    # Testloader--------------------------------------------------------------------------------------------------------
     if rank in [-1, 0]:
         ema.updates = start_epoch * nb // accumulate  # set EMA updates ***
         # local_rank is set to -1. Because only the first process is expected to do evaluation.
@@ -169,20 +169,13 @@ def train(hyp, opt, device, tb_writer=None):
     if rank in [-1, 0]:
         labels = np.concatenate(dataset.labels, 0)
         c = torch.tensor(labels[:, 0])  # classes
-        # cf = torch.bincount(c.long(), minlength=nc) + 1.
-        # model._initialize_biases(cf.to(device))
         plot_labels(labels, save_dir=log_dir)
         if tb_writer:
             tb_writer.add_histogram('classes', c, 0)
 
-        # Check anchors
-        # if not opt.noautoanchor:
-        #    check_anchors(dataset, model=model, thr=hyp['anchor_t'], imgsz=imgsz)
-
-    # Start training
+    # Start training----------------------------------------------------------------------------------------------------
     t0 = time.time()
     nw = max(3 * nb, 1e3)  # number of warmup iterations, max(3 epochs, 1k iterations)
-    # nw = min(nw, (epochs - start_epoch) / 2 * nb)  # limit warmup to < 1/2 of training
     maps = np.zeros(nc)  # mAP per class
     results = (0, 0, 0, 0, 0, 0, 0)  # 'P', 'R', 'mAP', 'F1', 'val GIoU', 'val Objectness', 'val Classification'
     scheduler.last_epoch = start_epoch - 1  # do not move
@@ -216,10 +209,6 @@ def train(hyp, opt, device, tb_writer=None):
                 dist.broadcast(indices, 0)
                 if rank != 0:
                     dataset.indices = indices.cpu().numpy()
-
-        # Update mosaic border
-        # b = int(random.uniform(0.25 * imgsz, 0.75 * imgsz + gs) // gs * gs)
-        # dataset.mosaic_border = [b - imgsz, -b]  # height, width borders
 
         mloss = torch.zeros(4, device=device)  # mean losses
         if rank != -1:
@@ -292,7 +281,6 @@ def train(hyp, opt, device, tb_writer=None):
                     result = plot_images(images=imgs, targets=targets, paths=paths, fname=f)
                     if tb_writer and result is not None:
                         tb_writer.add_image(f, result, dataformats='HWC', global_step=epoch)
-                        # tb_writer.add_graph(model, imgs)  # add model to tensorboard
 
             # end batch ------------------------------------------------------------------------------------------------
 
@@ -365,9 +353,8 @@ def train(hyp, opt, device, tb_writer=None):
                 ispt = f2.endswith('.pt')  # is *.pt
                 strip_optimizer(f2) if ispt else None  # strip optimizer
                 os.system('gsutil cp %s gs://%s/weights' % (f2, opt.bucket)) if opt.bucket and ispt else None  # upload
+
         # Finish
-        if not opt.evolve:
-            plot_results(save_dir=log_dir)  # save as results.png
         print('%g epochs completed in %.3f hours.\n' % (epoch - start_epoch + 1, (time.time() - t0) / 3600))
 
     dist.destroy_process_group() if rank not in [-1, 0] else None
@@ -403,7 +390,6 @@ if __name__ == '__main__':
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
     parser.add_argument('--logdir', type=str, default='runs/', help='logging directory')
     opt = parser.parse_args()
-
 
     opt.hyp = opt.hyp or ('data/hyp.scratch.yaml')
     opt.data, opt.cfg, opt.hyp = check_file(opt.data), check_file(opt.cfg), check_file(opt.hyp)  # check files
