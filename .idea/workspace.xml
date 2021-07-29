@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="train_evolve.py finish">
-      <change afterPath="$PROJECT_DIR$/yolof/cvpods/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolof/cvpods/batch_norm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolof/cvpods/comm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolof/cvpods/env.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolof/cvpods/shape_spec.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolof/cvpods/weight_init.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolof/cvpods/wrappers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolof/encoder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolof/utils.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="yolof encoder init">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yolof/encoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/yolof/encoder.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -236,7 +227,14 @@
       <option name="project" value="LOCAL" />
       <updated>1627541323326</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="yolof encoder init">
+      <created>1627547185562</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1627547185562</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -291,7 +289,8 @@
     <MESSAGE value="rtsp detect sucess" />
     <MESSAGE value="train_evolve.py init" />
     <MESSAGE value="train_evolve.py finish" />
-    <option name="LAST_COMMIT_MESSAGE" value="train_evolve.py finish" />
+    <MESSAGE value="yolof encoder init" />
+    <option name="LAST_COMMIT_MESSAGE" value="yolof encoder init" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -310,6 +309,10 @@
           <url>file://$PROJECT_DIR$/test_onnx.py</url>
           <line>169</line>
           <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/yolof/encoder.py</url>
+          <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
