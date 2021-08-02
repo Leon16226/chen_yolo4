@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="yolof encoder reader endt">
-      <change afterPath="$PROJECT_DIR$/yolof/decoder.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="yolof decoder reader endt">
+      <change afterPath="$PROJECT_DIR$/yolof/cvpods/apex_wrapper.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yolof/cvpods/nms.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yolof/cvpods/rotated_boxes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yolof/yolof.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yolof/cvpods/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/yolof/cvpods/__init__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +41,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../YOLOF" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../chen_frcnn" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunManager" selected="Python.test_onnx">
@@ -241,7 +246,14 @@
       <option name="project" value="LOCAL" />
       <updated>1627549001540</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="yolof decoder reader endt">
+      <created>1627550839840</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1627550839840</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -298,7 +310,8 @@
     <MESSAGE value="train_evolve.py finish" />
     <MESSAGE value="yolof encoder init" />
     <MESSAGE value="yolof encoder reader endt" />
-    <option name="LAST_COMMIT_MESSAGE" value="yolof encoder reader endt" />
+    <MESSAGE value="yolof decoder reader endt" />
+    <option name="LAST_COMMIT_MESSAGE" value="yolof decoder reader endt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

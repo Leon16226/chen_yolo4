@@ -391,13 +391,16 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             # Set training image shapes
             shapes = [[1, 1]] * nb
             for i in range(nb):
+                # i === now batch
                 ari = ar[bi == i]
                 mini, maxi = ari.min(), ari.max()
+                # while h < w
                 if maxi < 1:
                     shapes[i] = [maxi, 1]
                 elif mini > 1:
                     shapes[i] = [1, 1 / mini]
 
+            # decide the w&h at every batch -> (1920, 1080) -> (608, 320) -> letterbox
             self.batch_shapes = np.ceil(np.array(shapes) * img_size / stride + pad).astype(np.int) * stride
 
         # Cache labels
@@ -526,6 +529,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             img, (h0, w0), (h, w) = load_image(self, index)
 
             # Letterbox
+            # letterbox to 416 along longest image dimension, pads shorter dimension to minimum multiple of 32
             shape = self.batch_shapes[self.batch[index]] if self.rect else self.img_size  # final letterboxed shape
             img, ratio, pad = letterbox(img, shape, auto=False, scaleup=self.augment)
             shapes = (h0, w0), ((h / h0, w / w0), pad)  # for COCO mAP rescaling
@@ -711,7 +715,7 @@ def replicate(img, labels):
     return img, labels
 
 
-# resize image to rectangle
+# resize image
 def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True):
     # Resize image to a 32-pixel-multiple rectangle https://github.com/ultralytics/yolov3/issues/232
     shape = img.shape[:2]  # current shape [height, width]
