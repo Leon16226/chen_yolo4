@@ -10,7 +10,7 @@ import numpy as np
 
 
 # classes = ['Bag', 'Cup', 'Bottle']
-classes = ['SDL', 'ZBZ', 'KQSP']
+classes = ['SLD', 'ZBZ', 'KQSP']
 Annota_Save_Root = '../../datasets/Material/labels'   # label save
 Image_Save_Root = '../../datasets/Material/images'
 Label_Root = '../../datasets/Material/data/labels'  # label name
@@ -52,7 +52,13 @@ def convert_label(id=0, filepath='', sub_path=''):
         b = (float(xmlbox.find('xmin').text), float(xmlbox.find('xmax').text), float(xmlbox.find('ymin').text),
              float(xmlbox.find('ymax').text))
         bb = convert((w, h), b)
-        out_file.write(str(cls_id) + " " + " ".join([str(a) for a in bb]) + '\n')
+        #
+        temp = 0
+        for i in bb:
+            if i > 1:
+                temp = 1
+        if temp == 0:
+            out_file.write(str(cls_id) + " " + " ".join([str(a) for a in bb]) + '\n')
     in_file.close()
     out_file.close()
 
@@ -62,18 +68,21 @@ def convert_image(id=0, filepath='', sub_path=''):
 
 
 if __name__ == "__main__":
-
+    nt = 0
+    nv = 0
     for id, filename in enumerate(os.listdir(Label_Root)):
         rand = random.randint(1, 10)
         name = filename.split('.')[0]
         imagepath = os.path.join(Image_Root, name + '.jpg')
         if rand <= 8:
+            nt += 1
             filepath = os.path.join(Label_Root, filename)
-            convert_label(id, filepath, '/train')
-            convert_image(id, imagepath, '/train')
+            convert_label(nt, filepath, '/train')
+            convert_image(nt, imagepath, '/train')
         else:
+            nv += 1
             filepath = os.path.join(Label_Root, filename)
-            convert_label(id, filepath, '/val')
-            convert_image(id, filepath, '/val')
+            convert_label(nv, filepath, '/val')
+            convert_image(nv, imagepath, '/val')
 
 

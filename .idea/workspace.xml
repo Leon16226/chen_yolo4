@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="tran">
-      <change afterPath="$PROJECT_DIR$/data/tran/trans_material.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="trans_material success">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cfg/yolov4.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/yolov4.cfg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/tran/trans_material.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tran/trans_material.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +39,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../chen_frcnn" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../OWOD" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -261,7 +264,14 @@
       <option name="project" value="LOCAL" />
       <updated>1627896475178</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="trans_material success">
+      <created>1627954665565</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1627954665565</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -320,7 +330,8 @@
     <MESSAGE value="yolof encoder reader endt" />
     <MESSAGE value="yolof decoder reader endt" />
     <MESSAGE value="tran" />
-    <option name="LAST_COMMIT_MESSAGE" value="tran" />
+    <MESSAGE value="trans_material success" />
+    <option name="LAST_COMMIT_MESSAGE" value="trans_material success" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

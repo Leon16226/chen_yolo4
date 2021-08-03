@@ -118,7 +118,6 @@ def test(data,
             # Run model
             t = time_synchronized()
             inf_out, train_out = model(img, augment=augment)  # inference and training outputs
-            print(inf_out)
             t0 += time_synchronized() - t
 
             # Compute loss
