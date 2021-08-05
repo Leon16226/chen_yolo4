@@ -364,13 +364,13 @@ def train(hyp, opt, device, tb_writer=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', type=str, default='yolov4.pt', help='initial weights path')
-    parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
-    parser.add_argument('--data', type=str, default='data/coco128.yaml', help='data.yaml path')
+    parser.add_argument('--weights', type=str, default='./weights/material.pt', help='initial weights path')
+    parser.add_argument('--cfg', type=str, default='./cfg/yolov4.cfg', help='model.yaml path')
+    parser.add_argument('--data', type=str, default='data/material.yaml', help='data.yaml path')
     parser.add_argument('--hyp', type=str, default='', help='hyperparameters path, i.e. data/hyp.scratch.yaml')
     parser.add_argument('--epochs', type=int, default=300)
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[640, 640], help='train,test sizes')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[416, 416], help='train,test sizes')
     parser.add_argument('--rect', action='store_true', help='rectangular training')
     parser.add_argument('--resume', nargs='?', const='get_last', default=False,
                         help='resume from given path/last.pt, or most recent run if blank')
@@ -448,10 +448,11 @@ if __name__ == '__main__':
 
     assert opt.local_rank == -1, 'DDP mode not implemented for --evolve'
     opt.notest, opt.nosave = True, True  # only test/save final epoch
+    opt.evolve = True
     yaml_file = Path('runs/evolve/hyp_evolved.yaml')  # save best result here
 
     # iter
-    for _ in range(100):  # generations to evolve
+    for _ in range(1000):  # generations to evolve
         if os.path.exists('evolve.txt'):  # if evolve.txt exists: select best hyps and mutate
             # Select parent(s)
             parent = 'single'  # parent selection method: 'single' or 'weighted'
@@ -476,17 +477,17 @@ if __name__ == '__main__':
             for i, k in enumerate(hyp.keys()):  # plt.hist(v.ravel(), 300)
                 hyp[k] = float(x[i + 7] * v[i])  # mutate
 
-            # Constrain to limits---------------------------------------------------------------------------------------
-            for k, v in meta.items():
-                hyp[k] = max(hyp[k], v[1])  # lower limit
-                hyp[k] = min(hyp[k], v[2])  # upper limit
-                hyp[k] = round(hyp[k], 5)  # significant digits
+        # Constrain to limits---------------------------------------------------------------------------------------
+        for k, v in meta.items():
+            hyp[k] = max(hyp[k], v[1])  # lower limit
+            hyp[k] = min(hyp[k], v[2])  # upper limit
+            hyp[k] = round(hyp[k], 5)  # significant digits
 
-            # Train mutation
-            results = train(hyp.copy(), opt, device)
+        # Train mutation
+        results = train(hyp.copy(), opt, device)
 
-            # Write mutation results
-            print_mutation(hyp.copy(), results, yaml_file, opt.bucket)
+        # Write mutation results
+        print_mutation(hyp.copy(), results, yaml_file, opt.bucket)
 
     # Plot results
     plot_evolution(yaml_file)
