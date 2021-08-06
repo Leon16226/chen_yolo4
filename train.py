@@ -369,18 +369,19 @@ def train(hyp, opt, device, tb_writer=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
-    parser.add_argument('--weights', type=str, default='yolov4.pt', help='initial weights path')
-    parser.add_argument('--hyp', type=str, default='', help='hyperparameters path, i.e. data/hyp.scratch.yaml')
-    parser.add_argument('--data', type=str, default='data/coco128.yaml', help='data.yaml path')
-    parser.add_argument('--epochs', type=int, default=300)
+    parser.add_argument('--cfg', type=str, default='./cfg/yolov4.cfg', help='model.yaml path')
+    parser.add_argument('--weights', type=str, default='./weights/pre/cspdarknet53.pth', help='initial weights path')
+    parser.add_argument('--hyp', type=str, default='./data/hyp.material.yaml', help='hyperparameters path')
+    parser.add_argument('--data', type=str, default='./data/material.yaml', help='data.yaml path')
+    parser.add_argument('--epochs', type=int, default=250)
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[640, 640], help='train,test sizes')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[416, 416], help='train,test sizes')
+    parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    # optional
     parser.add_argument('--rect', action='store_true', help='rectangular training')
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
     parser.add_argument('--cache-images', action='store_true', help='cache images for faster training')
-    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     # save & test
     parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')
     parser.add_argument('--notest', action='store_true', help='only test final epoch')
