@@ -279,7 +279,7 @@ def train(hyp, opt, device, tb_writer=None):
                 pbar.set_description(s)
 
                 # Plot
-                if ni < 3:
+                if ni < 100:
                     f = str(log_dir / ('train_batch%g.jpg' % ni))  # filename
                     result = plot_images(images=imgs, targets=targets, paths=paths, fname=f)
                     if tb_writer and result is not None:

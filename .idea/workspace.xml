@@ -1,23 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="yolox">
-      <change afterPath="$PROJECT_DIR$/backbone/cspdarknet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cfg/yolof.cfg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cfg/yolov4-my.cfg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/yolo_p.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="yolof.cfg">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4-o.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4-pacsp-mish.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4-pacsp-s-mish.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4-pacsp-s.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4-pacsp-x-mish.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4-pacsp-x.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4-pacsp.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4-paspp.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4-tiny.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/yolo.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/yolo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -313,7 +301,14 @@
       <option name="project" value="LOCAL" />
       <updated>1628213066480</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="yolof.cfg">
+      <created>1628233152254</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1628233152254</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -377,14 +372,15 @@
     <MESSAGE value="only cup train" />
     <MESSAGE value="evolve success" />
     <MESSAGE value="yolox" />
-    <option name="LAST_COMMIT_MESSAGE" value="yolox" />
+    <MESSAGE value="yolof.cfg" />
+    <option name="LAST_COMMIT_MESSAGE" value="yolof.cfg" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/models.py</url>
-          <line>444</line>
+          <line>445</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
