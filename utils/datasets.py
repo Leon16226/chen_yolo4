@@ -139,12 +139,14 @@ class LoadImages:  # for inference
         else:
             # Read image
             self.count += 1
-            img0 = cv2.imread(path,)  # opencv -> BGR
+            # img0 = cv2.imread(path,)  # opencv -> BGR
+            img0 = cv2.imread(path, cv2.IMREAD_COLOR + cv2.IMREAD_IGNORE_ORIENTATION)
             assert img0 is not None, 'Image Not Found ' + path
             print('image %g/%g %s: ' % (self.count, self.nf, path), end='')
 
         # Padded resize
-        img = letterbox(img0, new_shape=self.img_size)[0]
+        # img = letterbox(img0, new_shape=self.img_size)[0]
+        img = cv2.resize(img0, [self.img_size, self.img_size])
 
         # Convert
         img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
