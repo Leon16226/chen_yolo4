@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="add yolox utils">
-      <change afterPath="$PROJECT_DIR$/yolox/data/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolox/data/data_augment.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolox/data/data_prefetcher.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolox/data/dataloading.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolox/data/samplers.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="yolox core">
+      <change afterPath="$PROJECT_DIR$/train_yolox.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yolox/exp/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yolox/exp/base_exp.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yolox/exp/build.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yolox/exp/yolox_base.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yolox/models/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yolox/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/yolox/trainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -335,7 +335,14 @@
       <option name="project" value="LOCAL" />
       <updated>1628476221456</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="yolox core">
+      <created>1628478380419</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1628478380419</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -403,7 +410,8 @@
     <MESSAGE value="opencv img oritation" />
     <MESSAGE value="add yolox" />
     <MESSAGE value="add yolox utils" />
-    <option name="LAST_COMMIT_MESSAGE" value="add yolox utils" />
+    <MESSAGE value="yolox core" />
+    <option name="LAST_COMMIT_MESSAGE" value="yolox core" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
