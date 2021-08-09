@@ -18,14 +18,14 @@ class Exp(BaseExp):
         super().__init__()
 
         # ---------------- model config ---------------- #
-        self.num_classes = 80
+        self.num_classes = 3
         self.depth = 1.00
         self.width = 1.00
 
         # ---------------- dataloader config ---------------- #
         # set worker to 4 for shorter dataloader init time
         self.data_num_workers = 4
-        self.input_size = (640, 640)
+        self.input_size = (416, 416)
         self.random_size = (14, 26)
         self.data_dir = None
         self.train_ann = "instances_train2017.json"
@@ -42,7 +42,7 @@ class Exp(BaseExp):
 
         # --------------  training config --------------------- #
         self.warmup_epochs = 5
-        self.max_epoch = 300
+        self.max_epoch = 250
         self.warmup_lr = 0
         self.basic_lr_per_img = 0.01 / 64.0
         self.scheduler = "yoloxwarmcos"
@@ -57,7 +57,7 @@ class Exp(BaseExp):
         self.exp_name = os.path.split(os.path.realpath(__file__))[1].split(".")[0]
 
         # -----------------  testing config ------------------ #
-        self.test_size = (640, 640)
+        self.test_size = (608, 608)
         self.test_conf = 0.01
         self.nmsthre = 0.65
 
@@ -80,6 +80,7 @@ class Exp(BaseExp):
         self.model.head.initialize_biases(1e-2)
         return self.model
 
+    # data_loader-------------------------------------------------------------------------------------------------------
     def get_data_loader(self, batch_size, is_distributed, no_aug=False):
         from yolox.data import (
             COCODataset,
@@ -101,6 +102,7 @@ class Exp(BaseExp):
             ),
         )
 
+        # mosaic---------------------------------
         dataset = MosaicDetection(
             dataset,
             mosaic=not no_aug,

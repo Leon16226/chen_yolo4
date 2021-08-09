@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding:utf-8 -*-
-# Copyright (c) Megvii, Inc. and its affiliates.
 
 from loguru import logger
 
@@ -43,6 +40,7 @@ def make_parser():
     return parser
 
 
+# train ----------------------------------------------------------------------------------------------------------------
 @logger.catch
 def main(exp, args):
     if exp.seed is not None:
