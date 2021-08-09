@@ -28,8 +28,8 @@ class Exp(BaseExp):
         self.input_size = (416, 416)
         self.random_size = (14, 26)
         self.data_dir = None
-        self.train_ann = "instances_train2017.json"
-        self.val_ann = "instances_val2017.json"
+        self.train_ann = "train.json"
+        self.val_ann = "train.json"
 
         # --------------- transform config ----------------- #
         self.degrees = 10.0
@@ -83,7 +83,7 @@ class Exp(BaseExp):
     # data_loader-------------------------------------------------------------------------------------------------------
     def get_data_loader(self, batch_size, is_distributed, no_aug=False):
         from yolox.data import (
-            COCODataset,
+            MaterialDataset,
             TrainTransform,
             YoloBatchSampler,
             DataLoader,
@@ -91,7 +91,8 @@ class Exp(BaseExp):
             MosaicDetection,
         )
 
-        dataset = COCODataset(
+        # 1. dataset --------------------------------
+        dataset = MaterialDataset(
             data_dir=self.data_dir,
             json_file=self.train_ann,
             img_size=self.input_size,
@@ -102,7 +103,7 @@ class Exp(BaseExp):
             ),
         )
 
-        # mosaic---------------------------------
+        # 2. mosaic ---------------------------------
         dataset = MosaicDetection(
             dataset,
             mosaic=not no_aug,
@@ -204,13 +205,15 @@ class Exp(BaseExp):
         )
         return scheduler
 
+    # eval -------------------------------------------------------------------------------------------------------------
     def get_eval_loader(self, batch_size, is_distributed, testdev=False):
-        from yolox.data import COCODataset, ValTransform
+        from yolox.data import MaterialDataset, ValTransform
 
-        valdataset = COCODataset(
+        valdataset = MaterialDataset(
             data_dir=self.data_dir,
             json_file=self.val_ann if not testdev else "image_info_test-dev2017.json",
-            name="val2017" if not testdev else "test2017",
+            #name="val2017" if not testdev else "test2017",
+            name="train",
             img_size=self.test_size,
             preproc=ValTransform(
                 rgb_means=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
