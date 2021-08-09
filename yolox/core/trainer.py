@@ -70,6 +70,7 @@ class Trainer:
         finally:
             self.after_train()
 
+    # train in epoch ---------------------------------------------------------------------------------------------------
     def train_in_epoch(self):
         for self.epoch in range(self.start_epoch, self.max_epoch):
             self.before_epoch()
@@ -91,6 +92,7 @@ class Trainer:
         targets.requires_grad = False
         data_end_time = time.time()
 
+        # loss
         outputs = self.model(inps, targets)
         loss = outputs["total_loss"]
 
@@ -117,6 +119,7 @@ class Trainer:
             **outputs,
         )
 
+    # before train -----------------------------------------------------------------------------------------------------
     def before_train(self):
         logger.info("args: {}".format(self.args))
         logger.info("exp value:\n{}".format(self.exp))
@@ -185,9 +188,11 @@ class Trainer:
             )
         )
 
+    # before epoch -----------------------------------------------------------------------------------------------------
     def before_epoch(self):
         logger.info("---> start train epoch{}".format(self.epoch + 1))
 
+        # no augment in last few epochs
         if self.epoch + 1 == self.max_epoch - self.exp.no_aug_epochs or self.no_aug:
             logger.info("--->No mosaic aug now!")
             self.train_loader.close_mosaic()
@@ -210,6 +215,7 @@ class Trainer:
             all_reduce_norm(self.model)
             self.evaluate_and_save_model()
 
+    # before iter ------------------------------------------------------------------------------------------------------
     def before_iter(self):
         pass
 
@@ -257,6 +263,7 @@ class Trainer:
                 self.train_loader, self.epoch, self.rank, self.is_distributed
             )
 
+    # tools ------------------------------------------------------------------------------------------------------------
     @property
     def progress_in_iter(self):
         return self.epoch * self.max_iter + self.iter
