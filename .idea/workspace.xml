@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="evaluator">
-      <change afterPath="$PROJECT_DIR$/data/tran/voc2coco.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yolox/exp/yolox_material.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="yolox train success">
+      <change afterPath="$PROJECT_DIR$/cfg/yolov4-s.cfg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detections_val2017_material_results.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_batch0_gt.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_batch0_pred.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_onnx_o.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_yolox.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_yolox.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cfg/yolov4-my.cfg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/layers.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/layers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yolox/core/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/yolox/core/trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/yolox/exp/yolox_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/yolox/exp/yolox_base.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,11 +54,12 @@
       <recent name="$PROJECT_DIR$/cfg" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/datasets/Material_x/annotations" />
       <recent name="$PROJECT_DIR$/data/tran" />
       <recent name="$PROJECT_DIR$/data/trans" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.voc2coco">
+  <component name="RunManager" selected="Python.train">
     <configuration name="export" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -166,9 +167,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.train" />
         <item itemvalue="Python.voc2coco" />
         <item itemvalue="Python.train_yolox" />
-        <item itemvalue="Python.train" />
         <item itemvalue="Python.trans_material" />
         <item itemvalue="Python.export" />
       </list>
@@ -358,7 +359,14 @@
       <option name="project" value="LOCAL" />
       <updated>1628488427752</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="yolox train success">
+      <created>1628502343904</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1628502343904</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -404,7 +412,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="test_onnx success" />
     <MESSAGE value="read detect rtsp" />
     <MESSAGE value="read nms code" />
     <MESSAGE value="read detect.py" />
@@ -429,7 +436,8 @@
     <MESSAGE value="yolox core" />
     <MESSAGE value="train yolox" />
     <MESSAGE value="evaluator" />
-    <option name="LAST_COMMIT_MESSAGE" value="evaluator" />
+    <MESSAGE value="yolox train success" />
+    <option name="LAST_COMMIT_MESSAGE" value="yolox train success" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -462,6 +470,11 @@
           <url>file://$PROJECT_DIR$/yolox/data/datasets/material.py</url>
           <line>91</line>
           <option name="timeStamp" value="19" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/utils/layers.py</url>
+          <line>39</line>
+          <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

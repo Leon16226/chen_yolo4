@@ -26,7 +26,7 @@ class Exp(BaseExp):
         # set worker to 4 for shorter dataloader init time
         self.data_num_workers = 4
         self.input_size = (416, 416)
-        self.random_size = (14, 26)
+        self.random_size = (14, 19)
         self.data_dir = None
         self.train_ann = "train.json"
         self.val_ann = "train.json"
@@ -58,7 +58,7 @@ class Exp(BaseExp):
 
         # -----------------  testing config ------------------ #
         self.test_size = (608, 608)
-        self.test_conf = 0.01
+        self.test_conf = 0.6
         self.nmsthre = 0.65
 
     def get_model(self):

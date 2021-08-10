@@ -290,7 +290,7 @@ class Darknet(nn.Module):
     def forward(self, x, augment=False, verbose=False):
 
         if not augment:
-            return self.forward_once(x)
+             return self.forward_once(x)
         else:  # Augment images (inference and test only) https://github.com/ultralytics/yolov3/issues/931
             img_size = x.shape[-2:]  # height, width
             s = [0.83, 0.67]  # scales

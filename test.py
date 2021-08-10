@@ -199,13 +199,6 @@ def test(data,
             # Append statistics (correct, conf, pcls, tcls)
             stats.append((correct.cpu(), pred[:, 4].cpu(), pred[:, 5].cpu(), tcls))
 
-        # Plot images
-        if batch_i < 1:
-            f = Path(save_dir) / ('test_batch%g_gt.jpg' % batch_i)  # filename
-            plot_images(img, targets, paths, str(f), names)  # ground truth
-            f = Path(save_dir) / ('test_batch%g_pred.jpg' % batch_i)
-            plot_images(img, output_to_target(output, width, height), paths, str(f), names)  # predictions
-
     # Compute statistics
     stats = [np.concatenate(x, 0) for x in zip(*stats)]  # to numpy
     if len(stats) and stats[0].any():
@@ -264,7 +257,8 @@ def test(data,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test.py')
-    parser.add_argument('--weights', type=str, default='./weights/material.pt', help='model.pt path(s)')
+    parser.add_argument('--verbose', action='store_true', help='report mAP by class')
+    parser.add_argument('--weights', type=str, default='./weights/material_5.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='./data/material.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=1, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=608, help='inference size (pixels)')
@@ -276,9 +270,8 @@ if __name__ == '__main__':
     parser.add_argument('--single-cls', action='store_true', help='treat as single-class dataset')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--merge', action='store_true', help='use Merge NMS')
-    parser.add_argument('--verbose', action='store_true', help='report mAP by class')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov4.cfg', help='*.cfg path')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov4-mish.cfg', help='*.cfg path')
     parser.add_argument('--names', type=str, default='data/material.names', help='*.cfg path')
     opt = parser.parse_args()
     opt.save_json |= opt.data.endswith('material.yaml')
