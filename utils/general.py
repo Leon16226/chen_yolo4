@@ -443,12 +443,12 @@ class BCEBlurWithLogitsLoss(nn.Module):
         loss *= alpha_factor
         return loss.mean()
 
-# loss
+# loss------------------------------------------------------------------------------------------------------------------
 def compute_loss(p, targets, model):  # predictions, targets, model
     device = targets.device
     lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
     tcls, tbox, indices, anchors = build_targets(p, targets, model)  # targets
-    h = model.hyp  # hyperparameters
+    h = model.hyp
 
     # Define criteria -> pos_weight : positive examples & negative examples
     # measure the error
@@ -559,7 +559,71 @@ def build_targets(p, targets, model):
 
     return tcls, tbox, indices, anch
 
-# loss------------------------------------------------------------------------------------------------------------------
+def compute_loss_s_dh(p, targets, model):
+    # small
+    sclass = p[1]
+    sreg = p[2]
+    sIOU = p[3]
+    # medium
+    mclass = p[4]
+    mreg = p[5]
+    mIOU = p[6]
+
+    # init--------------------------------------------------------------------------------------------------------------
+    device = targets.device
+    lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
+    tcls, tbox, indices, anchors = build_targets(p, targets, model)
+    h = model.hyp
+
+    BCEcls = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([h['cls_pw']])).to(device)
+    BCEobj = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([h['obj_pw']])).to(device)
+    cp, cn = smooth_BCE(eps=0.0)
+
+    # Losses------------------------------------------------------------------------------------------------------------
+    nt = 0
+    np = len(p)
+    balance = [4.0, 1.0]
+    for i, pi in enumerate(p):
+        b, a, gj, gi = indices[i]
+        tobj = torch.zeros_like(pi[..., 0], device=device)
+
+        n = b.shape[0]
+        if n:
+            nt += n
+            ps = pi[b, a, gj, gi]
+
+            # reg
+            pxy = ps[:, :2].sigmoid * 2. - 0.5
+            pwh = (ps[:, 2:4].sigmoid * 2) ** 2 * anchors[i]
+            pbox = torch.cat((pxy, pwh), 1).to(device)
+            giou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)
+            lbox += (1.0 - giou).mean()
+
+            # obj
+            tobj[b, a, gi, gi] = (1.0 - model.gr) + model.gr * giou.detach().clamp(0).type(obj.dtype)
+
+            # class
+            if model.nc > 1:
+                t = torch.full_like(ps[:, 5:], cn, device=device)
+                t[range(n), tcls[i]] = cp
+                lcls += BCEcls(ps[:, 5:], t)
+
+        lobj += BCEobj(pi[..., 4], tobj) * balance[i]
+
+    # output count scaling----------------------------------------------------------------------------------------------
+    s = 3 / np
+    lbox *= h['giou'] * s
+    lobj *= h['obj'] * s * (1.4 if np == 4 else 1.)
+    lcls *= h['cls'] * s
+    bs = tobj.shape[0]  # batch size
+
+    loss = lbox + lobj + lcls
+    return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
+
+
+
+
+# loss end--------------------------------------------------------------------------------------------------------------
 
 # nms -> conf & iou -> the shape of input same as outputs'
 def non_max_suppression(prediction, conf_thres=0.1, iou_thres=0.6, merge=False, classes=None, agnostic=False):

@@ -166,8 +166,8 @@ def detect(save_img=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # model
-    parser.add_argument('--weights', type=str, default='./weights/material_5.pt', help='model.pt path(s)')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov4-mish.cfg', help='*.cfg path')
+    parser.add_argument('--weights', type=str, default='./weights/material_6.pt', help='model.pt path(s)')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov4-s.cfg', help='*.cfg path')
     parser.add_argument('--names', type=str, default='data/material.names', help='*.cfg path')
     parser.add_argument('--conf-thres', type=float, default=0.6, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS')  #
@@ -176,7 +176,7 @@ if __name__ == '__main__':
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--img-size', type=int, default=608, help='inference size (pixels)')
     # save
-    parser.add_argument('--source', type=str, default='inference/material_f', help='source')
+    parser.add_argument('--source', type=str, default='inference/material_t', help='source')
     parser.add_argument('--output', type=str, default='inference/output', help='output folder')
     # process
     parser.add_argument('--view-img', action='store_true', help='display results')  # view image

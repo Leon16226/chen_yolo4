@@ -258,7 +258,8 @@ def test(data,
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test.py')
     parser.add_argument('--verbose', action='store_true', help='report mAP by class')
-    parser.add_argument('--weights', type=str, default='./weights/material_5.pt', help='model.pt path(s)')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov4-s.cfg', help='*.cfg path')
+    parser.add_argument('--weights', type=str, default='./weights/material_6.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='./data/material.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=1, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=608, help='inference size (pixels)')
@@ -271,7 +272,6 @@ if __name__ == '__main__':
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--merge', action='store_true', help='use Merge NMS')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov4-mish.cfg', help='*.cfg path')
     parser.add_argument('--names', type=str, default='data/material.names', help='*.cfg path')
     opt = parser.parse_args()
     opt.save_json |= opt.data.endswith('material.yaml')

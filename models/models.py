@@ -143,7 +143,7 @@ def create_modules(module_defs, img_size, cfg):
 
         elif mdef['type'] == 'yolo':
             yolo_index += 1
-            stride = [8, 16, 32, 64, 128]  # P3, P4, P5, P6, P7 strides
+            stride = [8, 16, 32, 64, 128, 256]  # P3, P4, P5, P6, P7 strides
             if any(x in cfg for x in ['yolov4-tiny', 'fpn', 'yolov3']):  # P5, P4, P3 strides
                 stride = [32, 16, 8]
             layers = mdef['from'] if 'from' in mdef else []
