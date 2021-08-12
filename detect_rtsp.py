@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import shutil
 import time
@@ -8,6 +9,7 @@ import numpy as np
 from threading import Thread
 from atlas_utils.acl_model import Model
 from atlas_utils.acl_resource import AclResource
+import requests
 
 rtsp = "rtsp://admin:xsy12345@192.168.1.86:554/h264/ch1/main/av_stream"
 SRC_PATH = os.path.realpath(__file__).rsplit("/", 1)[0]
@@ -208,6 +210,56 @@ def detect():
 
     vid_writer.release()
 
+# Event  Post----------------------------------------------------------------------------------------------------------------
+class Event:
+    def __init__(self, cameraIp='', timestamp=0, events=[]):
+        self.cameraIp = cameraIp
+        self.timestamp = timestamp
+        self.events = events
+
+def push():
+    # event ------------------------------------------------------------------------------------------------------------
+    events = [
+        {
+            "roadId": 1,
+            "roadName": "yzw1-dxcd",
+            "code": "illegalPark",
+            "subCode": "accident",
+            "dateTime": "2021-04-01 15:40:06",
+            "status": 1,
+            "no": [1, 10, 20],
+            "distance": 30,
+            "picture": "",
+            "coordinate": [
+                {
+                    "targetType": "people",
+                    "xAxis": 0,
+                    "yAxis": 0,
+                    "height": 0,
+                    "width": 0,
+                    "prob": 0.75
+                }
+            ],
+            "carNoAI": {
+                "miniPicture": "",
+                "carNo": " A12345"
+            },
+            "remark": ""
+        }
+    ]
+
+    event = Event('33.65.158.71', 1618283496244, events)
+
+    # post -------------------------------------------------------------------------------------------------------------
+    url = 'http://192.168.1.19:8080/v1/app/interface/uploadEvent'
+    payload = event
+    headers = {"content-type": "application/json"}
+
+    ret = requests.post(url, data=json.dump(payload), headers=headers)
+
+    print(ret.text)
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -233,4 +285,5 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     print(opt)
 
-    detect()
+    # detect()
+    push()

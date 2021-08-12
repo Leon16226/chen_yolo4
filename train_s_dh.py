@@ -215,23 +215,28 @@ def train(hyp, opt, device, tb_writer=None):
                 num_c = 3
                 for i, p in enumerate(pred):
                     p = p.permute(0, 2, 3, 1, 4)
+                    p_dtype = p.dtype
+
                     p = p.contiguous()
                     shape = p.shape
                     p = p.view([shape[0], shape[1], shape[2], shape[3] * shape[4]])
+
                     box = p[:, :, :, 0:(num_c * 4)]
                     obj = p[:, :, :, (num_c * 4): (num_c * 4 + num_c)]
                     cls = p[:, :, :, (num_c * 4 + num_c):]
 
-                    boxes = torch.zeros((shape[0], shape[1], shape[2], (4 + 1 + num_c) * 3), dtype=torch.float32, device=device)
+                    boxes = torch.zeros((shape[0], shape[1], shape[2], (4 + 1 + num_c) * 3), dtype=p_dtype, device=device)
 
                     for j in np.arange(num_c):
-                        boxes[:, :, :, (j * 7) : (j * 7) + 3] = box[:, :, :, (j * 3) : (j * 3) + 3]
-                        boxes[:, :, :, (j * 7 + 3) : (j * 7 + 3) + 1] = obj[:, :, :, j : j+1]
-                        boxes[:, :, :, (j * 7 + 4) : (j * 7 + 4) + 3] = cls[:, :, :, (j * 3) : (j * 3) + 3]
+                        # [0,1,2,3, 4, 5,6,7]
+                        boxes[:, :, :, (j * 8) : (j * 8) + 4] = box[:, :, :, (j * 4) : (j * 4) + 4]
+                        boxes[:, :, :, (j * 8 + 4) : (j * 8 + 4) + 1] = obj[:, :, :, j : j+1]
+                        boxes[:, :, :, (j * 8 + 5) : (j * 8 + 5) + 3] = cls[:, :, :, (j * 3) : (j * 3) + 3]
 
                     boxes = boxes.view([shape[0], shape[1], shape[2], shape[3], shape[4]])
+
                     boxes = boxes.contiguous()
-                    boxes.permute(0, 3, 1, 2, 4)
+                    boxes = boxes.permute(0, 3, 1, 2, 4)
                     boxes = boxes.contiguous()
                     pred_t.append(boxes)
 
