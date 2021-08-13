@@ -333,6 +333,7 @@ class Darknet(nn.Module):
                            torch_utils.scale_img(x, s[1]),  # scale
                            ), 0)
 
+        # compute-------------------------------------------------------------------------------------------------------
         for i, module in enumerate(self.module_list):
             name = module.__class__.__name__
             if name in ['WeightedFeatureFusion', 'FeatureConcat', 'FeatureConcat2', 'FeatureConcat3', 'FeatureConcat_l']:  # sum, concat
@@ -351,6 +352,7 @@ class Darknet(nn.Module):
                 print('%g/%g %s -' % (i, len(self.module_list), name), list(x.shape), str)
                 str = ''
 
+        # judgement ----------------------------------------------------------------------------------------------------
         if self.training:  # train
             return yolo_out
         elif ONNX_EXPORT:  # export

@@ -229,9 +229,9 @@ def train(hyp, opt, device, tb_writer=None):
 
                     for j in np.arange(num_c):
                         # [0,1,2,3, 4, 5,6,7]
-                        boxes[:, :, :, (j * 8) : (j * 8) + 4] = box[:, :, :, (j * 4) : (j * 4) + 4]
-                        boxes[:, :, :, (j * 8 + 4) : (j * 8 + 4) + 1] = obj[:, :, :, j : j+1]
-                        boxes[:, :, :, (j * 8 + 5) : (j * 8 + 5) + 3] = cls[:, :, :, (j * 3) : (j * 3) + 3]
+                        boxes[:, :, :, (j * 8): (j * 8) + 4] = box[:, :, :, (j * 4): (j * 4) + 4]
+                        boxes[:, :, :, (j * 8 + 4): (j * 8 + 4) + 1] = obj[:, :, :, j: j+1]
+                        boxes[:, :, :, (j * 8 + 5): (j * 8 + 5) + 3] = cls[:, :, :, (j * 3): (j * 3) + 3]
 
                     boxes = boxes.view([shape[0], shape[1], shape[2], shape[3], shape[4]])
 
@@ -242,8 +242,8 @@ def train(hyp, opt, device, tb_writer=None):
 
                 pred = pred_t
 
-                # Loss
-                loss, loss_items = compute_loss(pred, targets.to(device), model)
+                # Loss--------------------------------------------------------------------------------------------------
+                loss, loss_items, = compute_loss(pred, targets.to(device), model)
                 if rank != -1:
                     loss *= opt.world_size
 
@@ -259,12 +259,11 @@ def train(hyp, opt, device, tb_writer=None):
                 if ema is not None:
                     ema.update(model)
 
-            # Print
+            # Print-----------------------------------------------------------------------------------------------------
             if rank in [-1, 0]:
                 mloss = (mloss * i + loss_items) / (i + 1)  # update mean losses
                 mem = '%.3gG' % (torch.cuda.memory_reserved() / 1E9 if torch.cuda.is_available() else 0)  # (GB)
-                s = ('%10s' * 2 + '%10.4g' * 6) % (
-                    '%g/%g' % (epoch, epochs - 1), mem, *mloss, targets.shape[0], imgs.shape[-1])
+                s = ('%10s' * 2 + '%10.4g' * 6) % ('%g/%g' % (epoch, epochs - 1), mem, *mloss, targets.shape[0], imgs.shape[-1])
                 pbar.set_description(s)
 
                 # Plot
@@ -273,7 +272,6 @@ def train(hyp, opt, device, tb_writer=None):
                     result = plot_images(images=imgs, targets=targets, paths=paths, fname=f)
                     if tb_writer and result is not None:
                         tb_writer.add_image(f, result, dataformats='HWC', global_step=epoch)
-                        # tb_writer.add_graph(model, imgs)  # add model to tensorboard
 
             # end batch ------------------------------------------------------------------------------------------------
 

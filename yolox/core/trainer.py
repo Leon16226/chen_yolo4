@@ -92,7 +92,7 @@ class Trainer:
         targets.requires_grad = False
         data_end_time = time.time()
 
-        # loss
+        # loss----------------------------------------------------------------------------------------------------------
         outputs = self.model(inps, targets)
         loss = outputs["total_loss"]
 

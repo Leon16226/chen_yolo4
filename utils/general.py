@@ -559,50 +559,45 @@ def build_targets(p, targets, model):
 
     return tcls, tbox, indices, anch
 
-def compute_loss_s_dh(p, targets, model):
-    # small
-    sclass = p[1]
-    sreg = p[2]
-    sIOU = p[3]
-    # medium
-    mclass = p[4]
-    mreg = p[5]
-    mIOU = p[6]
-
-    # init--------------------------------------------------------------------------------------------------------------
+# dh
+def compute_loss_dh(p, targets, model):
     device = targets.device
+    h = model.hyp
+
     lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
     tcls, tbox, indices, anchors = build_targets(p, targets, model)
-    h = model.hyp
 
     BCEcls = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([h['cls_pw']])).to(device)
     BCEobj = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([h['obj_pw']])).to(device)
     cp, cn = smooth_BCE(eps=0.0)
+    g = h['fl_gamma']  # focal loss gamma
+    if g > 0:
+        BCEcls, BCEobj = FocalLoss(BCEcls, g), FocalLoss(BCEobj, g)
 
-    # Losses------------------------------------------------------------------------------------------------------------
-    nt = 0
-    np = len(p)
+    # Losses
+    nt = 0  # number of targets
+    np = len(p)  # number of outputs
     balance = [4.0, 1.0]
     for i, pi in enumerate(p):
-        b, a, gj, gi = indices[i]
-        tobj = torch.zeros_like(pi[..., 0], device=device)
+        b, a, gj, gi = indices[i]  # image, anchor, gridy, gridx
+        tobj = torch.zeros_like(pi[..., 0], device=device)  # target obj
 
-        n = b.shape[0]
+        n = b.shape[0]  # number of targets
         if n:
-            nt += n
-            ps = pi[b, a, gj, gi]
+            nt += n  # cumulative targets
+            ps = pi[b, a, gj, gi]  # prediction subset corresponding to targets
 
-            # reg
-            pxy = ps[:, :2].sigmoid * 2. - 0.5
-            pwh = (ps[:, 2:4].sigmoid * 2) ** 2 * anchors[i]
-            pbox = torch.cat((pxy, pwh), 1).to(device)
+            # Regression
+            pxy = ps[:, :2].sigmoid() * 2. - 0.5
+            pwh = (ps[:, 2:4].sigmoid() * 2) ** 2 * anchors[i]
+            pbox = torch.cat((pxy, pwh), 1).to(device)  # predicted box
             giou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)
             lbox += (1.0 - giou).mean()
 
-            # obj
-            tobj[b, a, gi, gi] = (1.0 - model.gr) + model.gr * giou.detach().clamp(0).type(obj.dtype)
+            # Objectness
+            tobj[b, a, gj, gi] = (1.0 - model.gr) + model.gr * giou.detach().clamp(0).type(tobj.dtype)  # giou ratio
 
-            # class
+            # Classification
             if model.nc > 1:
                 t = torch.full_like(ps[:, 5:], cn, device=device)
                 t[range(n), tcls[i]] = cp
@@ -610,17 +605,15 @@ def compute_loss_s_dh(p, targets, model):
 
         lobj += BCEobj(pi[..., 4], tobj) * balance[i]
 
-    # output count scaling----------------------------------------------------------------------------------------------
+    reg_weight = 5.0
     s = 3 / np
-    lbox *= h['giou'] * s
-    lobj *= h['obj'] * s * (1.4 if np == 4 else 1.)
-    lcls *= h['cls'] * s
-    bs = tobj.shape[0]  # batch size
+    lbox *= reg_weight * s
+    lobj *= s
+    lcls *= s
+    bs = tobj.shape[0]
 
     loss = lbox + lobj + lcls
-    return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
-
-
+    return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach
 
 
 # loss end--------------------------------------------------------------------------------------------------------------

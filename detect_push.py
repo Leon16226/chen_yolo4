@@ -48,7 +48,7 @@ def push():
     with open("/home/chen/chen_p/chen_yolo4/inference/output/mss1.jpg", "rb") as f:
         img = base64.b64encode(f.read())
         img = str(img)
-
+        img = img[2:]
 
     event = Event('10.17.1.20', int(round(time.time() * 1000)),
                   1, "yzw1-dxcd", "illegalPark", "", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
@@ -59,10 +59,9 @@ def push():
 
     # post -------------------------------------------------------------------------------------------------------------
     url = 'http://192.168.1.19:8080/v1/app/interface/uploadEvent'
-    payload = event
     headers = {"content-type": "application/json"}
 
-    ret = requests.post(url, data=payload, headers=headers)
+    ret = requests.post(url, data=event, headers=headers)
 
     print(ret.text)
 
