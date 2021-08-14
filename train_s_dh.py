@@ -57,8 +57,9 @@ def train(hyp, opt, device, tb_writer=None):
     assert len(names) == nc, '%g names found for nc=%g dataset in %s' % (len(names), nc, opt.data)
 
     # Model-------------------------------------------------------------------------------------------------------------
+    # Version-----------------------------------------------------------------------------------------------------------
     start_epoch, best_fitness = 0, 0.0
-    model = Darknet(opt.cfg).to(device)  # create
+    model = Darknet(opt.cfg, version="yolov4-s-dh").to(device)
 
     # Optimizer
     nbs = 64  # nominal batch size
@@ -208,41 +209,10 @@ def train(hyp, opt, device, tb_writer=None):
                     imgs = F.interpolate(imgs, size=ns, mode='bilinear', align_corners=False)
 
             # Forward---------------------------------------------------------------------------------------------------
+            # Loss------------------------------------------------------------------------------------------------------
             with amp.autocast(enabled=cuda):
 
                 pred = model(imgs)
-                pred_t = []
-                num_c = 3
-                for i, p in enumerate(pred):
-                    p = p.permute(0, 2, 3, 1, 4)
-                    p_dtype = p.dtype
-
-                    p = p.contiguous()
-                    shape = p.shape
-                    p = p.view([shape[0], shape[1], shape[2], shape[3] * shape[4]])
-
-                    box = p[:, :, :, 0:(num_c * 4)]
-                    obj = p[:, :, :, (num_c * 4): (num_c * 4 + num_c)]
-                    cls = p[:, :, :, (num_c * 4 + num_c):]
-
-                    boxes = torch.zeros((shape[0], shape[1], shape[2], (4 + 1 + num_c) * 3), dtype=p_dtype, device=device)
-
-                    for j in np.arange(num_c):
-                        # [0,1,2,3, 4, 5,6,7]
-                        boxes[:, :, :, (j * 8): (j * 8) + 4] = box[:, :, :, (j * 4): (j * 4) + 4]
-                        boxes[:, :, :, (j * 8 + 4): (j * 8 + 4) + 1] = obj[:, :, :, j: j+1]
-                        boxes[:, :, :, (j * 8 + 5): (j * 8 + 5) + 3] = cls[:, :, :, (j * 3): (j * 3) + 3]
-
-                    boxes = boxes.view([shape[0], shape[1], shape[2], shape[3], shape[4]])
-
-                    boxes = boxes.contiguous()
-                    boxes = boxes.permute(0, 3, 1, 2, 4)
-                    boxes = boxes.contiguous()
-                    pred_t.append(boxes)
-
-                pred = pred_t
-
-                # Loss--------------------------------------------------------------------------------------------------
                 loss, loss_items, = compute_loss(pred, targets.to(device), model)
                 if rank != -1:
                     loss *= opt.world_size

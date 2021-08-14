@@ -6,7 +6,7 @@ from utils import torch_utils
 ONNX_EXPORT = False
 
 
-def create_modules(module_defs, img_size, cfg):
+def create_modules(module_defs, img_size, cfg, version=""):
     # Constructs module list of layer blocks from module configuration in module_defs
 
     img_size = [img_size] * 2 if isinstance(img_size, int) else img_size  # expand if necessary
@@ -152,7 +152,8 @@ def create_modules(module_defs, img_size, cfg):
                                 img_size=img_size,  # (416, 416)
                                 yolo_index=yolo_index,  # 0, 1, 2...
                                 layers=layers,  # output layers
-                                stride=stride[yolo_index])
+                                stride=stride[yolo_index],
+                                version=version)
 
             # Initialize preceding Conv2d() bias (https://arxiv.org/pdf/1708.02002.pdf section 3.3)
             try:
@@ -180,7 +181,7 @@ def create_modules(module_defs, img_size, cfg):
 
 # yolo layer
 class YOLOLayer(nn.Module):
-    def __init__(self, anchors, nc, img_size, yolo_index, layers, stride):
+    def __init__(self, anchors, nc, img_size, yolo_index, layers, stride, version=""):
         super(YOLOLayer, self).__init__()
         self.anchors = torch.Tensor(anchors)
         self.index = yolo_index  # index of this layer in layers
@@ -193,6 +194,8 @@ class YOLOLayer(nn.Module):
         self.nx, self.ny, self.ng = 0, 0, 0  # initialize number of x, y gridpoints
         self.anchor_vec = self.anchors / self.stride
         self.anchor_wh = self.anchor_vec.view(1, self.na, 1, 1, 2)
+
+        self.version = version
 
         if ONNX_EXPORT:
             self.training = False
@@ -242,6 +245,43 @@ class YOLOLayer(nn.Module):
         # p.view(bs, 255, 13, 13) -- > (bs, 3, 13, 13, 85)  # (bs, anchors, grid, grid, classes + xywh)
         p = p.view(bs, self.na, self.no, self.ny, self.nx).permute(0, 1, 3, 4, 2).contiguous()  # prediction
 
+        # version ------------------------------------------------------------------------------------------------------
+
+        if self.version == 'yolov4-s-dh':
+            pred = []
+            pred_t = []
+            num_c = 3
+            pred.append(p)
+            for i, p in enumerate(pred):
+                p = p.permute(0, 2, 3, 1, 4)
+                p_dtype = p.dtype
+                p_device = p.device
+
+                p = p.contiguous()
+                shape = p.shape
+                p = p.view([shape[0], shape[1], shape[2], shape[3] * shape[4]])
+
+                box = p[:, :, :, 0:(num_c * 4)]
+                obj = p[:, :, :, (num_c * 4): (num_c * 4 + num_c)]
+                cls = p[:, :, :, (num_c * 4 + num_c):]
+
+                boxes = torch.zeros((shape[0], shape[1], shape[2], (4 + 1 + num_c) * 3), dtype=p_dtype, device=p_device)
+
+                for j in np.arange(num_c):
+                    # [0,1,2,3, 4, 5,6,7]
+                    boxes[:, :, :, (j * 8): (j * 8) + 4] = box[:, :, :, (j * 4): (j * 4) + 4]
+                    boxes[:, :, :, (j * 8 + 4): (j * 8 + 4) + 1] = obj[:, :, :, j: j + 1]
+                    boxes[:, :, :, (j * 8 + 5): (j * 8 + 5) + 3] = cls[:, :, :, (j * 3): (j * 3) + 3]
+
+                boxes = boxes.view([shape[0], shape[1], shape[2], shape[3], shape[4]])
+
+                boxes = boxes.contiguous()
+                boxes = boxes.permute(0, 3, 1, 2, 4)
+                boxes = boxes.contiguous()
+                pred_t.append(boxes)
+
+            p = pred_t[0]
+
         if self.training:
             return p
 
@@ -274,11 +314,11 @@ class YOLOLayer(nn.Module):
 class Darknet(nn.Module):
     # YOLOv3 object detection model
 
-    def __init__(self, cfg, img_size=(416, 416), verbose=False):
+    def __init__(self, cfg, img_size=(416, 416), verbose=False, version=""):
         super(Darknet, self).__init__()
 
         self.module_defs = parse_model_cfg(cfg)
-        self.module_list, self.routs = create_modules(self.module_defs, img_size, cfg)
+        self.module_list, self.routs = create_modules(self.module_defs, img_size, cfg, version=version)
         self.yolo_layers = get_yolo_layers(self)
         # torch_utils.initialize_weights(self)
 
@@ -286,6 +326,7 @@ class Darknet(nn.Module):
         self.version = np.array([0, 2, 5], dtype=np.int32)  # (int32) version info: major, minor, revision
         self.seen = np.array([0], dtype=np.int64)  # (int64) number of images seen during training
         self.info(verbose) if not ONNX_EXPORT else None  # print model description
+
 
     def forward(self, x, augment=False, verbose=False):
 
@@ -351,6 +392,7 @@ class Darknet(nn.Module):
             if verbose:
                 print('%g/%g %s -' % (i, len(self.module_list), name), list(x.shape), str)
                 str = ''
+
 
         # judgement ----------------------------------------------------------------------------------------------------
         if self.training:  # train
