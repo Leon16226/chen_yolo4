@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="http push sucess">
-      <change afterPath="$PROJECT_DIR$/test_s_dh.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="double head really success">
+      <change afterPath="$PROJECT_DIR$/cfg/yolov4-s-f" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -403,7 +401,14 @@
       <option name="project" value="LOCAL" />
       <updated>1628848763519</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="double head really success">
+      <created>1628907233359</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1628907233359</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -449,7 +454,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="train_evolve.py init" />
     <MESSAGE value="train_evolve.py finish" />
     <MESSAGE value="yolof encoder init" />
     <MESSAGE value="yolof encoder reader endt" />
@@ -474,7 +478,8 @@
     <MESSAGE value="yolo4-s-dh success turely" />
     <MESSAGE value="http push" />
     <MESSAGE value="http push sucess" />
-    <option name="LAST_COMMIT_MESSAGE" value="http push sucess" />
+    <MESSAGE value="double head really success" />
+    <option name="LAST_COMMIT_MESSAGE" value="double head really success" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
