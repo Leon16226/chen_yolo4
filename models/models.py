@@ -5,7 +5,7 @@ from utils import torch_utils
 
 ONNX_EXPORT = False
 
-
+# model ----------------------------------------------------------------------------------------------------------------
 def create_modules(module_defs, img_size, cfg, version=""):
     # Constructs module list of layer blocks from module configuration in module_defs
 
@@ -25,13 +25,26 @@ def create_modules(module_defs, img_size, cfg, version=""):
             k = mdef['size']  # kernel size
             stride = mdef['stride'] if 'stride' in mdef else (mdef['stride_y'], mdef['stride_x'])
             if isinstance(k, int):  # single-size conv
-                modules.add_module('Conv2d', nn.Conv2d(in_channels=output_filters[-1],
-                                                       out_channels=filters,
-                                                       kernel_size=k,
-                                                       stride=stride,
-                                                       padding=k // 2 if mdef['pad'] else 0,
-                                                       groups=mdef['groups'] if 'groups' in mdef else 1,
-                                                       bias=not bn))
+                if version == 'yolov4-s-f':
+                    padding = k // 2 if mdef['pad'] else 0,
+                    padding = mdef['padding'] if 'padding' in mdef else padding
+                    dilation = mdef['dilation'] if 'dialtion' in mdef else 1
+                    modules.add_module('Conv2d', nn.Conv2d(in_channels=output_filters[-1],
+                                                           out_channels=filters,
+                                                           kernel_size=k,
+                                                           stride=stride,
+                                                           padding=padding,
+                                                           dilation=dilation,
+                                                           groups=mdef['groups'] if 'groups' in mdef else 1,
+                                                           bias=not bn))
+                else:
+                    modules.add_module('Conv2d', nn.Conv2d(in_channels=output_filters[-1],
+                                                           out_channels=filters,
+                                                           kernel_size=k,
+                                                           stride=stride,
+                                                           padding=k // 2 if mdef['pad'] else 0,
+                                                           groups=mdef['groups'] if 'groups' in mdef else 1,
+                                                           bias=not bn))
             else:  # multiple-size conv
                 modules.add_module('MixConv2d', MixConv2d(in_ch=output_filters[-1],
                                                           out_ch=filters,
@@ -247,7 +260,7 @@ class YOLOLayer(nn.Module):
 
         # version ------------------------------------------------------------------------------------------------------
 
-        if self.version == 'yolov4-s-dh':
+        if self.version == 'yolov4-s-dh' or self.version == 'yolov4-s-f':
             pred = []
             pred_t = []
             num_c = 3
@@ -279,6 +292,7 @@ class YOLOLayer(nn.Module):
                 boxes = boxes.permute(0, 3, 1, 2, 4)
                 boxes = boxes.contiguous()
                 pred_t.append(boxes)
+
 
             p = pred_t[0]
 
@@ -393,6 +407,12 @@ class Darknet(nn.Module):
                 print('%g/%g %s -' % (i, len(self.module_list), name), list(x.shape), str)
                 str = ''
 
+        # version ------------------------------------------------------------------------------------------------------
+        if self.version == 'yolov4-s-f':
+            yolo_out_temp = []
+            for out in yolo_out_temp[::-1]:
+                yolo_out_temp.append(out)
+            yolo_out = yolo_out_temp
 
         # judgement ----------------------------------------------------------------------------------------------------
         if self.training:  # train

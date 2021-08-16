@@ -13,8 +13,8 @@ import numpy as np
 classes = ['SLD', 'ZBZ', 'KQSP']
 Annota_Save_Root = '../../datasets/Material/labels'   # label save
 Image_Save_Root = '../../datasets/Material/images'
-Label_Root = '../../datasets/Material/data/labels'  # label name
-Image_Root = '../../datasets/Material/data/images'
+Label_Root = '../../datasets/Material/data/road_labels'  # label name
+Image_Root = '../../datasets/Material/data/road_images'
 
 
 def convert(size, box):
@@ -74,14 +74,13 @@ if __name__ == "__main__":
         rand = random.randint(1, 10)
         name = filename.split('.')[0]
         imagepath = os.path.join(Image_Root, name + '.jpg')
-        if rand <= 8:
+        filepath = os.path.join(Label_Root, name + '.xml')
+        if rand <= 10:
             nt += 1
-            filepath = os.path.join(Label_Root, filename)
             convert_label(nt, filepath, '/train')
             convert_image(nt, imagepath, '/train')
         else:
             nv += 1
-            filepath = os.path.join(Label_Root, filename)
             convert_label(nv, filepath, '/val')
             convert_image(nv, imagepath, '/val')
 

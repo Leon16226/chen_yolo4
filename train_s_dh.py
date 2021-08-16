@@ -108,7 +108,7 @@ def train(hyp, opt, device, tb_writer=None):
     if cuda and rank != -1:
         model = DDP(model, device_ids=[opt.local_rank], output_device=(opt.local_rank))
 
-    # Trainloader
+    # 1.Trainloader-------------------------------------------------------------------------------------------------------
     dataloader, dataset = create_dataloader(train_path, imgsz, batch_size, gs, opt, hyp=hyp, augment=True,
                                             cache=opt.cache_images, rect=opt.rect, local_rank=rank,
                                             world_size=opt.world_size)
@@ -116,14 +116,14 @@ def train(hyp, opt, device, tb_writer=None):
     nb = len(dataloader)
     assert mlc < nc, 'Label class %g exceeds nc=%g in %s. Possible class labels are 0-%g' % (mlc, nc, opt.data, nc - 1)
 
-    # Testloader
+    # 2.Testloader--------------------------------------------------------------------------------------------------------
     if rank in [-1, 0]:
         ema.updates = start_epoch * nb // accumulate
         testloader = create_dataloader(test_path, imgsz_test, batch_size, gs, opt, hyp=hyp, augment=False,
                                        cache=opt.cache_images, rect=True, local_rank=-1, world_size=opt.world_size)[0]
 
     # Model parameters
-    hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset
+    hyp['cls'] *= nc / 3.  # scale coco-tuned hyp['cls'] to current dataset
     model.nc = nc  # attach number of classes to model
     model.hyp = hyp  # attach hyperparameters to model
     model.gr = 1.0  # giou loss ratio (obj_loss = 1.0 or giou)
@@ -202,7 +202,7 @@ def train(hyp, opt, device, tb_writer=None):
 
             # Multi-scale
             if opt.multi_scale:
-                sz = random.randrange(imgsz * 0.5, imgsz * 1.5 + gs) // gs * gs  # size
+                sz = random.randrange(imgsz * 0.5, imgsz * 1 + gs) // gs * gs  # size
                 sf = sz / max(imgs.shape[2:])  # scale factor
                 if sf != 1:
                     ns = [math.ceil(x * sf / gs) * gs for x in imgs.shape[2:]]  # new shape (stretched to gs-multiple)
@@ -213,7 +213,7 @@ def train(hyp, opt, device, tb_writer=None):
             with amp.autocast(enabled=cuda):
 
                 pred = model(imgs)
-                loss, loss_items, = compute_loss(pred, targets.to(device), model)
+                loss, loss_items, = compute_loss(pred, targets.to(device), model, version='yolov4-s-dh')
                 if rank != -1:
                     loss *= opt.world_size
 
@@ -315,8 +315,8 @@ def train(hyp, opt, device, tb_writer=None):
                 strip_optimizer(f2) if ispt else None  # strip optimizer
                 os.system('gsutil cp %s gs://%s/weights' % (f2, opt.bucket)) if opt.bucket and ispt else None  # upload
         # Finish
-        if not opt.evolve:
-            plot_results(save_dir=log_dir)  # save as results.png
+
+        plot_results(save_dir=log_dir)  # save as results.png
         print('%g epochs completed in %.3f hours.\n' % (epoch - start_epoch + 1, (time.time() - t0) / 3600))
 
     dist.destroy_process_group() if rank not in [-1, 0] else None

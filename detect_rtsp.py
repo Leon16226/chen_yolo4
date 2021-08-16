@@ -1,17 +1,21 @@
 import argparse
-import json
 import os
 import shutil
-import time
 from pathlib import Path
 import cv2
 import numpy as np
 from threading import Thread
 from atlas_utils.acl_model import Model
 from atlas_utils.acl_resource import AclResource
+import json
 import requests
+import base64
+import time
+import datetime
 
 rtsp = "rtsp://admin:xsy12345@192.168.1.86:554/h264/ch1/main/av_stream"
+post_url = "http://192.168.1.19:8080/v1/app/interface/uploadEvent"
+out = "./inference"
 SRC_PATH = os.path.realpath(__file__).rsplit("/", 1)[0]
 MODEL_PATH = os.path.join(SRC_PATH, "./weights/mask.om")
 
@@ -31,7 +35,7 @@ def load_classes(path):
 
 # load rtsp
 class LoadStreams:
-    def __init__(self, source='', img_size=640):
+    def __init__(self, source='', img_size=608):
         # init
         self.mode = 'images'
         self.img_size = img_size
@@ -62,7 +66,7 @@ class LoadStreams:
         while cap.isOpened():
             n += 1
             cap.grab()
-            # fps = 25
+            # fps = 25--------------------------------------------------------------------------------------------------
             if n == 12:
                 _, self.imgs = cap.retrieve()
                 n = 0
@@ -126,8 +130,7 @@ def func_nms(boxes, nms_threshold):
 
 
 def detect():
-    out, source, weights, view_img, save_txt, imgsz, cfg, names = \
-        opt.output, opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, opt.cfg, opt.names
+
     # init time
     t0, t1 = 0., 0.
 
@@ -136,12 +139,12 @@ def detect():
         shutil.rmtree(out)
     os.makedirs(out)
 
-    # Load model
+    # Load model--------------------------------------------------------------------------------------------------------
     acl_resource = AclResource()
     acl_resource.init()
     model = Model(MODEL_PATH)
 
-    # Set Dataloader
+    # Set Dataloader----------------------------------------------------------------------------------------------------
     vid_path, vid_writer = None, None
     dataset = LoadStreams(rtsp, img_size=(MODEL_WIDTH, MODEL_HEIGHT))
 
@@ -153,7 +156,7 @@ def detect():
 
         # 模型推理
         t = time.time()
-        infer_output = model.execute(resized_img)  # (1, 3, 416, 616)
+        infer_output = model.execute(resized_img)
         infer_output = infer_output[0]
         t0 += time.time() - t
 
@@ -210,80 +213,69 @@ def detect():
 
     vid_writer.release()
 
-# Event  Post----------------------------------------------------------------------------------------------------------------
-class Event:
-    def __init__(self, cameraIp='', timestamp=0, events=[]):
+# Event  Post-----------------------------------------------------------------------------------------------------------
+class Event(object):
+    def __init__(self, cameraIp, timestamp,
+                 roadId, roadName, code, subCode, dateTime, status, no, distance, picture,
+                 targetType, xAxis, yAxis, height, width, prob,
+                 miniPicture, carNo,
+                 remark
+                 ):
         self.cameraIp = cameraIp
         self.timestamp = timestamp
-        self.events = events
-
-def push():
-    # event ------------------------------------------------------------------------------------------------------------
-    events = [
-        {
-            "roadId": 1,
-            "roadName": "yzw1-dxcd",
-            "code": "illegalPark",
-            "subCode": "accident",
-            "dateTime": "2021-04-01 15:40:06",
-            "status": 1,
-            "no": [1, 10, 20],
-            "distance": 30,
-            "picture": "",
+        self.events = [
+         {
+            "roadId": roadId,
+            "roadName": roadName,
+            "code": code,
+            "subCode": subCode,
+            "dateTime": dateTime,
+            "status": status,
+            "no": no,
+            "distance": distance,
+            "picture": picture,
             "coordinate": [
                 {
-                    "targetType": "people",
-                    "xAxis": 0,
-                    "yAxis": 0,
-                    "height": 0,
-                    "width": 0,
-                    "prob": 0.75
+                    "targetType": targetType,
+                    "xAxis": xAxis,
+                    "yAxis": yAxis,
+                    "height": height,
+                    "width": width,
+                    "prob": prob
                 }
             ],
-            "carNoAI": {
-                "miniPicture": "",
-                "carNo": " A12345"
-            },
-            "remark": ""
-        }
-    ]
+             "carNoAI": {
+                 "miniPicture": miniPicture,
+                 "carNo": carNo
+             },
+             "remark": remark
+         }
+        ]
 
-    event = Event('33.65.158.71', 1618283496244, events)
+def push(frame):
+    # event ------------------------------------------------------------------------------------------------------------
+    img = base64.b64encode(frame.read())
+    img = str(img)
+    img = img[2:]
+
+    event = Event('10.17.1.20', int(round(time.time() * 1000)),
+                  1, "yzw1-dxcd", "illegalPark", "", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
+                  "people", 0, 0, 0, 0, 0.75,
+                  "", "",
+                  "")
+    event = json.dumps(event, default=lambda obj: obj.__dict__, sort_keys=True, indent=4)
 
     # post -------------------------------------------------------------------------------------------------------------
-    url = 'http://192.168.1.19:8080/v1/app/interface/uploadEvent'
-    payload = event
+    url = post_url
     headers = {"content-type": "application/json"}
 
-    ret = requests.post(url, data=json.dump(payload), headers=headers)
+    ret = requests.post(url, data=event, headers=headers)
 
     print(ret.text)
 
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    # model
-    parser.add_argument('--weights', type=str, default='./weights/mask.pt', help='model.pt path(s)')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov4.cfg', help='*.cfg path')
-    parser.add_argument('--names', type=str, default='data/mask.names', help='*.cfg path')
-    parser.add_argument('--conf-thres', type=float, default=0.65, help='object confidence threshold')
-    parser.add_argument('--iou-thres', type=float, default=0.6, help='IOU threshold for NMS')
-    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-    parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
-    parser.add_argument('--augment', action='store_true', help='augmented inference')
-    parser.add_argument('--img-size', type=int, default=416, help='inference size (pixels)')
-    # save
-    parser.add_argument('--source', type=str, default='inference/images', help='source')  # file/folder, 0 for webcam
-    parser.add_argument('--output', type=str, default='inference/output', help='output folder')  # output folders
-    # process
-    parser.add_argument('--view-img', action='store_true', help='display results')  # view image
-    parser.add_argument('--save-txt', action='store_true', help='save results to *.txt') # save-txt
-    parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --class 0, or --class 0 2 3')  # filter
-    parser.add_argument('--update', action='store_true', help='update all models')
 
-    opt = parser.parse_args()
-    print(opt)
 
-    # detect()
-    push()
+    detect()

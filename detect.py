@@ -43,7 +43,7 @@ def detect(save_img=False):
     half = device.type != 'cpu'  # half precision only supported on CUDA
 
     # Load model
-    model = Darknet(cfg, imgsz).cuda()
+    model = Darknet(cfg, imgsz, version="yolov4-s-dh").cuda()
     try:
         model.load_state_dict(torch.load(weights, map_location=device)['model_state'])
     except:
@@ -166,8 +166,8 @@ def detect(save_img=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # model
-    parser.add_argument('--weights', type=str, default='./weights/material_6.pt', help='model.pt path(s)')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov4-s.cfg', help='*.cfg path')
+    parser.add_argument('--weights', type=str, default='./weights/material_7.pt', help='model.pt path(s)')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov4-s-dh.cfg', help='*.cfg path')
     parser.add_argument('--names', type=str, default='data/material.names', help='*.cfg path')
     parser.add_argument('--conf-thres', type=float, default=0.6, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS')  #

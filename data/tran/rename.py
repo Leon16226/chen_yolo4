@@ -2,7 +2,7 @@ import os
 
 
 if __name__ == '__main__':
-   path = "/media/chen/U/xx"
+   path = "/home/chen/Desktop/抛撒物正报/补充b"
    count = 0
 
    filelist = os.listdir(path)
@@ -13,7 +13,7 @@ if __name__ == '__main__':
        filename = os.path.splitext(file)[0]
        filetype = os.path.splitext(file)[1]
        # import---------------------------------------------------------------------------------------------------------------
-       Newdir = os.path.join(path, 'ssss' + str(count) + filetype)
+       Newdir = os.path.join(path, 'ffffff' + str(count) + filetype)
        os.rename(Olddir, Newdir)
 
        count += 1

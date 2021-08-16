@@ -19,4 +19,4 @@ shear: 0.0
 perspective: 0.0
 flipud: 0.0
 fliplr: 0.46085
-mixup: 0.0
+mixup: 0.8

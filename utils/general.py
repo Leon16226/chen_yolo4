@@ -444,22 +444,16 @@ class BCEBlurWithLogitsLoss(nn.Module):
         return loss.mean()
 
 # loss------------------------------------------------------------------------------------------------------------------
-def compute_loss(p, targets, model):  # predictions, targets, model
+def compute_loss(p, targets, model, version=""):  # predictions, targets, model
     device = targets.device
     lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
     tcls, tbox, indices, anchors = build_targets(p, targets, model)  # targets
     h = model.hyp
 
-    # Define criteria -> pos_weight : positive examples & negative examples
-    # measure the error
-    # the targets should be the numbers between 0 and 1
+    # loss
     BCEcls = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([h['cls_pw']])).to(device)
     BCEobj = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor([h['obj_pw']])).to(device)
-
-    # Class label smoothing https://arxiv.org/pdf/1902.04103.pdf eqn 3
     cp, cn = smooth_BCE(eps=0.0)
-
-    # Focal loss
     g = h['fl_gamma']  # focal loss gamma
     if g > 0:
         BCEcls, BCEobj = FocalLoss(BCEcls, g), FocalLoss(BCEobj, g)
@@ -480,8 +474,6 @@ def compute_loss(p, targets, model):  # predictions, targets, model
             # Regression
             pxy = ps[:, :2].sigmoid() * 2. - 0.5
             pwh = (ps[:, 2:4].sigmoid() * 2) ** 2 * anchors[i]
-            #pxy = torch.sigmoid(ps[:, 0:2])  # pxy = pxy * s - (s - 1) / 2,  s = 1.5  (scale_xy)
-            #pwh = torch.exp(ps[:, 2:4]).clamp(max=1E3) * anchors[i]
             pbox = torch.cat((pxy, pwh), 1).to(device)  # predicted box
             giou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)  # giou(prediction, target)
             lbox += (1.0 - giou).mean()  # giou loss
@@ -495,16 +487,17 @@ def compute_loss(p, targets, model):  # predictions, targets, model
                 t[range(n), tcls[i]] = cp
                 lcls += BCEcls(ps[:, 5:], t)  # BCE
 
-            # Append targets to text file
-            # with open('targets.txt', 'a') as file:
-            #     [file.write('%11.5g ' * 4 % tuple(x) + '\n') for x in torch.cat((txy[i], twh[i]), 1)]
-
         lobj += BCEobj(pi[..., 4], tobj) * balance[i]  # obj loss
 
     s = 3 / np  # output count scaling
-    lbox *= h['giou'] * s
-    lobj *= h['obj'] * s * (1.4 if np == 4 else 1.)
-    lcls *= h['cls'] * s
+    if version == 'yolov4-s-dh':
+        lbox *= 5 * s
+        lobj *= 1 * s
+        lcls *= 1 * s
+    else:
+        lbox *= h['giou'] * s
+        lobj *= h['obj'] * s * (1.4 if np == 4 else 1.)
+        lcls *= h['cls'] * s
     bs = tobj.shape[0]  # batch size
 
     loss = lbox + lobj + lcls
