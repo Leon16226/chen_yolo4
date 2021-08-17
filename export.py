@@ -1,13 +1,13 @@
 import argparse
-
 import torch
-
-from utils.google_utils import attempt_download
+import models
+from utils.activations import Mish
+from onnxsim import  simplify
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', type=str, default='./weights/mask.pt', help='weights path')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[416, 416], help='image size')
+    parser.add_argument('--weights', type=str, default='./weights/material_7.pt', help='weights path')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[608, 608], help='image size')
     parser.add_argument('--batch-size', type=int, default=1, help='batch size')
     opt = parser.parse_args()
     opt.img_size *= 2 if len(opt.img_size) == 1 else 1  # expand
@@ -19,7 +19,6 @@ if __name__ == '__main__':
     # Load PyTorch model
     model = torch.load(opt.weights, map_location=torch.device('cpu'))['model'].float()
     model.eval()
-    # model.model[-1].export = True  # set Detect() layer export=True
     y = model(img)  # dry run
 
     # ONNX export
@@ -33,6 +32,7 @@ if __name__ == '__main__':
                           output_names=['classes', 'boxes'] if y is None else ['output'])
 
         # Checks
+        print('load onnx model')
         onnx_model = onnx.load(f)  # load onnx model
         onnx.checker.check_model(onnx_model)  # check onnx model
         print(onnx.helper.printable_graph(onnx_model.graph))  # print a human readable model

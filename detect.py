@@ -166,7 +166,7 @@ def detect(save_img=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # model
-    parser.add_argument('--weights', type=str, default='./weights/material_7.pt', help='model.pt path(s)')
+    parser.add_argument('--weights', type=str, default='./weights/material_8.pt', help='model.pt path(s)')
     parser.add_argument('--cfg', type=str, default='cfg/yolov4-s-dh.cfg', help='*.cfg path')
     parser.add_argument('--names', type=str, default='data/material.names', help='*.cfg path')
     parser.add_argument('--conf-thres', type=float, default=0.6, help='object confidence threshold')

@@ -250,7 +250,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
             # Letterbox
             # letterbox to 416 along longest image dimension, pads shorter dimension to minimum multiple of 32
-            shape = self.batch_shapes[self.batch[index]] if self.rect else self.img_size  # final letterboxed shape
+            shape =  self.img_size  # final letterboxed shape
             img, ratio, pad = letterbox(img, shape, auto=False, scaleup=self.augment)
             shapes = (h0, w0), ((h / h0, w / w0), pad)  # for COCO mAP rescaling
 

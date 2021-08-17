@@ -192,7 +192,8 @@ def create_modules(module_defs, img_size, cfg, version=""):
         routs_binary[i] = True
     return module_list, routs_binary
 
-# yolo layer
+
+# yolo layer------------------------------------------------------------------------------------------------------------
 class YOLOLayer(nn.Module):
     def __init__(self, anchors, nc, img_size, yolo_index, layers, stride, version=""):
         super(YOLOLayer, self).__init__()
@@ -318,11 +319,6 @@ class YOLOLayer(nn.Module):
             io[..., :2] = (io[..., :2] * 2. - 0.5 + self.grid)
             io[..., 2:4] = (io[..., 2:4] * 2) ** 2 * self.anchor_wh
             io[..., :4] *= self.stride
-            #io = p.clone()  # inference output
-            #io[..., :2] = torch.sigmoid(io[..., :2]) + self.grid  # xy
-            #io[..., 2:4] = torch.exp(io[..., 2:4]) * self.anchor_wh  # wh yolo method
-            #io[..., :4] *= self.stride
-            #torch.sigmoid_(io[..., 4:])
             return io.view(bs, -1, self.no), p  # view [1, 3, 13, 13, 85] as [1, 507, 85]
 
 class Darknet(nn.Module):

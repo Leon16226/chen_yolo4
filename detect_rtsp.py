@@ -15,6 +15,7 @@ import datetime
 
 rtsp = "rtsp://admin:xsy12345@192.168.1.86:554/h264/ch1/main/av_stream"
 post_url = "http://192.168.1.19:8080/v1/app/interface/uploadEvent"
+ponit_ip = "10.17.1.20"
 out = "./inference"
 SRC_PATH = os.path.realpath(__file__).rsplit("/", 1)[0]
 MODEL_PATH = os.path.join(SRC_PATH, "./weights/mask.om")
@@ -24,7 +25,7 @@ MODEL_HEIGHT = 608
 NMS_THRESHOLD_CONST = 0.65  # nms
 CLASS_SCORE_CONST = 0.6  # clss
 MODEL_OUTPUT_BOXNUM = 10647
-labels = ["on_mask", "mask"]
+labels = ["bag", "cup", "bottle"]
 
 
 def load_classes(path):
@@ -184,6 +185,7 @@ def detect():
         y_scale = orig_shape[0] / MODEL_WIDTH
 
         # im0s -> h, w, n
+        coords = []
         for detect_result in real_box:
             top_x = int((detect_result[0] - detect_result[2] / 2) * x_scale)
             top_y = int((detect_result[1] - detect_result[3] / 2) * y_scale)
@@ -192,24 +194,13 @@ def detect():
             cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 1)
             cv2.putText(im0s, labels[int(detect_result[4])], (top_x, top_y - 5),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            coords.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y, detect_result[5]))
 
-        print('im0s', im0s.shape)
+        # push----------------------------------------------------------------------------------------------------------
 
-        # save
-        save_path = str(Path(out) / 'result.mp4')
-        fourcc = 'mp4v'
-        fps = vid_cap.get(cv2.CAP_PROP_FPS)
-        w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        print(fourcc, fps, w, h)
-        if i == 0:
-            vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))  # 2560 * 1536
-        # vid_writer.write(im0s)
+        push(im0s, coords)
 
-        cv2.imshow('mask', im0s)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            print('quit')
-            break
+
 
     vid_writer.release()
 
@@ -217,7 +208,7 @@ def detect():
 class Event(object):
     def __init__(self, cameraIp, timestamp,
                  roadId, roadName, code, subCode, dateTime, status, no, distance, picture,
-                 targetType, xAxis, yAxis, height, width, prob,
+                 coords,
                  miniPicture, carNo,
                  remark
                  ):
@@ -234,16 +225,7 @@ class Event(object):
             "no": no,
             "distance": distance,
             "picture": picture,
-            "coordinate": [
-                {
-                    "targetType": targetType,
-                    "xAxis": xAxis,
-                    "yAxis": yAxis,
-                    "height": height,
-                    "width": width,
-                    "prob": prob
-                }
-            ],
+            "coordinate": coords,
              "carNoAI": {
                  "miniPicture": miniPicture,
                  "carNo": carNo
@@ -252,15 +234,30 @@ class Event(object):
          }
         ]
 
-def push(frame):
+
+class Coordinate(object):
+    def __init__(self, targetType, xAxis, yAxis, height, width, prob):
+        self.targetType = targetType
+        self.xAxis = xAxis
+        self.yAxis = yAxis
+        self.height = height
+        self.width = width
+        self.prob = prob
+
+
+def push(frame, coords):
     # event ------------------------------------------------------------------------------------------------------------
     img = base64.b64encode(frame.read())
     img = str(img)
     img = img[2:]
 
-    event = Event('10.17.1.20', int(round(time.time() * 1000)),
-                  1, "yzw1-dxcd", "illegalPark", "", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
-                  "people", 0, 0, 0, 0, 0.75,
+    coordinate = []
+    for i, coord in enumerate(coords):
+        coordinate.append(Coordinate("material", coord[0], coord[1], coord[2], coord[3], coord[4]))
+
+    event = Event(ponit_ip, int(round(time.time() * 1000)),
+                  1, "yzw1-dxcd", "throwThings", "", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
+                  coordinate,
                   "", "",
                   "")
     event = json.dumps(event, default=lambda obj: obj.__dict__, sort_keys=True, indent=4)
@@ -268,14 +265,10 @@ def push(frame):
     # post -------------------------------------------------------------------------------------------------------------
     url = post_url
     headers = {"content-type": "application/json"}
-
     ret = requests.post(url, data=event, headers=headers)
-
     print(ret.text)
 
 
-
 if __name__ == '__main__':
-
 
     detect()
