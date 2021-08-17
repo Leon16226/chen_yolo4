@@ -12,13 +12,14 @@ import requests
 import base64
 import time
 import datetime
+from shapely.geometry import Polygon
 
-rtsp = "rtsp://admin:xsy12345@192.168.1.86:554/h264/ch1/main/av_stream"
+rtsp = "rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0"
 post_url = "http://192.168.1.19:8080/v1/app/interface/uploadEvent"
 ponit_ip = "10.17.1.20"
 out = "./inference"
 SRC_PATH = os.path.realpath(__file__).rsplit("/", 1)[0]
-MODEL_PATH = os.path.join(SRC_PATH, "./weights/mask.om")
+MODEL_PATH = os.path.join(SRC_PATH, "./weights/material.om")
 
 MODEL_WIDTH = 608
 MODEL_HEIGHT = 608
@@ -27,12 +28,11 @@ CLASS_SCORE_CONST = 0.6  # clss
 MODEL_OUTPUT_BOXNUM = 10647
 labels = ["bag", "cup", "bottle"]
 
-
+# Tools-----------------------------------------------------------------------------------------------------------------
 def load_classes(path):
     with open(path, 'r') as f:
         names = f.read().split('\n')
     return list(filter(None, names))
-
 
 # load rtsp
 class LoadStreams:
@@ -95,7 +95,6 @@ class LoadStreams:
     def __len__(self):
         return 0  # 1E12 frames = 32 streams at 30 FPS for 30 years
 
-
 # nms
 def func_nms(boxes, nms_threshold):
         b_x = boxes[:, 0]
@@ -129,11 +128,25 @@ def func_nms(boxes, nms_threshold):
         final_boxes = [boxes[i] for i in keep]
         return final_boxes
 
+# shapley
+def Cal_area_2poly(point1,point2):
 
+    poly1 = Polygon(point1).convex_hull      # Polygon：多边形对象
+    poly2 = Polygon(point2).convex_hull
+
+    if not poly1.intersects(poly2):
+        inter_area = 0  # 如果两四边形不相交
+    else:
+        inter_area = poly1.intersection(poly2).area  # 相交面积
+    return inter_area
+
+
+# Detect----------------------------------------------------------------------------------------------------------------
 def detect():
 
     # init time
     t0, t1 = 0., 0.
+    point2 = []
 
     # Initialize
     if os.path.exists(out):
@@ -155,15 +168,17 @@ def detect():
         resized_img = img.astype(np.float32)
         resized_img /= 255.0
 
-        # 模型推理
+        # 模型推理-------------------------------------------------------------------------------------------------------
         t = time.time()
         infer_output = model.execute(resized_img)
+        print(np.array(infer_output).shape)
         infer_output = infer_output[0]
         t0 += time.time() - t
 
         # 1.根据模型的输出以及对检测网络的认知，可以知道：-------------------------------------------------
+        MODEL_OUTPUT_BOXNUM = infer_output.shape[1]
         result_box = infer_output[:, :, 0:6].reshape((-1, 6)).astype('float32')
-        list_class = infer_output[:, :, 5:7].reshape((-1, 2)).astype('float32')
+        list_class = infer_output[:, :, 5:8].reshape((-1, 3)).astype('float32')
         list_max = list_class.argmax(axis=1)
         list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
         result_box[:, 5] = list_max[:, 0]
@@ -184,6 +199,20 @@ def detect():
         x_scale = orig_shape[1] / MODEL_HEIGHT
         y_scale = orig_shape[0] / MODEL_WIDTH
 
+        # filter strategy-----------------------------------------------------------------------------------------------
+
+        # 1. unique area
+        toplx, toply = 752, 555
+        toprx, topry = 1342, 608
+        bottomlx, bottomly = 392, 928
+        bottomrx, bottomry = 1304, 1066
+        point1 = [toplx, toply, bottomlx, bottomly, bottomrx, bottomry, toprx, topry]
+        point1 = np.array(point1).reshape(4, 2)
+
+        # 2.remove duplicate
+
+
+
         # im0s -> h, w, n
         coords = []
         for detect_result in real_box:
@@ -191,16 +220,46 @@ def detect():
             top_y = int((detect_result[1] - detect_result[3] / 2) * y_scale)
             bottom_x = int((detect_result[0] + detect_result[2] / 2) * x_scale)
             bottom_y = int((detect_result[1] + detect_result[3] / 2) * y_scale)
-            cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 1)
-            cv2.putText(im0s, labels[int(detect_result[4])], (top_x, top_y - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-            coords.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y, detect_result[5]))
+
+            # plan1
+            point = [top_x, top_y, top_x, bottom_y, bottom_x, bottom_y, bottom_x, top_y]
+            point = np.array(point).reshape(4, 2)
+            inter_area = Cal_area_2poly(point1, point)
+            pred_area = (bottom_x - top_x) * (bottom_y - top_y)
+            iou_p1 = inter_area / pred_area
+
+            # plan2
+            iou_p2 = 0
+            for i, p in enumerate(point2):
+                p = np.array(p).reshape(4, 2)
+                inter_area = Cal_area_2poly(point, p)
+                p_iou = inter_area / pred_area
+                iou_p2 = p_iou if p_iou > iou_p2 else iou_p2
+            print("iou_p2:", iou_p2)
+            if(iou_p1 >= 0.5 and iou_p2 < 0.5):
+                cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 1)
+                cv2.putText(im0s, labels[int(detect_result[4])], (top_x, top_y - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+                coords.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y, detect_result[5]))
+
+        # before push---------------------------------------------------------------------------------------------------
+        if len(coords) > 0:
+            for i, cor in enumerate(coords):
+                point2 = []
+                point2.append([cor[0], cor[0], cor[1]+cor[3], cor[0]+cor[2], cor[1]+cor[3],
+                               cor[1], cor[0]+cor[2], cor[1]])
 
         # push----------------------------------------------------------------------------------------------------------
+        if(len(coords) > 0):
+            print("push one")
+            push(im0s, coords)
 
-        push(im0s, coords)
-
-
+        # wait key------------------------------------------------------------------------------------------------------
+        cv2.imshow(im0s)
+        k = cv2.waitKey(10) & 0xff
+        if k == ord('q'):
+            print('quit')
+            break
 
     vid_writer.release()
 
@@ -208,7 +267,7 @@ def detect():
 class Event(object):
     def __init__(self, cameraIp, timestamp,
                  roadId, roadName, code, subCode, dateTime, status, no, distance, picture,
-                 coords,
+                 targetType, xAxis, yAxis, height, width, prob,
                  miniPicture, carNo,
                  remark
                  ):
@@ -225,7 +284,16 @@ class Event(object):
             "no": no,
             "distance": distance,
             "picture": picture,
-            "coordinate": coords,
+            "coordinate": [
+                {
+                    "targetType": targetType,
+                    "xAxis": xAxis,
+                    "yAxis": yAxis,
+                    "height": height,
+                    "width": width,
+                    "prob": prob
+                }
+            ],
              "carNoAI": {
                  "miniPicture": miniPicture,
                  "carNo": carNo
@@ -247,7 +315,8 @@ class Coordinate(object):
 
 def push(frame, coords):
     # event ------------------------------------------------------------------------------------------------------------
-    img = base64.b64encode(frame.read())
+    _, bi_frame = cv2.imencode('.jpg', frame)
+    img = base64.b64encode(bi_frame)
     img = str(img)
     img = img[2:]
 
@@ -257,7 +326,7 @@ def push(frame, coords):
 
     event = Event(ponit_ip, int(round(time.time() * 1000)),
                   1, "yzw1-dxcd", "throwThings", "", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
-                  coordinate,
+                  "material", 0, 0, 0, 0, 0.75,
                   "", "",
                   "")
     event = json.dumps(event, default=lambda obj: obj.__dict__, sort_keys=True, indent=4)

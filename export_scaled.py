@@ -38,9 +38,7 @@ if __name__ == '__main__':
                     for j, child in enumerate(mm):
                         if child.__class__.__name__ == 'MishCuda':
                             print("update ")
-
                             m.module_list[i][j] = Mish()
-        print("darknet:", m if isinstance(m, Darknet) else 0)
 
         if isinstance(m, models.common.Conv) and isinstance(m.act, models.common.Mish):
             print("update mish1----------------")
@@ -59,8 +57,7 @@ if __name__ == '__main__':
 
     model.eval()
 
-
-    # ONNX export
+    # ONNX export-------------------------------------------------------------------------------------------------------
     try:
         import onnx
 
@@ -74,7 +71,6 @@ if __name__ == '__main__':
         model_simp, check = simplify(onnx_model)
         assert check, "Simplified ONNX model could not be validated"
         onnx.save(model_simp, f)
-        # print(onnx.helper.printable_graph(onnx_model.graph))  # print a human readable model
         print('ONNX export success, saved as %s' % f)
     except Exception as e:
         print('ONNX export failure: %s' % e)

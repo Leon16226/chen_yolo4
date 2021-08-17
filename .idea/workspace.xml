@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="read datasets">
-      <change afterPath="$PROJECT_DIR$/export_scaled.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/export_v5.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="onnx mish export sucess">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect_push.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_push.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/export.py" beforeDir="false" afterPath="$PROJECT_DIR$/export.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/experimental.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/experimental.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/activations.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/activations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/export_scaled.py" beforeDir="false" afterPath="$PROJECT_DIR$/export_scaled.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/general.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/general.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -433,7 +424,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629100471216</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="onnx mish export sucess">
+      <created>1629170839560</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1629170839560</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -479,7 +477,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="yolof encoder reader endt" />
     <MESSAGE value="yolof decoder reader endt" />
     <MESSAGE value="tran" />
     <MESSAGE value="trans_material success" />
@@ -504,7 +501,8 @@
     <MESSAGE value="double head really success" />
     <MESSAGE value="yolov4-s-f sucess" />
     <MESSAGE value="read datasets" />
-    <option name="LAST_COMMIT_MESSAGE" value="read datasets" />
+    <MESSAGE value="onnx mish export sucess" />
+    <option name="LAST_COMMIT_MESSAGE" value="onnx mish export sucess" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
