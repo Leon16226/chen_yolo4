@@ -1,45 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="rtsp">
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/LICENSE" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/dcn_v2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/make.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/setup.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cpu/dcn_v2_cpu.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cpu/vision.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/dcn_v2_cuda.cu" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/dcn_v2_im2col_cuda.cu" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/dcn_v2_im2col_cuda.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/dcn_v2_psroi_pooling_cuda.cu" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/vision.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/dcn_v2.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/vision.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/kmeans/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/kmeans/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/kmeans/kmeans.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/kmeans/pairwise.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/Makefile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/cpu_nms.pyx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/gpu_nms.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/gpu_nms.pyx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/nms_kernel.cu" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/py_cpu_nms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms_wrapper.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/setup.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/utils/metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/y-rrnet/utils/metrics/metrics.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="rnnet init">
+      <change afterPath="$PROJECT_DIR$/yrrnet/configs/rrnet_config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yrrnet/data/demo/annotations/0000364_01765_d_0000782.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yrrnet/data/demo/images/0000364_01765_d_0000782.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yrrnet/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,11 +43,12 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/yrrnet" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/yrrnet/configs" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/yrrnet/configs" />
       <recent name="$PROJECT_DIR$/yrrnet" />
       <recent name="$PROJECT_DIR$/y-rrnet" />
       <recent name="$PROJECT_DIR$/cfg" />
@@ -452,7 +421,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629270920888</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="rnnet init">
+      <created>1629276613946</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1629276613946</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -498,7 +474,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="tran" />
     <MESSAGE value="trans_material success" />
     <MESSAGE value="material run" />
     <MESSAGE value="only cup train" />
@@ -523,7 +498,8 @@
     <MESSAGE value="read datasets" />
     <MESSAGE value="onnx mish export sucess" />
     <MESSAGE value="rtsp" />
-    <option name="LAST_COMMIT_MESSAGE" value="rtsp" />
+    <MESSAGE value="rnnet init" />
+    <option name="LAST_COMMIT_MESSAGE" value="rnnet init" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -581,6 +557,10 @@
           <url>file://$PROJECT_DIR$/export_scaled.py</url>
           <line>29</line>
           <option name="timeStamp" value="40" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/yrrnet/configs/rrnet_config.py</url>
+          <option name="timeStamp" value="43" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
