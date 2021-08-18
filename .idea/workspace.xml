@@ -2,8 +2,44 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="rtsp">
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/LICENSE" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/dcn_v2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/make.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/setup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cpu/dcn_v2_cpu.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cpu/vision.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/dcn_v2_cuda.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/dcn_v2_im2col_cuda.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/dcn_v2_im2col_cuda.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/dcn_v2_psroi_pooling_cuda.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/cuda/vision.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/dcn_v2.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/src/vision.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/dcn/test.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/kmeans/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/kmeans/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/kmeans/kmeans.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/kmeans/pairwise.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/Makefile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/cpu_nms.pyx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/gpu_nms.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/gpu_nms.pyx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/nms_kernel.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms/py_cpu_nms.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/nms_wrapper.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/ext/nms/setup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/utils/metrics/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/y-rrnet/utils/metrics/metrics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,20 +75,35 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Stitcher" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/yrrnet" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/yrrnet" />
+      <recent name="$PROJECT_DIR$/y-rrnet" />
       <recent name="$PROJECT_DIR$/cfg" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/y-rrnet/datasets" />
       <recent name="$PROJECT_DIR$/datasets/Material_x/annotations" />
       <recent name="$PROJECT_DIR$/data/tran" />
       <recent name="$PROJECT_DIR$/data/trans" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.export_scaled">
+  <component name="RunManager" selected="Makefile Target.all (1)">
+    <configuration name="all (1)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/yrrnet/ext/nms/Makefile" target="all" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="all" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/y-rrnet/ext/nms/Makefile" target="all" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
     <configuration name="detect" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -95,48 +146,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="export_v5" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="PyTorch_YOLOv4s" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/export_v5.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="general" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="PyTorch_YOLOv4s" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils/general.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -160,11 +169,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Makefile Target.all (1)" />
+        <item itemvalue="Makefile Target.all" />
         <item itemvalue="Python.export_scaled" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.detect" />
-        <item itemvalue="Python.export_v5" />
-        <item itemvalue="Python.general" />
       </list>
     </recent_temporary>
   </component>
@@ -436,7 +445,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629193243839</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="rtsp">
+      <created>1629270920887</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1629270920888</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

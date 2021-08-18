@@ -265,7 +265,7 @@ def detect():
             if(len(point2) >= threshold_box):
                 del point2[0:-threshold_box]
             # in---------------------------------
-            real_box = real_box * 5 if nf_thres < 120 else real_box * 3
+            # real_box = real_box * 5 if nf_thres < 120 else real_box * 3
             for i, cor in enumerate(real_box):
                 top_x = int((cor[0] - cor[2] / 2) * x_scale)
                 top_y = int((cor[1] - cor[3] / 2) * y_scale)
@@ -274,6 +274,7 @@ def detect():
                 point2.append([top_x, top_y, top_x, bottom_y,
                                bottom_x, bottom_y, bottom_x, top_y])
             # in--------------------------------
+            coords = coords * 5 if nf_thres < 120 else coords * 3
             for i, cor in enumerate(coords):
                 point2.append([cor[0], cor[1], cor[0], cor[1] + cor[3],
                                cor[0] + cor[2], cor[1] + cor[3], cor[0] + cor[2], cor[1]])
