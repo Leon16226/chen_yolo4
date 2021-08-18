@@ -14,6 +14,7 @@ import time
 import datetime
 from shapely.geometry import Polygon
 
+
 rtsp = "rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0"
 post_url = "http://192.168.1.19:8080/v1/app/interface/uploadEvent"
 ponit_ip = "10.17.1.20"
@@ -26,7 +27,7 @@ MODEL_HEIGHT = 608
 NMS_THRESHOLD_CONST = 0.65  # nms
 CLASS_SCORE_CONST = 0.6  # clss
 MODEL_OUTPUT_BOXNUM = 10647
-labels = ["bag", "cup", "bottle"]
+labels = ["Bag", "Cup", "Bottle"]
 
 # Tools-----------------------------------------------------------------------------------------------------------------
 def load_classes(path):
@@ -144,9 +145,13 @@ def Cal_area_2poly(point1,point2):
 # Detect----------------------------------------------------------------------------------------------------------------
 def detect():
 
-    # init time
+    # init
     t0, t1 = 0., 0.
     point2 = []
+    nf = 0
+    threshold = 1
+    threshold_frame = 15
+    threshold_box = 150
 
     # Initialize
     if os.path.exists(out):
@@ -211,9 +216,7 @@ def detect():
 
         # 2.remove duplicate
 
-
-
-        # im0s -> h, w, n
+        # real_box------------------------------------------------------------------------------------------------------
         coords = []
         for detect_result in real_box:
             top_x = int((detect_result[0] - detect_result[2] / 2) * x_scale)
@@ -221,33 +224,60 @@ def detect():
             bottom_x = int((detect_result[0] + detect_result[2] / 2) * x_scale)
             bottom_y = int((detect_result[1] + detect_result[3] / 2) * y_scale)
 
-            # plan1
+            # plan1-----------------------------------------------------------------------------------------------------
             point = [top_x, top_y, top_x, bottom_y, bottom_x, bottom_y, bottom_x, top_y]
             point = np.array(point).reshape(4, 2)
             inter_area = Cal_area_2poly(point1, point)
             pred_area = (bottom_x - top_x) * (bottom_y - top_y)
             iou_p1 = inter_area / pred_area
 
-            # plan2
-            iou_p2 = 0
+            # plan2-----------------------------------------------------------------------------------------------------
+            niou = 0
             for i, p in enumerate(point2):
                 p = np.array(p).reshape(4, 2)
                 inter_area = Cal_area_2poly(point, p)
                 p_iou = inter_area / pred_area
-                iou_p2 = p_iou if p_iou > iou_p2 else iou_p2
-            print("iou_p2:", iou_p2)
-            if(iou_p1 >= 0.5 and iou_p2 < 0.5):
-                cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 1)
-                cv2.putText(im0s, labels[int(detect_result[4])], (top_x, top_y - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+                niou = niou + 1 if p_iou >= 0.60 else niou
+            print("niou:", niou)
+
+            # cv2
+            nf_thres = 0
+            nf_thres = nf_thres + nf if nf_thres < 120 else nf_thres
+            threshold = 1 if nf_thres < 120 and threshold == 1 else 2
+            threshold_frame = 30 if nf_thres < 120 and threshold == 30 else 15
+            if(iou_p1 >= 0.5 and niou < threshold):
+                cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 3)
+                cv2.putText(im0s, labels[int(detect_result[4])] + " " + str(detect_result[5]), (top_x, top_y - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 255), 2)
                 coords.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y, detect_result[5]))
 
         # before push---------------------------------------------------------------------------------------------------
-        if len(coords) > 0:
+        print('ponit2 size:', len(point2))
+        if len(real_box) > 0:
+            nf = 1 if nf == threshold_frame else nf + 1
+            # del-------------------------------
+            if nf == threshold_frame:
+                nn = len(point2)
+                r = np.random.random()
+                end = nn//15 if r <= 0.65 else nn//18
+                del point2[0:end]
+            # del-------------------------------
+            if(len(point2) >= threshold_box):
+                del point2[0:-threshold_box]
+            # in---------------------------------
+            real_box = real_box * 5 if nf_thres < 120 else real_box * 3
+            for i, cor in enumerate(real_box):
+                top_x = int((cor[0] - cor[2] / 2) * x_scale)
+                top_y = int((cor[1] - cor[3] / 2) * y_scale)
+                bottom_x = int((cor[0] + cor[2] / 2) * x_scale)
+                bottom_y = int((cor[1] + cor[3] / 2) * y_scale)
+                point2.append([top_x, top_y, top_x, bottom_y,
+                               bottom_x, bottom_y, bottom_x, top_y])
+            # in--------------------------------
             for i, cor in enumerate(coords):
-                point2 = []
-                point2.append([cor[0], cor[0], cor[1]+cor[3], cor[0]+cor[2], cor[1]+cor[3],
-                               cor[1], cor[0]+cor[2], cor[1]])
+                point2.append([cor[0], cor[1], cor[0], cor[1] + cor[3],
+                               cor[0] + cor[2], cor[1] + cor[3], cor[0] + cor[2], cor[1]])
+
 
         # push----------------------------------------------------------------------------------------------------------
         if(len(coords) > 0):
@@ -255,13 +285,17 @@ def detect():
             push(im0s, coords)
 
         # wait key------------------------------------------------------------------------------------------------------
-        cv2.imshow(im0s)
-        k = cv2.waitKey(10) & 0xff
+
+        # detect area
+        point1 = point1.reshape((-1, 1, 2))
+        cv2.polylines(im0s, [point1], True, (0, 255, 255))
+
+        cv2.imshow("material", im0s)
+        k = cv2.waitKey(10) & 0xFF
         if k == ord('q'):
             print('quit')
+            cv2.destroyAllWindows()
             break
-
-    vid_writer.release()
 
 # Event  Post-----------------------------------------------------------------------------------------------------------
 class Event(object):

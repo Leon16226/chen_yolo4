@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="onnx mish export sucess">
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="rtsp">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/export_scaled.py" beforeDir="false" afterPath="$PROJECT_DIR$/export_scaled.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/general.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/general.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -431,7 +429,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629170839560</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="rtsp">
+      <created>1629193243839</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1629193243839</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -477,7 +482,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="yolof decoder reader endt" />
     <MESSAGE value="tran" />
     <MESSAGE value="trans_material success" />
     <MESSAGE value="material run" />
@@ -502,7 +506,8 @@
     <MESSAGE value="yolov4-s-f sucess" />
     <MESSAGE value="read datasets" />
     <MESSAGE value="onnx mish export sucess" />
-    <option name="LAST_COMMIT_MESSAGE" value="onnx mish export sucess" />
+    <MESSAGE value="rtsp" />
+    <option name="LAST_COMMIT_MESSAGE" value="rtsp" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
