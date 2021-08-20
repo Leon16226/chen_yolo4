@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment=" erode sucess">
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment=" erode sucess 2">
+      <change afterPath="$PROJECT_DIR$/train_rrnet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/tran/erode.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tran/erode.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/tran/trans_material.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tran/trans_material.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -59,15 +58,9 @@
       <recent name="$PROJECT_DIR$/data/trans" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.erode">
+  <component name="RunManager" selected="Python.train_rrnet">
     <configuration name="all (1)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
       <makefile filename="$PROJECT_DIR$/yrrnet/ext/nms/Makefile" target="all" workingDirectory="" arguments="">
-        <envs />
-      </makefile>
-      <method v="2" />
-    </configuration>
-    <configuration name="all" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/y-rrnet/ext/nms/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
@@ -114,6 +107,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="train_rrnet" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="PyTorch_YOLOv4s" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_rrnet.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="trans_material" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -137,11 +151,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.train_rrnet" />
         <item itemvalue="Python.erode" />
         <item itemvalue="Python.trans_material" />
         <item itemvalue="Python.test (1)" />
         <item itemvalue="Makefile Target.all (1)" />
-        <item itemvalue="Makefile Target.all" />
       </list>
     </recent_temporary>
   </component>
@@ -448,7 +462,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629429916199</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary=" erode sucess 2">
+      <created>1629445538326</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1629445538326</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -494,7 +515,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="evolve success" />
     <MESSAGE value="yolox" />
     <MESSAGE value="yolof.cfg" />
     <MESSAGE value="opencv img oritation" />
@@ -519,7 +539,8 @@
     <MESSAGE value="rnnet sucess" />
     <MESSAGE value="erode" />
     <MESSAGE value=" erode sucess" />
-    <option name="LAST_COMMIT_MESSAGE" value=" erode sucess" />
+    <MESSAGE value=" erode sucess 2" />
+    <option name="LAST_COMMIT_MESSAGE" value=" erode sucess 2" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -586,6 +607,21 @@
           <url>file://$PROJECT_DIR$/data/tran/erode.py</url>
           <line>37</line>
           <option name="timeStamp" value="46" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/utils/datasets.py</url>
+          <line>487</line>
+          <option name="timeStamp" value="47" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/utils/datasets.py</url>
+          <line>495</line>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/yrrnet/datasets/transforms/functional.py</url>
+          <line>276</line>
+          <option name="timeStamp" value="49" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

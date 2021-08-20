@@ -16,6 +16,9 @@ from tqdm import tqdm
 
 from utils.general import xyxy2xywh, xywh2xyxy, torch_distributed_zero_first
 
+from yrrnet.datasets.transforms import *
+from PIL import Image
+
 help_url = ''
 img_formats = ['.bmp', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.dng']
 vid_formats = ['.mov', '.avi', '.mp4', '.mpg', '.mpeg', '.m4v', '.wmv', '.mkv']
@@ -50,17 +53,27 @@ def exif_size(img):
 # -> rect-train rect-infer
 # -> mosaic
 def create_dataloader(path, imgsz, batch_size, stride, opt, hyp=None, augment=False, cache=False, pad=0.0, rect=False,
-                      local_rank=-1, world_size=1):
+                      local_rank=-1, world_size=1, datatype=""):
     # Make sure only the first process in DDP process the dataset first, and the following others can use the cache.
     with torch_distributed_zero_first(local_rank):
-        dataset = LoadImagesAndLabels(path, imgsz, batch_size,
-                                      augment=augment,  # augment images
-                                      hyp=hyp,  # augmentation hyperparameters
-                                      rect=rect,  # rectangular training
-                                      cache_images=cache,
-                                      single_cls=opt.single_cls,
-                                      stride=int(stride),
-                                      pad=pad)
+        if(datatype == 'rrnet'):
+            dataset = RrnetDataset(path, imgsz, batch_size,
+                                        augment=augment,  # augment images
+                                        hyp=hyp,  # augmentation hyperparameters
+                                        rect=rect,  # rectangular training
+                                        cache_images=cache,
+                                        single_cls=opt.single_cls,
+                                        stride=int(stride),
+                                        pad=pad)
+        else:
+            dataset = LoadImagesAndLabels(path, imgsz, batch_size,
+                                        augment=augment,  # augment images
+                                        hyp=hyp,  # augmentation hyperparameters
+                                        rect=rect,  # rectangular training
+                                        cache_images=cache,
+                                        single_cls=opt.single_cls,
+                                        stride=int(stride),
+                                        pad=pad)
 
     batch_size = min(batch_size, len(dataset))
     nw = min([os.cpu_count() // world_size, batch_size if batch_size > 1 else 0, 8])  # number of workers
@@ -471,86 +484,59 @@ class RrnetDataset(Dataset):
         return len(self.img_files)
 
     def __getitem__(self, index):
-        if self.image_weights:
-            index = self.indices[index]
+        # init
+        image = Image.open(self.img_files[index]).convert("RGB")
+        image = image.resize((416, 416), Image.BILINEAR)
+        annotation = self.labels[index]
+        annotation = annotation.copy()
 
-        hyp = self.hyp
-        # mosaic--------------------------------------------------------------------------------------------------------
-        if self.mosaic:
-            img, labels = load_mosaic(self, index)
-            shapes = None
+        roadmap = None
 
-            # mixup-----------------------------------------------------------------------------------------------------
-            if random.random() < hyp['mixup']:
-                img2, labels2 = load_mosaic(self, random.randint(0, len(self.labels) - 1))
-                r = np.random.beta(8.0, 8.0)  # mixup ratio, alpha=beta=8.0
-                img = (img * r + img2 * (1 - r)).astype(np.uint8)
-                labels = np.concatenate((labels, labels2), 0)
+        # sample--------------------------------------------------------------------------------------------------------
+        annt_shape = annotation.shape
+        annt_shape = (annt_shape[0], annt_shape[1] + 3)
+        annt = np.zeros(annt_shape).astype(annotation.dtype)
+        annt[:, 0] = annotation[:, 3]
+        annt[:, 1] = annotation[:, 4]
+        annt[:, 2] = annotation[:, 1]
+        annt[:, 3] = annotation[:, 2]
+        annt[:, 4] = 1
+        annt[:, 5] = annotation[:, 0]
+        annt[:, 6] = 0
+        annt[:, 7] = 1
 
-        else:
-            # Load image
-            img, (h0, w0), (h, w) = load_image(self, index)
+        # trajsforms ---------------------------------------------------------------------------------------------------
+        sample = (image, annt, roadmap)
+        transforms = Compose([
+            # MultiScale(scale=(1, 1.15, 1.25, 1.35, 1.5)),
+            ToTensor(),
+            MaskIgnore((0.485, 0.456, 0.406)),
+            FillDuck(),
+            HorizontalFlip(),
+            # RandomCrop((416, 416)),
+            Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        ])
+        sample = transforms(sample)
 
-            # Letterbox
-            # letterbox to 416 along longest image dimension, pads shorter dimension to minimum multiple of 32
-            shape = self.img_size  # final letterboxed shape
-            img, ratio, pad = letterbox(img, shape, auto=False, scaleup=self.augment)
-            shapes = (h0, w0), ((h / h0, w / w0), pad)  # for COCO mAP rescaling
+        # out-----------------------------------------------------------------------------------------------------------
+        labels = sample[1]
+        labels_shape = labels.shape
+        annt = np.zeros((labels_shape[0], 5)).astype(annotation.dtype)
+        annt[:, 0] = labels[:, 5]
+        annt[:, 1] = labels[:, 2]
+        annt[:, 2] = labels[:, 3]
+        annt[:, 3] = labels[:, 0]
+        annt[:, 4] = labels[:, 1]
 
-            # Load labels
-            labels = []
-            x = self.labels[index]
-            if x.size > 0:
-                # Normalized xywh to pixel xyxy format
-                labels = x.copy()
-                labels[:, 1] = ratio[0] * w * (x[:, 1] - x[:, 3] / 2) + pad[0]  # pad width
-                labels[:, 2] = ratio[1] * h * (x[:, 2] - x[:, 4] / 2) + pad[1]  # pad height
-                labels[:, 3] = ratio[0] * w * (x[:, 1] + x[:, 3] / 2) + pad[0]
-                labels[:, 4] = ratio[1] * h * (x[:, 2] + x[:, 4] / 2) + pad[1]
-
-        # no mosaic-----------------------------------------------------------------------------------------------------
-        if self.augment:
-            # Augment imagespace
-            if not self.mosaic:
-                img, labels = random_perspective(img, labels,
-                                                 degrees=hyp['degrees'],
-                                                 translate=hyp['translate'],
-                                                 scale=hyp['scale'],
-                                                 shear=hyp['shear'],
-                                                 perspective=hyp['perspective'])
-
-            # Augment colorspace
-            augment_hsv(img, hgain=hyp['hsv_h'], sgain=hyp['hsv_s'], vgain=hyp['hsv_v'])
-
-        nL = len(labels)  # number of labels
-        if nL:
-            labels[:, 1:5] = xyxy2xywh(labels[:, 1:5])  # convert xyxy to xywh
-            labels[:, [2, 4]] /= img.shape[0]  # normalized height 0-1
-            labels[:, [1, 3]] /= img.shape[1]  # normalized width 0-1
-
-        # flip----------------------------------------------------------------------------------------------------------
-        if self.augment:
-            # flip up-down
-            if random.random() < hyp['flipud']:
-                img = np.flipud(img)
-                if nL:
-                    labels[:, 2] = 1 - labels[:, 2]
-
-            # flip left-right
-            if random.random() < hyp['fliplr']:
-                img = np.fliplr(img)
-                if nL:
-                    labels[:, 1] = 1 - labels[:, 1]
+        nL = len(annt)
+        img = sample[0]
+        shapes = None
 
         labels_out = torch.zeros((nL, 6))
         if nL:
-            labels_out[:, 1:] = torch.from_numpy(labels)
+            labels_out[:, 1:] = torch.from_numpy(annt)
 
-        # Convert-------------------------------------------------------------------------------------------------------
-        img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
-        img = np.ascontiguousarray(img)
-
-        return torch.from_numpy(img), labels_out, self.img_files[index], shapes
+        return img, labels_out, self.img_files[index], shapes
 
     @staticmethod
     def collate_fn(batch):
