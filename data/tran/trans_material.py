@@ -11,10 +11,10 @@ import numpy as np
 
 # classes = ['Bag', 'Cup', 'Bottle']
 classes = ['SLD', 'ZBZ', 'KQSP']
-Annota_Save_Root = '../../datasets/Material/labels'   # label save
-Image_Save_Root = '../../datasets/Material/images'
-Label_Root = '../../datasets/Material/data/labels'  # label name
-Image_Root = '../../datasets/Material/data/images'
+Annota_Save_Root = '../../datasets/Material/road/labels'   # label save
+Image_Save_Root = '../../datasets/Material/road/images'
+Label_Root = '../../datasets/Material/data/labels_road'  # label name
+Image_Root = '../../datasets/Material/data/images_road'
 
 
 def convert(size, box):

@@ -29,7 +29,7 @@ def custom_threshold(image):
     ret, binary = cv2.threshold(gray, mean, 255, cv2.THRESH_BINARY)
     # erode-------------------------------------------------------------------------------------------------------------
     k = np.ones((3, 3), np.uint8)
-    binary = cv2.erode(binary, k, iterations=1)
+    binary = cv2.erode(binary, k, iterations=5)
     return binary
 
 

@@ -2,3 +2,5 @@ datasets
 inference
 runs
 weights
+data/tran/in
+data/tran/out
