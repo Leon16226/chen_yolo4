@@ -294,6 +294,8 @@ class YOLOLayer(nn.Module):
                 boxes = boxes.contiguous()
                 pred_t.append(boxes)
 
+        # cbam ---------------------------------------------------------------------------------------------------------
+
 
             p = pred_t[0]
 

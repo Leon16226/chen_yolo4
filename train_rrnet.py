@@ -109,9 +109,9 @@ def train(hyp, opt, device, tb_writer=None):
         model = DDP(model, device_ids=[opt.local_rank], output_device=(opt.local_rank))
 
     # 1.Trainloader-------------------------------------------------------------------------------------------------------
-    dataloader, dataset = create_dataloader(train_path, imgsz, batch_size, gs, opt, hyp=hyp, augment=True,
+    dataloader, dataset = create_dataloader(train_path, imgsz, 16, gs, opt, hyp=hyp, augment=True,
                                             cache=opt.cache_images, rect=opt.rect, local_rank=rank,
-                                            world_size=opt.world_size, datatype='rrnet')
+                                            world_size=opt.world_size, datatype='')
     mlc = np.concatenate(dataset.labels, 0)[:, 0].max()
     nb = len(dataloader)
     assert mlc < nc, 'Label class %g exceeds nc=%g in %s. Possible class labels are 0-%g' % (mlc, nc, opt.data, nc - 1)

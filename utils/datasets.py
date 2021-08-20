@@ -443,17 +443,6 @@ class RrnetDataset(Dataset):
             print(s)
             assert not augment, '%s. Can not train without labels.' % s
 
-        # Cache images into memory for faster training (WARNING: large datasets may exceed system RAM)
-        self.imgs = [None] * n
-        if cache_images:
-            gb = 0  # Gigabytes of cached images
-            pbar = tqdm(range(len(self.img_files)), desc='Caching images')
-            self.img_hw0, self.img_hw = [None] * n, [None] * n
-            for i in pbar:  # max 10k images
-                self.imgs[i], self.img_hw0[i], self.img_hw[i] = load_image(self, i)  # img, hw_original, hw_resized
-                gb += self.imgs[i].nbytes
-                pbar.desc = 'Caching images (%.1fGB)' % (gb / 1E9)
-
     def cache_labels(self, path='labels.cache'):
         # Cache dataset labels, check images and read shapes
         x = {}  # dict
@@ -510,8 +499,8 @@ class RrnetDataset(Dataset):
         transforms = Compose([
             # MultiScale(scale=(1, 1.15, 1.25, 1.35, 1.5)),
             ToTensor(),
-            MaskIgnore((0.485, 0.456, 0.406)),
-            FillDuck(),
+            # MaskIgnore((0.485, 0.456, 0.406)),
+            # FillDuck(),
             HorizontalFlip(),
             # RandomCrop((416, 416)),
             Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
