@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="rnnet init">
-      <change afterPath="$PROJECT_DIR$/yrrnet/configs/rrnet_config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yrrnet/data/demo/annotations/0000364_01765_d_0000782.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yrrnet/data/demo/images/0000364_01765_d_0000782.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yrrnet/test.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="rnnet sucess">
+      <change afterPath="$PROJECT_DIR$/data/tran/erode.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hyp.material.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/hyp.material.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/material.names" beforeDir="false" afterPath="$PROJECT_DIR$/data/material.names" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/material_cup.names" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/material_cup.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/tran/rename.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tran/rename.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/tran/trans_material.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tran/trans_material.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yrrnet/configs/rrnet_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/yrrnet/configs/rrnet_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yrrnet/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/yrrnet/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +52,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/yrrnet/configs" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
@@ -60,7 +69,7 @@
       <recent name="$PROJECT_DIR$/data/trans" />
     </key>
   </component>
-  <component name="RunManager" selected="Makefile Target.all (1)">
+  <component name="RunManager" selected="Python.erode">
     <configuration name="all (1)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
       <makefile filename="$PROJECT_DIR$/yrrnet/ext/nms/Makefile" target="all" workingDirectory="" arguments="">
         <envs />
@@ -73,7 +82,7 @@
       </makefile>
       <method v="2" />
     </configuration>
-    <configuration name="detect" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="erode" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -81,11 +90,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data/tran" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/detect.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/tran/erode.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -94,7 +103,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="export_scaled" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="test (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -102,11 +111,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/yrrnet" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/export_scaled.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/yrrnet/test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -115,7 +124,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="trans_material" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -123,11 +132,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data/tran" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/tran/trans_material.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -138,11 +147,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.erode" />
+        <item itemvalue="Python.test (1)" />
+        <item itemvalue="Python.trans_material" />
         <item itemvalue="Makefile Target.all (1)" />
         <item itemvalue="Makefile Target.all" />
-        <item itemvalue="Python.export_scaled" />
-        <item itemvalue="Python.test" />
-        <item itemvalue="Python.detect" />
       </list>
     </recent_temporary>
   </component>
@@ -428,7 +437,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629276613946</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="rnnet sucess">
+      <created>1629277971682</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1629277971682</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -474,7 +490,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="trans_material success" />
     <MESSAGE value="material run" />
     <MESSAGE value="only cup train" />
     <MESSAGE value="evolve success" />
@@ -499,7 +514,8 @@
     <MESSAGE value="onnx mish export sucess" />
     <MESSAGE value="rtsp" />
     <MESSAGE value="rnnet init" />
-    <option name="LAST_COMMIT_MESSAGE" value="rnnet init" />
+    <MESSAGE value="rnnet sucess" />
+    <option name="LAST_COMMIT_MESSAGE" value="rnnet sucess" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

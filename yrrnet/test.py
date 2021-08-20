@@ -7,4 +7,5 @@ if __name__ == '__main__':
 
     train_loader, val_loader = make_dataloader(Config, DronesDET.collate_fn())
     for i, (image, annotation, roadmap, name) in enumerate(train_loader):
-        pass
+        cv2.imshow("ss", image)
+        cv2.waitKey(100)

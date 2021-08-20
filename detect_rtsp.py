@@ -151,7 +151,7 @@ def detect():
     nf = 0
     threshold = 1
     threshold_frame = 15
-    threshold_box = 150
+    threshold_box = 100
 
     # Initialize
     if os.path.exists(out):
@@ -218,6 +218,7 @@ def detect():
 
         # real_box------------------------------------------------------------------------------------------------------
         coords = []
+        coords_in_area = []
         for detect_result in real_box:
             top_x = int((detect_result[0] - detect_result[2] / 2) * x_scale)
             top_y = int((detect_result[1] - detect_result[3] / 2) * y_scale)
@@ -245,6 +246,8 @@ def detect():
             nf_thres = nf_thres + nf if nf_thres < 120 else nf_thres
             threshold = 1 if nf_thres < 120 and threshold == 1 else 2
             threshold_frame = 30 if nf_thres < 120 and threshold == 30 else 15
+            if(iou_p1 >= 0.5):
+                coords_in_area.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y))
             if(iou_p1 >= 0.5 and niou < threshold):
                 cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 3)
                 cv2.putText(im0s, labels[int(detect_result[4])] + " " + str(detect_result[5]), (top_x, top_y - 5),
@@ -253,32 +256,28 @@ def detect():
 
         # before push---------------------------------------------------------------------------------------------------
         print('ponit2 size:', len(point2))
-        if len(real_box) > 0:
-            nf = 1 if nf == threshold_frame else nf + 1
+        if len(coords_in_area) > 0:
+            # nf = threshold_frame if nf == threshold_frame else nf + 1
+
             # del-------------------------------
-            if nf == threshold_frame:
-                nn = len(point2)
-                r = np.random.random()
-                end = nn//15 if r <= 0.65 else nn//18
-                del point2[0:end]
+            # if nf == threshold_frame:
+            #     nn = len(point2)
+            #     r = np.random.random()
+            #     end = nn//15 if r <= 0.65 else nn//18
+            #     del point2[0:end]
+
             # del-------------------------------
             if(len(point2) >= threshold_box):
                 del point2[0:-threshold_box]
             # in---------------------------------
-            # real_box = real_box * 5 if nf_thres < 120 else real_box * 3
-            for i, cor in enumerate(real_box):
-                top_x = int((cor[0] - cor[2] / 2) * x_scale)
-                top_y = int((cor[1] - cor[3] / 2) * y_scale)
-                bottom_x = int((cor[0] + cor[2] / 2) * x_scale)
-                bottom_y = int((cor[1] + cor[3] / 2) * y_scale)
-                point2.append([top_x, top_y, top_x, bottom_y,
-                               bottom_x, bottom_y, bottom_x, top_y])
+            for i, cor in enumerate(coords_in_area):
+                point2.append([cor[0], cor[1], cor[0], cor[1] + cor[3],
+                               cor[0] + cor[2], cor[1] + cor[3], cor[0] + cor[2], cor[1]])
             # in--------------------------------
-            coords = coords * 5 if nf_thres < 120 else coords * 3
+            coords = (coords * 5 if nf_thres < 120 else coords * 3) if len(coords) > 0 else coords
             for i, cor in enumerate(coords):
                 point2.append([cor[0], cor[1], cor[0], cor[1] + cor[3],
                                cor[0] + cor[2], cor[1] + cor[3], cor[0] + cor[2], cor[1]])
-
 
         # push----------------------------------------------------------------------------------------------------------
         if(len(coords) > 0):

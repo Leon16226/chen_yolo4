@@ -1,9 +1,0 @@
-train: /home/chen/chen_p/chen_yolo4/datasets/Material/cup_images/train
-val: /home/chen/chen_p/chen_yolo4/datasets/Material/cup_images/val
-test: /home/chen/chen_p/chen_yolo4/datasets/Material/cup_images/val
-
-
-nc: 3
-
-
-names : [ 'Bag', 'Cup', 'Bottle']
