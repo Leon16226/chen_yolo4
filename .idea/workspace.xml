@@ -1,22 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="rnnet sucess">
-      <change afterPath="$PROJECT_DIR$/data/tran/erode.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="erode">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/hyp.material.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/hyp.material.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/material.names" beforeDir="false" afterPath="$PROJECT_DIR$/data/material.names" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/material_cup.names" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/material_cup.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/tran/rename.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tran/rename.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/tran/trans_material.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tran/trans_material.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yrrnet/configs/rrnet_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/yrrnet/configs/rrnet_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yrrnet/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/yrrnet/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/tran/erode.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tran/erode.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -444,7 +431,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629277971682</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="erode">
+      <created>1629427748548</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1629427748548</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -490,7 +484,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="material run" />
     <MESSAGE value="only cup train" />
     <MESSAGE value="evolve success" />
     <MESSAGE value="yolox" />
@@ -515,7 +508,8 @@
     <MESSAGE value="rtsp" />
     <MESSAGE value="rnnet init" />
     <MESSAGE value="rnnet sucess" />
-    <option name="LAST_COMMIT_MESSAGE" value="rnnet sucess" />
+    <MESSAGE value="erode" />
+    <option name="LAST_COMMIT_MESSAGE" value="erode" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -577,6 +571,11 @@
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/yrrnet/configs/rrnet_config.py</url>
           <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/data/tran/erode.py</url>
+          <line>37</line>
+          <option name="timeStamp" value="46" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

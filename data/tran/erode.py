@@ -1,3 +1,5 @@
+import os
+
 import cv2
 import numpy as np
 
@@ -27,15 +29,18 @@ def custom_threshold(image):
     ret, binary = cv2.threshold(gray, mean, 255, cv2.THRESH_BINARY)
     # erode-------------------------------------------------------------------------------------------------------------
     k = np.ones((3, 3), np.uint8)
-    binary = cv2.erode(binary, k, iterations=3)
-    cv2.imshow("binary ", binary)
+    binary = cv2.erode(binary, k, iterations=1)
+    return binary
 
 
 if __name__ == "__main__":
-    img = cv2.imread("./m1.jpg")
-    cv2.namedWindow("input image", cv2.WINDOW_AUTOSIZE)
-    cv2.imshow("input image", img)
-    # threshold---------------------------------------------------------------------------------------------------------
-    custom_threshold(img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # files-------------------------------------------------------------------------------------------------------------
+    path = "./in"
+    for file in os.listdir(path):
+        file_path = os.path.join(path, file)
+        if os.path.exists(file_path):
+            img = cv2.imread(file_path, cv2.IMREAD_COLOR + cv2.IMREAD_IGNORE_ORIENTATION)
+            img = custom_threshold(img)
+            cv2.imwrite("./out/" + file, img)
+
+
