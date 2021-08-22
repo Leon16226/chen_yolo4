@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="rrnet run sucuess">
-      <change afterPath="$PROJECT_DIR$/models/cbam.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="cbam">
+      <change afterPath="$PROJECT_DIR$/cfg/yolov4-s-cbam.cfg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/tranformers/functional.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/tranformers/transforms.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/yolof.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cfg/yolov4-s-f.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/yolov4-s-f.cfg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/cbam.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/cbam.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_rrnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_rrnet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/yolo.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/yolo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/parse_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/parse_config.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -495,7 +499,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629452270839</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="cbam">
+      <created>1629463517355</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1629463517355</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -541,7 +552,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="yolof.cfg" />
     <MESSAGE value="opencv img oritation" />
     <MESSAGE value="add yolox" />
     <MESSAGE value="add yolox utils" />
@@ -566,14 +576,15 @@
     <MESSAGE value=" erode sucess" />
     <MESSAGE value=" erode sucess 2" />
     <MESSAGE value="rrnet run sucuess" />
-    <option name="LAST_COMMIT_MESSAGE" value="rrnet run sucuess" />
+    <MESSAGE value="cbam" />
+    <option name="LAST_COMMIT_MESSAGE" value="cbam" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/models.py</url>
-          <line>507</line>
+          <line>514</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -617,7 +628,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/models/models.py</url>
-          <line>129</line>
+          <line>131</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

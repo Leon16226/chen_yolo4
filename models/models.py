@@ -2,10 +2,11 @@ from utils.google_utils import *
 from utils.layers import *
 from utils.parse_config import *
 from utils import torch_utils
+from models.cbam import CBAM
 
 ONNX_EXPORT = False
 
-# model ----------------------------------------------------------------------------------------------------------------
+# create model ----------------------------------------------------------------------------------------------------------------
 def create_modules(module_defs, img_size, cfg, version=""):
     # Constructs module list of layer blocks from module configuration in module_defs
 
@@ -16,6 +17,7 @@ def create_modules(module_defs, img_size, cfg, version=""):
     routs = []  # list of layers which rout to deeper layers
     yolo_index = -1
 
+    # modules
     for i, mdef in enumerate(module_defs):
         modules = nn.Sequential()
 
@@ -180,6 +182,10 @@ def create_modules(module_defs, img_size, cfg, version=""):
             except:
                 print('WARNING: smart bias initialization failure.')
 
+        elif mdef['type'] == 'cbam':
+            channels = mdef['channels']
+            modules = CBAM(gate_channels=channels)
+
         else:
             print('Warning: Unrecognized Layer Type: ' + mdef['type'])
 
@@ -323,16 +329,17 @@ class YOLOLayer(nn.Module):
             io[..., :4] *= self.stride
             return io.view(bs, -1, self.no), p  # view [1, 3, 13, 13, 85] as [1, 507, 85]
 
+# darknet --------------------------------------------------------------------------------------------------------------
 class Darknet(nn.Module):
     # YOLOv3 object detection model
 
     def __init__(self, cfg, img_size=(416, 416), verbose=False, version=""):
         super(Darknet, self).__init__()
 
+        # init
         self.module_defs = parse_model_cfg(cfg)
         self.module_list, self.routs = create_modules(self.module_defs, img_size, cfg, version=version)
         self.yolo_layers = get_yolo_layers(self)
-        # torch_utils.initialize_weights(self)
 
         # Darknet Header https://github.com/AlexeyAB/darknet/issues/2914#issuecomment-496675346
         self.version = np.array([0, 2, 5], dtype=np.int32)  # (int32) version info: major, minor, revision

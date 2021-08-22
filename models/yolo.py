@@ -57,6 +57,8 @@ class Detect(nn.Module):
 class Model(nn.Module):
     def __init__(self, cfg='yolov4.yaml', ch=3, nc=None):  # model, input channels, number of classes
         super(Model, self).__init__()
+
+        # cfg-----------------------------------------------------------------------------------------------------------
         if isinstance(cfg, dict):
             self.yaml = cfg  # model dict
         else:  # is *.yaml
@@ -65,12 +67,11 @@ class Model(nn.Module):
             with open(cfg) as f:
                 self.yaml = yaml.load(f, Loader=yaml.FullLoader)  # model dict
 
-        # Define model
+        # Define model--------------------------------------------------------------------------------------------------
         if nc and nc != self.yaml['nc']:
             print('Overriding %s nc=%g with nc=%g' % (cfg, self.yaml['nc'], nc))
             self.yaml['nc'] = nc  # override yaml value
         self.model, self.save = parse_model(deepcopy(self.yaml), ch=[ch])  # model, savelist, ch_out
-        # print([x.shape for x in self.forward(torch.zeros(1, ch, 64, 64))])
 
         # Build strides, anchors
         m = self.model[-1]  # Detect()
@@ -148,11 +149,6 @@ class Model(nn.Module):
             b = mi.bias.detach().view(m.na, -1).T  # conv.bias(255) to (3,85)
             print(('%6g Conv2d.bias:' + '%10.3g' * 6) % (mi.weight.shape[1], *b[:5].mean(1).tolist(), b[5:].mean()))
 
-    # def _print_weights(self):
-    #     for m in self.model.modules():
-    #         if type(m) is Bottleneck:
-    #             print('%10.3g' % (m.w.detach().sigmoid() * 2))  # shortcut weights
-
     def fuse(self):  # fuse model Conv2d() + BatchNorm2d() layers
         print('Fusing layers... ', end='')
         for m in self.model.modules():
@@ -168,7 +164,9 @@ class Model(nn.Module):
         model_info(self)
 
 
+# parse model-----------------------------------------------------------------------------------------------------------
 def parse_model(d, ch):  # model_dict, input_channels(3)
+    # init
     print('\n%3s%18s%3s%10s  %-40s%-30s' % ('', 'from', 'n', 'params', 'module', 'arguments'))
     anchors, nc, gd, gw = d['anchors'], d['nc'], d['depth_multiple'], d['width_multiple']
     na = (len(anchors[0]) // 2) if isinstance(anchors, list) else anchors  # number of anchors
@@ -182,28 +180,12 @@ def parse_model(d, ch):  # model_dict, input_channels(3)
                 args[j] = eval(a) if isinstance(a, str) else a  # eval strings
             except:
                 pass
-
+        # model --------------------------------------------------------------------------------------------------------
         n = max(round(n * gd), 1) if n > 1 else n  # depth gain
         if m in [nn.Conv2d, Conv, Bottleneck, SPP, DWConv, MixConv2d, Focus, CrossConv, BottleneckCSP, BottleneckCSP2, SPPCSP, VoVCSP, C3]:
             c1, c2 = ch[f], args[0]
 
-            # Normal
-            # if i > 0 and args[0] != no:  # channel expansion factor
-            #     ex = 1.75  # exponential (default 2.0)
-            #     e = math.log(c2 / ch[1]) / math.log(2)
-            #     c2 = int(ch[1] * ex ** e)
-            # if m != Focus:
-
             c2 = make_divisible(c2 * gw, 8) if c2 != no else c2
-
-            # Experimental
-            # if i > 0 and args[0] != no:  # channel expansion factor
-            #     ex = 1 + gw  # exponential (default 2.0)
-            #     ch1 = 32  # ch[1]
-            #     e = math.log(c2 / ch1) / math.log(2)  # level 1-n
-            #     c2 = int(ch1 * ex ** e)
-            # if m != Focus:
-            #     c2 = make_divisible(c2, 8) if c2 != no else c2
 
             args = [c1, c2, *args[1:]]
             if m in [BottleneckCSP, BottleneckCSP2, SPPCSP, VoVCSP, C3]:

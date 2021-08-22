@@ -36,16 +36,17 @@ def parse_model_cfg(path):
                 else:
                     mdefs[-1][key] = val  # return string
 
-    # Check all fields are supported
+    # support
     supported = ['type', 'batch_normalize', 'filters', 'size', 'stride', 'pad', 'activation', 'layers', 'groups',
                  'from', 'mask', 'anchors', 'classes', 'num', 'jitter', 'ignore_thresh', 'truth_thresh', 'random',
                  'stride_x', 'stride_y', 'weights_type', 'weights_normalization', 'scale_x_y', 'beta_nms', 'nms_kind',
-                 'iou_loss', 'iou_normalizer', 'cls_normalizer', 'iou_thresh', 'padding', 'dilation']
+                 'iou_loss', 'iou_normalizer', 'cls_normalizer', 'iou_thresh', 'padding', 'dilation', 'channels']
 
-    f = []  # fields
+    # check unsupported
+    f = []
     for x in mdefs[1:]:
         [f.append(k) for k in x if k not in f]
-    u = [x for x in f if x not in supported]  # unsupported fields
+    u = [x for x in f if x not in supported]
     assert not any(u), "Unsupported fields %s in %s. See https://github.com/ultralytics/yolov3/issues/631" % (u, path)
 
     return mdefs
