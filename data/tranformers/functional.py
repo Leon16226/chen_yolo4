@@ -3,11 +3,52 @@ import random
 from PIL import Image
 import PIL.ImageEnhance as ImageEnhance
 import torchvision.transforms.functional as torchtransform
-from utils.metrics.metrics import bbox_iou
+from yrrnet.utils.metrics.metrics import bbox_iou
 import numpy as np
 import torch.nn.functional as F
 import math
 import cv2
+
+# ada sampling----------------------------------------------------------------------------------------------------------
+def fill_duck(data):
+    try:
+        img, annos, roadmap = data
+
+        # I. Get valid area.--------------------------------------------------------------------------------------------
+        valid_idx = roadmap.view(-1)
+        idx = torch.nonzero(valid_idx).view(-1)
+        if idx.size(0) == 0:
+            return img, annos
+
+        # valid xy
+        xs = idx % roadmap.size(1)
+        ys = idx // roadmap.size(1)
+        coor = torch.stack((xs, ys), dim=1)
+
+        # II Calculate scale -------------------------------------------------------------------------------------------
+        scale_factor = [1.25, 0.75, 0.5]
+        (_, h, w) = img.shape
+        for i, an in enumerate(annos):
+            tx, ty = (an[1] - an[3]/2) * w, (an[2] - an[4]/2) * h
+            bx, by = (an[1] + an[3]/2) * w, (an[2] + an[4]/2) * h
+            img_an = img[:, ty:by, tx:bx]
+            idxs = torch.randint(low=0, high=coor.shape[0], size=(len(scale_factor)))
+
+            for j, scale in enumerate(scale_factor):
+                (_, ah, aw) = img_an.shape
+                rh, rw = ah*scale, aw*scale
+                img_an = cv2.resize(img_an, (rh, rw), interpolation=cv2.INTER_LINEAR)
+                coorxy = coor[idxs[j]]
+                rtx, rty = coorxy[0], coorxy[1]
+                rbx, rby = tx + rw, ty + rh
+
+                img[:, rty:rby, rtx:rbx] = img_an
+                annos.append([an[0], (rtx + rbx) / 2 / w, (rty + rby) / 2 / h, rw/w, rh/h])
+
+        return img, annos
+    except:
+        return data[0], data[1]
+
 
 def to_heatmap(data, scale_factor=4, cls_num=10):
     """

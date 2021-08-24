@@ -11,10 +11,10 @@ import numpy as np
 
 # classes = ['Bag', 'Cup', 'Bottle']
 classes = ['SLD', 'ZBZ', 'KQSP']
-Annota_Save_Root = '../../datasets/Material/road/labels'   # label save
-Image_Save_Root = '../../datasets/Material/road/images'
-Label_Root = '../../datasets/Material/data/labels_road'  # label name
-Image_Root = '../../datasets/Material/data/images_road'
+Annota_Save_Root = '../../datasets/Material/labels'   # label save
+Image_Save_Root = '../../datasets/Material/images'
+Label_Root = '../../datasets/Material/data/labels'  # label name
+Image_Root = '../../datasets/Material/data/images'
 
 
 def convert(size, box):
@@ -34,6 +34,7 @@ def convert(size, box):
 def convert_label(id=0, filepath='', sub_path=''):
     in_file = open(filepath)
     out_file = open(Annota_Save_Root + sub_path + '/m%s.txt' % id, 'w')
+    if_none = True
 
     # xml parse
     tree = ET.parse(in_file)
@@ -45,20 +46,23 @@ def convert_label(id=0, filepath='', sub_path=''):
     for obj in root.iter('object'):
         difficult = obj.find('difficult').text
         cls = obj.find('name').text
-        if cls not in classes or int(difficult) == 1:
+        if cls.upper() not in classes:
             continue
-        cls_id = classes.index(cls)
+        cls_id = classes.index(cls.upper())
         xmlbox = obj.find('bndbox')
         b = (float(xmlbox.find('xmin').text), float(xmlbox.find('xmax').text), float(xmlbox.find('ymin').text),
              float(xmlbox.find('ymax').text))
         bb = convert((w, h), b)
-        #
+        if_none = False if len(bb) > 0 else if_none
+        # write---------------------------------------------------------------------------------------------------------
         temp = 0
-        for i in bb:
-            if i > 1:
+        for b in bb:
+            if b > 1:
                 temp = 1
-        if temp == 0:
+        if temp == 0 and not if_none:
             out_file.write(str(cls_id) + " " + " ".join([str(a) for a in bb]) + '\n')
+
+
     in_file.close()
     out_file.close()
 

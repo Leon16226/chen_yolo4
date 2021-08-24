@@ -260,8 +260,8 @@ if __name__ == '__main__':
 
 
     parser.add_argument('--verbose', action='store_true', help='report mAP by class')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov4-s-dh.cfg', help='*.cfg path')
-    parser.add_argument('--weights', type=str, default='./weights/material_9.pt', help='model.pt path(s)')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov4-s-f.cfg', help='*.cfg path')
+    parser.add_argument('--weights', type=str, default='./weights/material_11_a.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='./data/material.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=1, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=608, help='inference size (pixels)')
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS')
     parser.add_argument('--save-json', action='store_true', help='save a cocoapi-compatible JSON results file')
     parser.add_argument('--task', default='test', help="'val', 'test', 'study'")
-    parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--single-cls', action='store_true', help='treat as single-class dataset')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--merge', action='store_true', help='use Merge NMS')

@@ -202,7 +202,7 @@ def train(hyp, opt, device, tb_writer=None):
 
             # Multi-scale
             if opt.multi_scale:
-                sz = random.randrange(imgsz * 0.5, imgsz * 1 + gs) // gs * gs  # size
+                sz = random.randrange(imgsz * 0.5, imgsz * 1.5 + gs) // gs * gs  # size
                 sf = sz / max(imgs.shape[2:])  # scale factor
                 if sf != 1:
                     ns = [math.ceil(x * sf / gs) * gs for x in imgs.shape[2:]]  # new shape (stretched to gs-multiple)
@@ -329,9 +329,9 @@ if __name__ == '__main__':
     parser.add_argument('--cfg', type=str, default='./cfg/yolov4-s-f.cfg', help='model.yaml path')
     parser.add_argument('--hyp', type=str, default='./data/hyp.material.yaml', help='hyperparameters path')
     parser.add_argument('--data', type=str, default='./data/material.yaml', help='data.yaml path')
-    parser.add_argument('--epochs', type=int, default=200)
+    parser.add_argument('--epochs', type=int, default=250)
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[416, 416], help='train,test sizes')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[608, 608], help='train,test sizes')
     parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     # optional
     parser.add_argument('--notest', action='store_true', help='only test final epoch')
