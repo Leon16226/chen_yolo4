@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="dataset upper">
-      <change afterPath="$PROJECT_DIR$/export_w2onnx.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="roadmap success">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/yolov4.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/yolov4.cfg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/hyp.scratch.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/hyp.scratch.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/tranformers/functional.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tranformers/functional.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/general.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/general.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yrrnet/utils/metrics/metrics.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -522,7 +515,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629769351345</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="roadmap success">
+      <created>1629873349305</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1629873349305</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -568,7 +568,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add yolox utils" />
     <MESSAGE value="yolox core" />
     <MESSAGE value="train yolox" />
     <MESSAGE value="evaluator" />
@@ -593,7 +592,8 @@
     <MESSAGE value="cbam" />
     <MESSAGE value="yolof cfg" />
     <MESSAGE value="dataset upper" />
-    <option name="LAST_COMMIT_MESSAGE" value="dataset upper" />
+    <MESSAGE value="roadmap success" />
+    <option name="LAST_COMMIT_MESSAGE" value="roadmap success" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -629,7 +629,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/train_s_dh.py</url>
-          <line>216</line>
+          <line>219</line>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -663,12 +663,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/utils/datasets.py</url>
-          <line>694</line>
+          <line>702</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/utils/datasets.py</url>
-          <line>702</line>
+          <line>710</line>
           <option name="timeStamp" value="48" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

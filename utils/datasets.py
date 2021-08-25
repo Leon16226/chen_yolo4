@@ -251,6 +251,14 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             index = self.indices[index]
 
         hyp = self.hyp
+
+        # if mosaic-----------------------------------------------------------------------------------------------------
+        if hyp['dynamic'] < 0.2 or hyp['end']:
+            self.mosaic = True
+
+        else:
+            self.mosaic = False
+
         # mosaic--------------------------------------------------------------------------------------------------------
         if self.mosaic:
             img, labels = load_mosaic(self, index)

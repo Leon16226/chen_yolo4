@@ -15,17 +15,13 @@ import datetime
 from shapely.geometry import Polygon
 
 
-# rtsp = ""
-# post_url = ""
-# ponit_ip = ""
 out = "./inference"
 SRC_PATH = os.path.realpath(__file__).rsplit("/", 1)[0]
-# MODEL_PATH = os.path.join(SRC_PATH, "./weights/material.om")
 
 MODEL_WIDTH = 608
 MODEL_HEIGHT = 608
-NMS_THRESHOLD_CONST = 0.65  # nms
-CLASS_SCORE_CONST = 0.6  # clss
+NMS_THRESHOLD_CONST = 0.65
+CLASS_SCORE_CONST = 0.6
 MODEL_OUTPUT_BOXNUM = 10647
 labels = ["Bag", "Cup", "Bottle"]
 

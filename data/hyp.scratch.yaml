@@ -5,8 +5,8 @@
 # cls_pw, obj_pw
 
 
-lr0: 0.001  # initial learning rate (SGD=1E-2, Adam=1E-3)
-momentum: 0.937  # SGD momentum/Adam beta1
+lr0: 0.0025  # initial learning rate (SGD=1E-2, Adam=1E-3)
+momentum: 0.9  # SGD momentum/Adam beta1
 weight_decay: 0.0005  # optimizer weight decay 5e-4
 giou: 0.05  # GIoU loss gain
 cls: 0.5  # cls loss gain
@@ -26,4 +26,4 @@ shear: 5.0  # image shear (+/- deg)
 perspective: 0.0  # image perspective (+/- fraction), range 0-0.001
 flipud: 0.5  # image flip up-down (probability)
 fliplr: 0.5  # image flip left-right (probability)
-mixup: 0.5  # image mixup (probability)
+mixup: 1  # image mixup (probability)

@@ -159,6 +159,9 @@ def train(hyp, opt, device, tb_writer=None):
     for epoch in range(start_epoch, epochs):
         model.train()
 
+        # if mosaic-----------------------------------------------------------------------------------------------------
+        hyp['end'] = True if (epochs - epoch) == 15 else False
+
         # Update image weights (optional)
         if dataset.image_weights:
             # Generate indices
@@ -214,7 +217,8 @@ def train(hyp, opt, device, tb_writer=None):
             with amp.autocast(enabled=cuda):
 
                 pred = model(imgs)
-                loss, loss_items, = compute_loss(pred, targets.to(device), model)
+                loss, loss_items, dynamic = compute_loss(pred, targets.to(device), model)
+                hyp['dynamic'] = dynamic
                 if rank != -1:
                     loss *= opt.world_size
 
@@ -374,13 +378,14 @@ if __name__ == '__main__':
 
     print(opt)
     with open(opt.hyp) as f:
-        hyp = yaml.load(f, Loader=yaml.FullLoader)  # load hyps
+        hyp = yaml.load(f, Loader=yaml.FullLoader)
+    hyp['dynamic'] = 1.0
 
     # train
     tb_writer = None
     if opt.global_rank in [-1, 0]:
         print('Start Tensorboard with "tensorboard --logdir %s", view at http://localhost:6006/' % opt.logdir)
-        tb_writer = SummaryWriter(log_dir=increment_dir(Path(opt.logdir) / 'exp', opt.name))  # runs/exp
+        tb_writer = SummaryWriter(log_dir=increment_dir(Path(opt.logdir) / 'exp', opt.name))
 
     train(hyp, opt, device, tb_writer)
 

@@ -447,7 +447,7 @@ class BCEBlurWithLogitsLoss(nn.Module):
         return loss.mean()
 
 # loss------------------------------------------------------------------------------------------------------------------
-def compute_loss(p, targets, model, version=""):  # predictions, targets, model
+def compute_loss(p, targets, model):  # predictions, targets, model
     device = targets.device
     lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
     tcls, tbox, indices, anchors = build_targets(p, targets, model)  # targets
@@ -484,17 +484,16 @@ def compute_loss(p, targets, model, version=""):  # predictions, targets, model
             giou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)  # giou(prediction, target)
             lbox += (1.0 - giou).mean()  # giou loss
 
-            # small proportion-----------------------------------------------------------------------------------------
-            if(False):
-                pbox_small, tbox_small = [], []
-                small_thresh = 0.0841
-                for j, box in enumerate(pbox):
-                    if(box[2] < small_thresh and box[3] < small_thresh):
-                        pbox_small.append(box)
-                        tbox_small.append(tbox[i][j])
-                if(len(pbox_small) > 0):
-                    giou_small = bbox_iou(pbox_small.T, tbox_small[i], x1y1x2y2=False, CIoU=True)
-                    lbox_s += (1.0 - giou_small).mean()
+            # small proportion------------------------------------------------------------------------------------------
+            pbox_small, tbox_small = [], []
+            small_thresh = 0.0841
+            for j, box in enumerate(pbox):
+                if(box[2] < small_thresh and box[3] < small_thresh):
+                    pbox_small.append(box)
+                    tbox_small.append(tbox[i][j])
+            if(len(pbox_small) > 0):
+                giou_small = bbox_iou(pbox_small.T, tbox_small[i], x1y1x2y2=False, CIoU=True)
+                lbox_s += (1.0 - giou_small).mean()
 
 
             # Objectness
@@ -516,7 +515,7 @@ def compute_loss(p, targets, model, version=""):  # predictions, targets, model
     bs = tobj.shape[0]  # batch size
 
     loss = lbox + lobj + lcls
-    return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
+    return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach(), lbox_s / lobj
 
 # targets
 def build_targets(p, targets, model):
