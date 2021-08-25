@@ -159,7 +159,7 @@ def test(data,
                 # [{"image_id": 42, "category_id": 18, "bbox": [258.15, 41.29, 348.26, 243.78], "score": 0.236}, ...
                 image_id = Path(paths[si]).stem
                 box = pred[:, :4].clone()  # xyxy
-                scale_coords(img[si].shape[1:], box, shapes[si][0], shapes[si][1])  # to original shape
+                # scale_coords(img[si].shape[1:], box, shapes[si][0], shapes[si][1])  # to original shape
                 box = xyxy2xywh(box)  # xywh
                 box[:, :2] -= box[:, 2:] / 2  # xy center to top-left corner
                 for p, b in zip(pred.tolist(), box.tolist()):
@@ -261,7 +261,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--verbose', action='store_true', help='report mAP by class')
     parser.add_argument('--cfg', type=str, default='cfg/yolov4-s-f.cfg', help='*.cfg path')
-    parser.add_argument('--weights', type=str, default='./weights/material_11_a.pt', help='model.pt path(s)')
+    parser.add_argument('--weights', type=str, default='./weights/material_11_b.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='./data/material.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=1, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=608, help='inference size (pixels)')

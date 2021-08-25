@@ -3,7 +3,6 @@ import random
 from PIL import Image
 import PIL.ImageEnhance as ImageEnhance
 import torchvision.transforms.functional as torchtransform
-from yrrnet.utils.metrics.metrics import bbox_iou
 import numpy as np
 import torch.nn.functional as F
 import math
@@ -13,6 +12,8 @@ import cv2
 def fill_duck(data):
     try:
         img, annos, roadmap = data
+        img = torch.tensor(img)
+        roadmap = torch.tensor(roadmap)
 
         # I. Get valid area.--------------------------------------------------------------------------------------------
         valid_idx = roadmap.view(-1)
@@ -21,124 +22,58 @@ def fill_duck(data):
             return img, annos
 
         # valid xy
-        xs = idx % roadmap.size(1)
-        ys = idx // roadmap.size(1)
+        ys = idx % roadmap.size(1)
+        xs = idx // roadmap.size(1)
         coor = torch.stack((xs, ys), dim=1)
+
+        # ann
+        annos_n = [s for s in annos]
 
         # II Calculate scale -------------------------------------------------------------------------------------------
         scale_factor = [1.25, 0.75, 0.5]
-        (_, h, w) = img.shape
+        (h, w, _) = img.shape
         for i, an in enumerate(annos):
-            tx, ty = (an[1] - an[3]/2) * w, (an[2] - an[4]/2) * h
-            bx, by = (an[1] + an[3]/2) * w, (an[2] + an[4]/2) * h
-            img_an = img[:, ty:by, tx:bx]
-            idxs = torch.randint(low=0, high=coor.shape[0], size=(len(scale_factor)))
+            tx, ty = int((an[1] - an[3]/2) * w), int((an[2] - an[4]/2) * h)
+            bx, by = int((an[1] + an[3]/2) * w), int((an[2] + an[4]/2) * h)
+            img_an = img[ty:by, tx:bx, :]
+            idxs = torch.randint(low=0, high=coor.shape[0], size=(3,))
 
             for j, scale in enumerate(scale_factor):
-                (_, ah, aw) = img_an.shape
-                rh, rw = ah*scale, aw*scale
-                img_an = cv2.resize(img_an, (rh, rw), interpolation=cv2.INTER_LINEAR)
+                (ah, aw, _) = img_an.shape
+                rh, rw = int(ah*scale), int(aw*scale)
+                img_scale = cv2.resize(img_an.numpy(), (rw, rh), interpolation=cv2.INTER_LINEAR)
                 coorxy = coor[idxs[j]]
-                rtx, rty = coorxy[0], coorxy[1]
-                rbx, rby = tx + rw, ty + rh
+                rtx, rty = int(coorxy[0].numpy()), int(coorxy[1].numpy())
+                rbx, rby = rtx + rw, rty + rh
 
-                img[:, rty:rby, rtx:rbx] = img_an
-                annos.append([an[0], (rtx + rbx) / 2 / w, (rty + rby) / 2 / h, rw/w, rh/h])
-
-        return img, annos
-    except:
+                try:
+                    img[rty:rby, rtx:rbx, :] = torch.from_numpy(img_scale)
+                    annos_n.append([an[0], (rtx + rbx) / 2 / w, (rty + rby) / 2 / h, rw/w, rh/h])
+                except:
+                    continue
+        # cv2.imwrite("/home/chen/Desktop/ss/" + str(annos_n[0][1]) + 'ss.jpg', img.numpy())
+        return img.numpy(), np.array(annos_n)
+    except Exception as e:
         return data[0], data[1]
 
 
-def to_heatmap(data, scale_factor=4, cls_num=10):
-    """
-    Transform annotations to heatmap.
-    :param data: (img, annos), tensor
-    :param scale_factor:
-    :param cls_num:
-    :return:
-    """
-    # init
-    img = data[0]
-    annos = data[1].clone()
-    h, w = img.size(1), img.size(2)
-
-    hm = torch.zeros(cls_num, h // scale_factor, w // scale_factor)
-
-    # annos
-    annos[:, 2] += annos[:, 0]
-    annos[:, 3] += annos[:, 1]
-    annos[:, :4] = annos[:, :4] / scale_factor
-    cls_idx = annos[:, 5] - 1
-    bboxs_h, bboxs_w = annos[:, 3:4] - annos[:, 1:2], annos[:, 2:3] - annos[:, 0:1]
-
-    wh = torch.cat([bboxs_w, bboxs_h], dim=1)
-
-    # center
-    ct = torch.cat(((annos[:, 0:1] + annos[:, 2:3]) / 2., (annos[:, 1:2] + annos[:, 3:4]) / 2.), dim=1)
-    ct_int = ct.floor()
-    offset = ct - ct_int
-
-    reg_mask = ((bboxs_h > 0) * (bboxs_w > 0))
-
-    ind = ct_int[:, 1:2] * (w // 4) + ct_int[:, 0:1]
-
-    # radius------------------------------------------------------------------------------------------------------------
-    radius = gaussian_radius((bboxs_h.ceil(), bboxs_w.ceil()))
-    radius = radius.floor().clamp(min=0)
-    for k, cls in enumerate(cls_idx):
-        draw_umich_gaussian(hm[cls.long().item()], ct_int[k], radius[k])
-
-    return data[0], data[1], hm, wh, ind, offset, reg_mask
-
-# radius----------------------------------------------------------------------------------------------------------------
-def gaussian_radius(det_size, min_overlap=0.7):
-    height, width = det_size
-
-    a1 = 1
-    b1 = (height + width)
-    c1 = width * height * (1 - min_overlap) / (1 + min_overlap)
-    sq1 = (b1 ** 2 - 4 * a1 * c1).sqrt()
-    r1 = (b1 + sq1) / 2.
-
-    a2 = 4
-    b2 = 2 * (height + width)
-    c2 = (1 - min_overlap) * width * height
-    sq2 = (b2 ** 2 - 4 * a2 * c2).sqrt()
-    r2 = (b2 + sq2) / 2
-
-    a3 = 4 * min_overlap
-    b3 = -2 * min_overlap * (height + width)
-    c3 = (min_overlap - 1) * width * height
-    sq3 = (b3 ** 2 - 4 * a3 * c3).sqrt()
-    r3 = (b3 + sq3) / 2
-    r = torch.cat((r1, r2, r3), dim=1).min(dim=1)[0]
-    return r
-
-def gaussian2d(shape, sigma=1):
-    m, n = [(ss - 1.) / 2. for ss in shape]
-    m = m.numpy()
-    n = n.numpy()
-    y, x = np.ogrid[-m:m + 1, -n:n + 1]
-    h = np.exp(-(x * x + y * y) / (2 * sigma.numpy() * sigma.numpy()))
-    h[h < np.finfo(h.dtype).eps * h.max()] = 0
-    h = torch.from_numpy(h).float()
-    return h
+# synthesize
+def to_image_list_synthesize_4(transposed_info, size_divisible=0):
+    tensors = transposed_info[0]
+    if isinstance(tensors, (tuple, list)):
+        pass
+    else:
+        raise TypeError("Unsupported type for to_image_list: {}".format(type(tensors)))
 
 
-def draw_umich_gaussian(heatmap, center, radius, k=1):
-    diameter = 2 * radius + 1
+if __name__ == '__main__':
+    img = cv2.imread("/home/chen/chen_p/chen_yolo4/datasets/Material/roadmap/road1.jpg")
+    ann = [[0, 0.45598958333333334, 0.4203703703703704, 0.06614583333333333, 0.037037037037037035]]
+    roadmap = cv2.imread("/home/chen/chen_p/chen_yolo4/datasets/Material/roadmap/m688.png", cv2.IMREAD_GRAYSCALE)
+    data = (img, ann, roadmap)
+    imgs, annos = fill_duck(data)
 
-    gaussian = gaussian2d((diameter, diameter), sigma=diameter / 6)
-
-    x, y = center[0], center[1]
-
-    height, width = heatmap.size()[0:2]
-    left, right = torch.min(x, radius), torch.min(width - x, radius + 1)
-    top, bottom = torch.min(y, radius), torch.min(height - y, radius + 1)
-
-    masked_heatmap = heatmap[int(y - top):int(y + bottom), int(x - left):int(x + right)]
-    masked_gaussian = gaussian[int(radius - top):int(radius + bottom), int(radius - left):int(radius + right)]
-    if min(list(masked_gaussian.size())) > 0 and min(list(masked_heatmap.size())) > 0:
-        torch.max(masked_heatmap, masked_gaussian * k, out=masked_heatmap)
-    return heatmap
+    # ------------------------------------------------------------------------------------------------------------------
+    print(annos)
+    cv2.imshow("ss", imgs.numpy())
+    cv2.waitKey(0)

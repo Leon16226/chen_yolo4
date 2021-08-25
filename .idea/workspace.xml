@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="yolof cfg">
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="dataset upper">
+      <change afterPath="$PROJECT_DIR$/export_w2onnx.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/material.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/material.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/tran/trans_material.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tran/trans_material.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cfg/yolov4.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/yolov4.cfg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hyp.scratch.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/hyp.scratch.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/tranformers/functional.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tranformers/functional.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/general.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/general.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yrrnet/utils/metrics/metrics.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +50,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Stitcher" />
+    <property name="last_opened_file_path" value="$USER_HOME$/DeepLabV3Plus-Pytorch" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
@@ -63,7 +68,7 @@
       <recent name="$PROJECT_DIR$/data/trans" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.trans_material">
+  <component name="RunManager" selected="Python.erode">
     <configuration name="erode" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -85,7 +90,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="functional" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -93,11 +98,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/yrrnet" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data/tranformers" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/yrrnet/test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/tranformers/functional.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -171,11 +176,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.erode" />
+        <item itemvalue="Python.functional" />
         <item itemvalue="Python.trans_material" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.train_rrnet" />
-        <item itemvalue="Python.erode" />
-        <item itemvalue="Python.test (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -510,7 +515,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629602599421</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="dataset upper">
+      <created>1629769351345</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1629769351345</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -556,7 +568,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add yolox" />
     <MESSAGE value="add yolox utils" />
     <MESSAGE value="yolox core" />
     <MESSAGE value="train yolox" />
@@ -581,7 +592,8 @@
     <MESSAGE value="rrnet run sucuess" />
     <MESSAGE value="cbam" />
     <MESSAGE value="yolof cfg" />
-    <option name="LAST_COMMIT_MESSAGE" value="yolof cfg" />
+    <MESSAGE value="dataset upper" />
+    <option name="LAST_COMMIT_MESSAGE" value="dataset upper" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -617,7 +629,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/train_s_dh.py</url>
-          <line>215</line>
+          <line>216</line>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -651,18 +663,28 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/utils/datasets.py</url>
-          <line>702</line>
+          <line>694</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/utils/datasets.py</url>
-          <line>710</line>
+          <line>702</line>
           <option name="timeStamp" value="48" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/yrrnet/datasets/transforms/functional.py</url>
-          <line>276</line>
+          <line>275</line>
           <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/data/tranformers/functional.py</url>
+          <line>13</line>
+          <option name="timeStamp" value="50" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/data/tranformers/functional.py</url>
+          <line>32</line>
+          <option name="timeStamp" value="51" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

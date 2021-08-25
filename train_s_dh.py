@@ -61,7 +61,7 @@ def train(hyp, opt, device, tb_writer=None):
     start_epoch, best_fitness = 0, 0.0
     model = Darknet(opt.cfg, version="yolov4-s-dh").to(device)
 
-    # Optimizer
+    # Optimizer---------------------------------------------------------------------------------------------------------
     nbs = 64  # nominal batch size
     accumulate = max(round(nbs / total_batch_size), 1)  # accumulate loss before optimizing
     hyp['weight_decay'] *= total_batch_size * accumulate / nbs  # scale weight_decay
@@ -85,6 +85,7 @@ def train(hyp, opt, device, tb_writer=None):
     print('Optimizer groups: %g .bias, %g conv.weight, %g other' % (len(pg2), len(pg1), len(pg0)))
     del pg0, pg1, pg2
 
+    # lr scheduler -----------------------------------------------------------------------------------------------------
     lf = lambda x: (((1 + math.cos(x * math.pi / epochs)) / 2) ** 1.0) * 0.8 + 0.2  # cosine
     scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lf)
 
@@ -96,7 +97,7 @@ def train(hyp, opt, device, tb_writer=None):
     if cuda and rank == -1 and torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
 
-    # SyncBatchNorm
+    # SyncBatchNorm-----------------------------------------------------------------------------------------------------
     if opt.sync_bn and cuda and rank != -1:
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model).to(device)
         print('Using SyncBatchNorm()')
@@ -154,7 +155,7 @@ def train(hyp, opt, device, tb_writer=None):
         print('Using %g dataloader workers' % dataloader.num_workers)
         print('Starting training for %g epochs...' % epochs)
 
-    # epoch ------------------------------------------------------------------
+    # epoch ------------------------------------------------------------------------------------------------------------
     for epoch in range(start_epoch, epochs):
         model.train()
 
@@ -187,22 +188,22 @@ def train(hyp, opt, device, tb_writer=None):
         # batch --------------------------------------------------------------------------------------------------------
         for i, (imgs, targets, paths, _) in pbar:
 
-            ni = i + nb * epoch  # number integrated batches (since train start)
-            imgs = imgs.to(device, non_blocking=True).float() / 255.0  # uint8 to float32, 0-255 to 0.0-1.0
+            # init
+            ni = i + nb * epoch  # batchs
+            imgs = imgs.to(device, non_blocking=True).float() / 255.0
 
-            # Warmup
-            if ni <= nw:  # warmup thresh
-                xi = [0, nw]  # x interp
+            # Warmup----------------------------------------------------------------------------------------------------
+            if ni <= nw:
+                xi = [0, nw]
                 accumulate = max(1, np.interp(ni, xi, [1, nbs / total_batch_size]).round())
-                # iter
                 for j, x in enumerate(optimizer.param_groups):
                     x['lr'] = np.interp(ni, xi, [0.1 if j == 2 else 0.0, x['initial_lr'] * lf(epoch)])
                     if 'momentum' in x:
                         x['momentum'] = np.interp(ni, xi, [0.9, hyp['momentum']])
 
-            # Multi-scale
+            # Multi-scale-----------------------------------------------------------------------------------------------
             if opt.multi_scale:
-                sz = random.randrange(imgsz * 0.5, imgsz * 1.5 + gs) // gs * gs  # size
+                sz = random.randrange(imgsz * 0.7, imgsz * 1.3 + gs) // gs * gs  # size
                 sf = sz / max(imgs.shape[2:])  # scale factor
                 if sf != 1:
                     ns = [math.ceil(x * sf / gs) * gs for x in imgs.shape[2:]]  # new shape (stretched to gs-multiple)
@@ -213,7 +214,7 @@ def train(hyp, opt, device, tb_writer=None):
             with amp.autocast(enabled=cuda):
 
                 pred = model(imgs)
-                loss, loss_items, = compute_loss(pred, targets.to(device), model, version='yolov4-s-dh')
+                loss, loss_items, = compute_loss(pred, targets.to(device), model)
                 if rank != -1:
                     loss *= opt.world_size
 
@@ -236,7 +237,7 @@ def train(hyp, opt, device, tb_writer=None):
                 s = ('%10s' * 2 + '%10.4g' * 6) % ('%g/%g' % (epoch, epochs - 1), mem, *mloss, targets.shape[0], imgs.shape[-1])
                 pbar.set_description(s)
 
-                # Plot
+                # Plot--------------------------------------------------------------------------------------------------
                 if ni < 100:
                     f = str(log_dir / ('train_batch%g.jpg' % ni))  # filename
                     result = plot_images(images=imgs, targets=targets, paths=paths, fname=f)
@@ -329,9 +330,9 @@ if __name__ == '__main__':
     parser.add_argument('--cfg', type=str, default='./cfg/yolov4-s-f.cfg', help='model.yaml path')
     parser.add_argument('--hyp', type=str, default='./data/hyp.material.yaml', help='hyperparameters path')
     parser.add_argument('--data', type=str, default='./data/material.yaml', help='data.yaml path')
-    parser.add_argument('--epochs', type=int, default=250)
+    parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[608, 608], help='train,test sizes')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[416, 416], help='train,test sizes')
     parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     # optional
     parser.add_argument('--notest', action='store_true', help='only test final epoch')
