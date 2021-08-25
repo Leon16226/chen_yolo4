@@ -18,7 +18,6 @@ from utils.general import (
 from utils.torch_utils import select_device, time_synchronized
 
 from models.models import *
-#from utils.datasets import *
 
 def load_classes(path):
     # Loads *.names file at 'path'
@@ -43,39 +42,36 @@ def test(data,
          save_dir='',
          merge=False,
          save_txt=False):
-    # Initialize/load model and set device
+    # init -------------------------------------------------------------------------------------------------------------
     training = model is not None
-    if training:  # called by train.py
-        device = next(model.parameters()).device  # get model device
-
-    else:  # called directly
+    if training:
+        device = next(model.parameters()).device
+    else:
         device = select_device(opt.device, batch_size=batch_size)
-        # device = 'cpu'
-        merge, save_txt = opt.merge, opt.save_txt  # use Merge NMS, save *.txt labels
+        merge, save_txt = opt.merge, opt.save_txt
+        # output floder
         if save_txt:
             out = Path('inference/output')
             if os.path.exists(out):
-                shutil.rmtree(out)  # delete output folder
-            os.makedirs(out)  # make new output folder
+                shutil.rmtree(out)
+            os.makedirs(out)
 
         # Remove previous
         for f in glob.glob(str(Path(save_dir) / 'test_batch*.jpg')):
             os.remove(f)
 
-        # Load model
+        # Load model----------------------------------------------------------------------------------------------------
         model = Darknet(opt.cfg, version="yolov4-s-dh").to(device)
-
-        # load model
         try:
-            ckpt = torch.load(weights, map_location=device)  # load checkpoint
+            ckpt = torch.load(weights, map_location=device)
             ckpt['model'] = {k: v for k, v in ckpt['model_state'].items() if model.state_dict()[k].numel() == v.numel()}
             model.load_state_dict(ckpt['model'], strict=False)
         except:
             load_darknet_weights(model, weights[0])
-        imgsz = check_img_size(imgsz, s=32)  # check img_size
+        imgsz = check_img_size(imgsz, s=32)
 
     # Half
-    half = device.type != 'cpu'  # half precision only supported on CUDA
+    half = device.type != 'cpu'
     if half:
         model.half()
 
@@ -105,23 +101,25 @@ def test(data,
     p, r, f1, mp, mr, map50, map, t0, t1 = 0., 0., 0., 0., 0., 0., 0., 0., 0.
     loss = torch.zeros(3, device=device)
     jdict, stats, ap, ap_class = [], [], [], []
+
+    # start-------------------------------------------------------------------------------------------------------------
     for batch_i, (img, targets, paths, shapes) in enumerate(tqdm(dataloader, desc=s)):
         img = img.to(device, non_blocking=True)
-        img = img.half() if half else img.float()  # uint8 to fp16/32
-        img /= 255.0  # 0 - 255 to 0.0 - 1.0
+        img = img.half() if half else img.float()
+        img /= 255.0
         targets = targets.to(device)
-        nb, _, height, width = img.shape  # batch size, channels, height, width
+        nb, _, height, width = img.shape
         whwh = torch.Tensor([width, height, width, height]).to(device)
 
         # Disable gradients
         with torch.no_grad():
-            # Run model
+            # Run model-------------------------------------------------------------------------------------------------
             t = time_synchronized()
-            inf_out, train_out = model(img, augment=augment)  # inference and training outputs
+            inf_out, train_out = model(img, augment=augment)
             t0 += time_synchronized() - t
 
             # Compute loss
-            if training:  # if model has loss hyperparameters
+            if training:
                 loss += compute_loss([x.float() for x in train_out], targets, model)[1][:3]  # GIoU, obj, cls
 
             # Run NMS
@@ -129,7 +127,7 @@ def test(data,
             output = non_max_suppression(inf_out, conf_thres=conf_thres, iou_thres=iou_thres, merge=merge)
             t1 += time_synchronized() - t
 
-        # Statistics per image
+        # Statistics per image------------------------------------------------------------------------------------------
         for si, pred in enumerate(output):
             labels = targets[targets[:, 0] == si, 1:]
             nl = len(labels)
@@ -153,20 +151,6 @@ def test(data,
 
             # Clip boxes to image bounds
             clip_coords(pred, (height, width))
-
-            # Append to pycocotools JSON dictionary
-            if save_json:
-                # [{"image_id": 42, "category_id": 18, "bbox": [258.15, 41.29, 348.26, 243.78], "score": 0.236}, ...
-                image_id = Path(paths[si]).stem
-                box = pred[:, :4].clone()  # xyxy
-                # scale_coords(img[si].shape[1:], box, shapes[si][0], shapes[si][1])  # to original shape
-                box = xyxy2xywh(box)  # xywh
-                box[:, :2] -= box[:, 2:] / 2  # xy center to top-left corner
-                for p, b in zip(pred.tolist(), box.tolist()):
-                    jdict.append({'image_id': int(image_id) if image_id.isnumeric() else image_id,
-                                  'category_id': coco91class[int(p[5])],
-                                  'bbox': [round(x, 3) for x in b],
-                                  'score': round(p[4], 5)})
 
             # Assign all predictions as incorrect
             correct = torch.zeros(pred.shape[0], niou, dtype=torch.bool, device=device)
@@ -199,7 +183,7 @@ def test(data,
             # Append statistics (correct, conf, pcls, tcls)
             stats.append((correct.cpu(), pred[:, 4].cpu(), pred[:, 5].cpu(), tcls))
 
-    # Compute statistics
+    # Compute statistics------------------------------------------------------------------------------------------------
     stats = [np.concatenate(x, 0) for x in zip(*stats)]  # to numpy
     if len(stats) and stats[0].any():
         p, r, ap, f1, ap_class = ap_per_class(*stats)
@@ -209,43 +193,20 @@ def test(data,
     else:
         nt = torch.zeros(1)
 
-    # Print results
+    # print-------------------------------------------------------------------------------------------------------------
+    # 1.Print results
     pf = '%20s' + '%12.3g' * 6  # print format
     print(pf % ('all', seen, nt.sum(), mp, mr, map50, map))
 
-    # Print results per class
+    # 2.Print results per class
     if verbose and nc > 1 and len(stats):
         for i, c in enumerate(ap_class):
             print(pf % (names[c], seen, nt[c], p[i], r[i], ap50[i], ap[i]))
 
-    # Print speeds
+    # 3.Print speeds
     t = tuple(x / seen * 1E3 for x in (t0, t1, t0 + t1)) + (imgsz, imgsz, batch_size)  # tuple
     if not training:
         print('Speed: %.1f/%.1f/%.1f ms inference/NMS/total per %gx%g image at batch-size %g' % t)
-
-    # Save JSON
-    if save_json and len(jdict):
-        f = 'detections_val2017_%s_results.json' % \
-            (weights.split(os.sep)[-1].replace('.pt', '') if isinstance(weights, str) else '')  # filename
-        print('\nCOCO mAP with pycocotools... saving %s...' % f)
-        with open(f, 'w') as file:
-            json.dump(jdict, file)
-
-        try:  # https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/pycocoEvalDemo.ipynb
-            from pycocotools.coco import COCO
-            from pycocotools.cocoeval import COCOeval
-
-            imgIds = [int(Path(x).stem) for x in dataloader.dataset.img_files]
-            cocoGt = COCO(glob.glob('../coco/annotations/instances_val*.json')[0])  # initialize COCO ground truth api
-            cocoDt = cocoGt.loadRes(f)  # initialize COCO pred api
-            cocoEval = COCOeval(cocoGt, cocoDt, 'bbox')
-            cocoEval.params.imgIds = imgIds  # image IDs to evaluate
-            cocoEval.evaluate()
-            cocoEval.accumulate()
-            cocoEval.summarize()
-            map, map50 = cocoEval.stats[:2]  # update results (mAP@0.5:0.95, mAP@0.5)
-        except Exception as e:
-            print('ERROR: pycocotools unable to run: %s' % e)
 
     # Return results
     model.float()  # for training
@@ -257,9 +218,12 @@ def test(data,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test.py')
-
-
+    # opt
     parser.add_argument('--verbose', action='store_true', help='report mAP by class')
+    parser.add_argument('--task', default='test', help="'val', 'test', 'study'")
+    parser.add_argument('--augment', action='store_true', help='augmented inference')
+    parser.add_argument('--merge', action='store_true', help='use Merge NMS')
+    # set
     parser.add_argument('--cfg', type=str, default='cfg/yolov4-s-f.cfg', help='*.cfg path')
     parser.add_argument('--weights', type=str, default='./weights/material_11_b.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='./data/material.yaml', help='*.data path')
@@ -268,16 +232,14 @@ if __name__ == '__main__':
     parser.add_argument('--conf-thres', type=float, default=0.6, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS')
     parser.add_argument('--save-json', action='store_true', help='save a cocoapi-compatible JSON results file')
-    parser.add_argument('--task', default='test', help="'val', 'test', 'study'")
     parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    # no need
     parser.add_argument('--single-cls', action='store_true', help='treat as single-class dataset')
-    parser.add_argument('--augment', action='store_true', help='augmented inference')
-    parser.add_argument('--merge', action='store_true', help='use Merge NMS')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
     parser.add_argument('--names', type=str, default='data/material.names', help='*.cfg path')
     opt = parser.parse_args()
     opt.save_json |= opt.data.endswith('material.yaml')
-    opt.data = check_file(opt.data)  # check file
+    opt.data = check_file(opt.data)
     print(opt)
 
     if opt.task in ['val', 'test']:  # run normally

@@ -92,6 +92,8 @@ def create_dataloader(path, imgsz, batch_size, stride, opt, hyp=None, augment=Fa
 class LoadImagesAndLabels(Dataset):  # for training/testing
     def __init__(self, path, img_size=640, batch_size=16, augment=False, hyp=None, rect=False, image_weights=False,
                  cache_images=False, single_cls=False, stride=32, pad=0.0):
+
+        # load image file-----------------------------------------------------------------------------------------------
         try:
             f = []  # image files
             for p in path if isinstance(path, list) else [path]:
@@ -113,15 +115,15 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         n = len(self.img_files)
         assert n > 0, 'No images found in %s. See %s' % (path, help_url)
         bi = np.floor(np.arange(n) / batch_size).astype(np.int)  # batch index
-        nb = bi[-1] + 1  # number of batches
 
+        # init ---------------------------------------------------------------------------------------------------------
         self.n = n  # number of images
         self.batch = bi  # batch index of image
         self.img_size = img_size
         self.augment = augment
         self.hyp = hyp
         self.image_weights = image_weights
-        self.mosaic = self.augment   # load 4 images at a time into a mosaic (only during training)
+        self.mosaic = self.augment
         self.mosaic_border = [-img_size // 2, -img_size // 2]
         self.stride = stride
 
@@ -133,21 +135,16 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         self.roadmap_files = [x.replace('train', 'roadmap').replace(os.path.splitext(x)[-1], '.png') for x in
                               self.img_files]
 
-        # Check cache
-        cache_path = str(Path(self.label_files[0]).parent) + '.cache'  # cached labels
-        if os.path.isfile(cache_path):
-            cache = torch.load(cache_path)  # load
-            if cache['hash'] != get_hash(self.label_files + self.img_files):  # dataset changed
-                cache = self.cache_labels(cache_path)  # re-cache
-        else:
-            cache = self.cache_labels(cache_path)  # cache
+        # 1.label cache---------------------------------------------------------------------------------------------------
+        cache_path = str(Path(self.label_files[0]).parent) + '.cache'
+        cache = self.cache_labels(cache_path)  # cache
 
-        # Get labels
+        # 2.Get labels
         labels, shapes = zip(*[cache[x] for x in self.img_files])
         self.shapes = np.array(shapes, dtype=np.float64)
         self.labels = list(labels)
 
-        # Cache labels
+        # 3.check labels
         create_datasubset, extract_bounding_boxes, labels_loaded = False, False, False
         nm, nf, ne, ns, nd = 0, 0, 0, 0, 0  # number missing, found, empty, datasubset, duplicate
         pbar = tqdm(self.label_files)
@@ -160,7 +157,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 if np.unique(l, axis=0).shape[0] < l.shape[0]:  # duplicate rows
                     nd += 1  # print('WARNING: duplicate rows in %s' % self.label_files[i])  # duplicate rows
                 if single_cls:
-                    l[:, 0] = 0  # force dataset into single-class mode
+                    l[:, 0] = 0
                 self.labels[i] = l
                 nf += 1  # file found
 
@@ -206,7 +203,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             print(s)
             assert not augment, '%s. Can not train without labels.' % s
 
-        # Cache images into memory for faster training (WARNING: large datasets may exceed system RAM)
+        # Cache images into memory for faster training------------------------------------------------------------------
         self.imgs = [None] * n
         if cache_images:
             gb = 0  # Gigabytes of cached images
@@ -255,7 +252,6 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         # if mosaic-----------------------------------------------------------------------------------------------------
         if hyp['dynamic'] < 0.2 or hyp['end']:
             self.mosaic = True
-
         else:
             self.mosaic = False
 
@@ -275,7 +271,6 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             img, (h0, w0), (h, w) = load_image(self, index)
             shapes = (h0, w0), ((h / h0, w / w0), 0)  # for COCO mAP rescaling
 
-            # Load labels
             labels = []
             x = self.labels[index]
             if x.size > 0:
