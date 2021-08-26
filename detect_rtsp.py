@@ -23,7 +23,7 @@ MODEL_HEIGHT = 608
 NMS_THRESHOLD_CONST = 0.65
 CLASS_SCORE_CONST = 0.6
 MODEL_OUTPUT_BOXNUM = 10647
-labels = ["Bag", "Cup", "Bottle"]
+
 
 # Tools-----------------------------------------------------------------------------------------------------------------
 def load_classes(path):
@@ -143,6 +143,13 @@ def detect(opt):
     # opt
     rtsp = opt.rtsp
     MODEL_PATH = os.path.join(SRC_PATH, opt.om)
+    print('rtsp:', rtsp)
+    print("om:", MODEL_PATH)
+
+    # Load labels-------------------------------------------------------------------------------------------------------
+    names = opt.name
+    labels = load_classes(names)
+    print('labels:', labels)
 
     # init
     t0, t1 = 0., 0.
@@ -161,7 +168,7 @@ def detect(opt):
     acl_resource.init()
     model = Model(MODEL_PATH)
 
-    # Set Dataloader----------------------------------------------------------------------------------------------------
+    # Load dataset----------------------------------------------------------------------------------------------------
     dataset = LoadStreams(rtsp, img_size=(MODEL_WIDTH, MODEL_HEIGHT))
 
     # iter
@@ -177,7 +184,7 @@ def detect(opt):
         infer_output = infer_output[0]
         t0 += time.time() - t
 
-        # 1.根据模型的输出以及对检测网络的认知，可以知道：-------------------------------------------------
+        # 1.根据模型的输出以及对检测网络的认知，可以知道：---------------------------------------------------------------------
         MODEL_OUTPUT_BOXNUM = infer_output.shape[1]
         result_box = infer_output[:, :, 0:6].reshape((-1, 6)).astype('float32')
         list_class = infer_output[:, :, 5:8].reshape((-1, 3)).astype('float32')
@@ -380,7 +387,8 @@ if __name__ == '__main__':
     parser.add_argument('--rtsp', type=str, default='rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0')
     parser.add_argument('--post', type=str, default='http://192.168.1.19:8080/v1/app/interface/uploadEvent')
     parser.add_argument('--point', type=str, default='10.17.1.20')
-    parser.add_argument('--om', type=str, default='./weights/material.om')
+    parser.add_argument('--om', type=str, default='weights/company.om')
+    parser.add_argument('--name', type=str, default='./data/material.names')
     parser.add_argument('--show', action='store_true')
     opt = parser.parse_args()
 

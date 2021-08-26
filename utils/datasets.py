@@ -250,10 +250,10 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         hyp = self.hyp
 
         # if mosaic-----------------------------------------------------------------------------------------------------
-        if hyp['dynamic'] < 0.2 or hyp['end']:
-            self.mosaic = True
-        else:
-            self.mosaic = False
+        # if hyp['dynamic'] < 0.2 or hyp['end']:
+        #     self.mosaic = True
+        # else:
+        #     self.mosaic = False
 
         # mosaic--------------------------------------------------------------------------------------------------------
         if self.mosaic:
@@ -1011,9 +1011,9 @@ def load_image(self, index):
         assert img is not None, 'Image Not Found ' + path
         h0, w0 = img.shape[:2]  # orig hw
         r = self.img_size / max(h0, w0)  # resize image to img_size
-        interp = cv2.INTER_AREA if r < 1 and not self.augment else cv2.INTER_LINEAR
-        # img = cv2.resize(img, (int(w0 * r), int(h0 * r)), interpolation=interp)
-        img = cv2.resize(img, (self.img_size, self.img_size), interpolation=interp)
+        if r != 1:  # always resize down, only resize up if training with augmentation
+            interp = cv2.INTER_AREA if r < 1 and not self.augment else cv2.INTER_LINEAR
+            img = cv2.resize(img, (self.img_size, self.img_size), interpolation=interp)
         return img, (h0, w0), img.shape[:2]  # img, hw_original, hw_resized
     else:
         return self.imgs[index], self.img_hw0[index], self.img_hw[index]  # img, hw_original, hw_resized
@@ -1056,9 +1056,10 @@ def load_mosaic(self, index):
             # resize----------------------------------------------------------------------------------------------------
             roadmap = cv2.imread(roadmappath, cv2.IMREAD_GRAYSCALE)
             h0, w0 = roadmap.shape[:2]  # orig hw
-            r = self.img_size / max(h0, w0)  # resize image to img_size
-            interp = cv2.INTER_AREA if r < 1 and not self.augment else cv2.INTER_LINEAR
-            roadmap = cv2.resize(roadmap, (self.img_size, self.img_size), interpolation=interp)
+            r = self.img_size / max(h0, w0)
+            if r != 1:
+                interp = cv2.INTER_AREA if r < 1 and not self.augment else cv2.INTER_LINEAR
+                roadmap = cv2.resize(roadmap, (self.img_size, self.img_size), interpolation=interp)
 
             data = (img, x, roadmap)
             img, x = fill_duck(data)
@@ -1182,8 +1183,7 @@ def random_perspective(img, targets=(), degrees=10, translate=.1, scale=.1, shea
     # 1. Rotation and Scale------------------------------------------------------------------------------------------------
     R = np.eye(3)
     a = random.uniform(-degrees, degrees)
-    a += random.choice([-180, -90, 0, 90])  # add 90deg rotations to small rotations
-    s = 2 ** random.uniform(-scale, scale)
+    s = random.uniform(1 - scale, 1 + scale)
     R[:2] = cv2.getRotationMatrix2D(angle=a, center=(0, 0), scale=s)
 
     # 2. Shear----------------------------------------------------------------------------------------------------------

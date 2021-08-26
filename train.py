@@ -378,10 +378,10 @@ if __name__ == '__main__':
     parser.add_argument('--img-size', nargs='+', type=int, default=[480, 480], help='train,test sizes')
     parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     # optional
-    parser.add_argument('--rect', action='store_true', help='rectangular training')
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
     parser.add_argument('--cache-images', action='store_true', help='cache images for faster training')
+    parser.add_argument('--rect', action='store_true', help='rectangular training')
     # save & test
     parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')
     parser.add_argument('--notest', action='store_true', help='only test final epoch')

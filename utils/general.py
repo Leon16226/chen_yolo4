@@ -485,15 +485,15 @@ def compute_loss(p, targets, model):  # predictions, targets, model
             lbox += (1.0 - giou).mean()  # giou loss
 
             # small proportion------------------------------------------------------------------------------------------
-            pbox_small, tbox_small = [], []
-            small_thresh = 0.0841
-            for j, box in enumerate(pbox):
-                if(box[2] < small_thresh and box[3] < small_thresh):
-                    pbox_small.append(box)
-                    tbox_small.append(tbox[i][j])
-            if(len(pbox_small) > 0):
-                giou_small = bbox_iou(pbox_small.T, tbox_small[i], x1y1x2y2=False, CIoU=True)
-                lbox_s += (1.0 - giou_small).mean()
+            # pbox_small, tbox_small = [], []
+            # small_thresh = 0.0841
+            # for j, box in enumerate(pbox):
+            #     if(box[2] < small_thresh and box[3] < small_thresh):
+            #         pbox_small.append(box)
+            #         tbox_small.append(tbox[i][j])
+            # if(len(pbox_small) > 0):
+            #     giou_small = bbox_iou(pbox_small.T, tbox_small[i], x1y1x2y2=False, CIoU=True)
+            #     lbox_s += (1.0 - giou_small).mean()
 
 
             # Objectness

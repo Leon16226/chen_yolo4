@@ -160,7 +160,7 @@ def train(hyp, opt, device, tb_writer=None):
         model.train()
 
         # if mosaic-----------------------------------------------------------------------------------------------------
-        hyp['end'] = True if (epochs - epoch) == 15 else False
+        # hyp['end'] = 1 if (epochs - epoch) == 15 else 0
 
         # Update image weights (optional)
         if dataset.image_weights:
@@ -206,7 +206,7 @@ def train(hyp, opt, device, tb_writer=None):
 
             # Multi-scale-----------------------------------------------------------------------------------------------
             if opt.multi_scale:
-                sz = random.randrange(imgsz * 0.7, imgsz * 1.3 + gs) // gs * gs  # size
+                sz = random.randrange(int(imgsz * 0.8), int(imgsz * 1.2 + gs)) // gs * gs  # size
                 sf = sz / max(imgs.shape[2:])  # scale factor
                 if sf != 1:
                     ns = [math.ceil(x * sf / gs) * gs for x in imgs.shape[2:]]  # new shape (stretched to gs-multiple)
@@ -218,7 +218,8 @@ def train(hyp, opt, device, tb_writer=None):
 
                 pred = model(imgs)
                 loss, loss_items, dynamic = compute_loss(pred, targets.to(device), model)
-                hyp['dynamic'] = dynamic
+                # print("smloss:", dynamic)
+                # hyp['dynamic'] = dynamic
                 if rank != -1:
                     loss *= opt.world_size
 
@@ -379,7 +380,7 @@ if __name__ == '__main__':
     print(opt)
     with open(opt.hyp) as f:
         hyp = yaml.load(f, Loader=yaml.FullLoader)
-    hyp['dynamic'] = 1.0
+    # hyp['dynamic'] = 1.0
 
     # train
     tb_writer = None

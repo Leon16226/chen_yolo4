@@ -7,6 +7,7 @@ import numpy as np
 import torch.nn.functional as F
 import math
 import cv2
+from utils.general import plot_images
 
 # ada sampling----------------------------------------------------------------------------------------------------------
 def fill_duck(data):
@@ -15,6 +16,15 @@ def fill_duck(data):
         img = torch.tensor(img)
         roadmap = torch.tensor(roadmap)
 
+        # constrain-----------------------------------------------------------------------------------------------------
+        ch, cw= roadmap.shape
+        sh = int(ch * 0.35)
+        sw = int(cw * 0.3)
+        roadmap[0:ch, 0:sw] = 0
+        roadmap[0:ch, cw-sw:cw] = 0
+        roadmap[0:sh, 0:cw] = 0
+        # cv2.imwrite("/home/chen/Desktop/dd/" + str(annos[0][1]) + 'ss.jpg', roadmap.numpy())
+
         # I. Get valid area.--------------------------------------------------------------------------------------------
         valid_idx = roadmap.view(-1)
         idx = torch.nonzero(valid_idx).view(-1)
@@ -22,21 +32,21 @@ def fill_duck(data):
             return img, annos
 
         # valid xy
-        ys = idx % roadmap.size(1)
-        xs = idx // roadmap.size(1)
+        xs = idx % roadmap.size(1)
+        ys = idx // roadmap.size(1)
         coor = torch.stack((xs, ys), dim=1)
 
         # ann
         annos_n = [s for s in annos]
 
         # II Calculate scale -------------------------------------------------------------------------------------------
-        scale_factor = [1.25, 0.75, 0.5]
+        scale_factor = [1.25, 0.75]
         (h, w, _) = img.shape
         for i, an in enumerate(annos):
             tx, ty = int((an[1] - an[3]/2) * w), int((an[2] - an[4]/2) * h)
             bx, by = int((an[1] + an[3]/2) * w), int((an[2] + an[4]/2) * h)
             img_an = img[ty:by, tx:bx, :]
-            idxs = torch.randint(low=0, high=coor.shape[0], size=(3,))
+            idxs = torch.randint(low=0, high=coor.shape[0], size=(2,))
 
             for j, scale in enumerate(scale_factor):
                 (ah, aw, _) = img_an.shape
@@ -48,10 +58,18 @@ def fill_duck(data):
 
                 try:
                     img[rty:rby, rtx:rbx, :] = torch.from_numpy(img_scale)
-                    annos_n.append([an[0], (rtx + rbx) / 2 / w, (rty + rby) / 2 / h, rw/w, rh/h])
+                    annos_n.append([an[0], (rtx + rbx) / 2.0 / w, (rty + rby) / 2.0 / h, rw/w, rh/h])
                 except:
                     continue
-        # cv2.imwrite("/home/chen/Desktop/ss/" + str(annos_n[0][1]) + 'ss.jpg', img.numpy())
+
+        print("roadmap sucess")
+
+        # ss = img.numpy()
+        # for i, n in enumerate(annos_n):
+        #     tx, ty = int((n[1] - n[3] / 2) * w), int((n[2] - n[4] / 2) * h)
+        #     bx, by = int((n[1] + n[3] / 2) * w), int((n[2] + n[4] / 2) * h)
+        #     cv2.rectangle(ss, (tx, ty), (bx, by), (0, 255, 0), 1)
+        # cv2.imwrite("/home/chen/Desktop/ss/" + str(annos_n[0][1]) + 'ss.jpg', ss)
         return img.numpy(), np.array(annos_n)
     except Exception as e:
         return data[0], data[1]
