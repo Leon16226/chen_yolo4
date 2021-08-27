@@ -19,10 +19,14 @@ from utils.general import xyxy2xywh, xywh2xyxy, torch_distributed_zero_first
 from yrrnet.datasets.transforms import *
 from PIL import Image
 from data.tranformers.functional import *
+from multiprocessing.pool import Pool
+from itertools import repeat
 
 help_url = ''
 img_formats = ['.bmp', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.dng']
 vid_formats = ['.mov', '.avi', '.mp4', '.mpg', '.mpeg', '.m4v', '.wmv', '.mkv']
+IMG_FORMATS = ['bmp', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'dng', 'webp', 'mpo']
+NUM_THREADS = min(8, os.cpu_count())
 
 # Get orientation exif tag
 for orientation in ExifTags.TAGS.keys():
@@ -55,17 +59,8 @@ def create_dataloader(path, imgsz, batch_size, stride, opt, hyp=None, augment=Fa
                       local_rank=-1, world_size=1, datatype=""):
     # Make sure only the first process in DDP process the dataset first, and the following others can use the cache.
     with torch_distributed_zero_first(local_rank):
-        if(datatype == 'rrnet'):
-            dataset = RrnetDataset(path, imgsz, batch_size,
-                                        augment=augment,  # augment images
-                                        hyp=hyp,  # augmentation hyperparameters
-                                        rect=rect,  # rectangular training
-                                        cache_images=cache,
-                                        single_cls=opt.single_cls,
-                                        stride=int(stride),
-                                        pad=pad)
-        else:
-            dataset = LoadImagesAndLabels(path, imgsz, batch_size,
+
+        dataset = LoadImagesAndLabels(path, imgsz, batch_size,
                                         augment=augment,  # augment images
                                         hyp=hyp,  # augmentation hyperparameters
                                         rect=rect,  # rectangular training
@@ -89,7 +84,7 @@ def create_dataloader(path, imgsz, batch_size, stride, opt, hyp=None, augment=Fa
 # Dataset---------------------------------------------------------------------------------------------------------------
 class LoadImagesAndLabels(Dataset):  # for training/testing
     def __init__(self, path, img_size=640, batch_size=16, augment=False, hyp=None, rect=False, image_weights=False,
-                 cache_images=False, single_cls=False, stride=32, pad=0.0):
+                 cache_images=False, single_cls=False, stride=32, pad=0.0, prefix=''):
 
         # load image file-----------------------------------------------------------------------------------------------
         try:
@@ -136,7 +131,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
         # 1.label cache---------------------------------------------------------------------------------------------------
         cache_path = str(Path(self.label_files[0]).parent) + '.cache'
-        cache = self.cache_labels(cache_path)  # cache
+        cache, exists = self.cache_labels(cache_path, prefix), False  # cache
 
         # 2.Get labels
         labels, shapes = zip(*[cache[x] for x in self.img_files])
@@ -213,30 +208,40 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 gb += self.imgs[i].nbytes
                 pbar.desc = 'Caching images (%.1fGB)' % (gb / 1E9)
 
-    def cache_labels(self, path='labels.cache'):
+    def cache_labels(self, path=Path('./labels.cache'), prefix=''):
         # Cache dataset labels, check images and read shapes
         x = {}  # dict
-        pbar = tqdm(zip(self.img_files, self.label_files), desc='Scanning images', total=len(self.img_files))
-        for (img, label) in pbar:
-            try:
-                l = []
-                image = Image.open(img)
-                image.verify()  # PIL verify
+        nm, nf, ne, nc, msgs = 0, 0, 0, 0, []  # number missing, found, empty, corrupt, messages
+        desc = f"{prefix}Scanning '{path.parent / path.stem}' images and labels..."
+        with Pool(NUM_THREADS) as pool:
+            pbar = tqdm(pool.imap_unordered(verify_image_label, zip(self.img_files, self.label_files, repeat(prefix))),
+                        desc=desc, total=len(self.img_files))
+            for im_file, l, shape, segments, nm_f, nf_f, ne_f, nc_f, msg in pbar:
+                nm += nm_f
+                nf += nf_f
+                ne += ne_f
+                nc += nc_f
+                if im_file:
+                    x[im_file] = [l, shape, segments]
+                if msg:
+                    msgs.append(msg)
+                pbar.desc = f"{desc}{nf} found, {nm} missing, {ne} empty, {nc} corrupted"
 
-                shape = exif_size(image)  # image size
-                assert (shape[0] > 9) & (shape[1] > 9), 'image size <10 pixels'
-                if os.path.isfile(label):
-                    with open(label, 'r') as f:
-                        l = np.array([x.split() for x in f.read().splitlines()], dtype=np.float32)  # labels
-                if len(l) == 0:
-                    l = np.zeros((0, 5), dtype=np.float32)
-                x[img] = [l, shape]
-            except Exception as e:
-                x[img] = None
-                print('WARNING: %s: %s' % (img, e))
-
+        pbar.close()
+        if msgs:
+            print('\n'.join(msgs))
+        if nf == 0:
+            print(f'{prefix}WARNING: No labels found in {path}.')
         x['hash'] = get_hash(self.label_files + self.img_files)
-        torch.save(x, path)  # save for next time
+        x['results'] = nf, nm, ne, nc, len(self.img_files)
+        x['msgs'] = msgs  # warnings
+        x['version'] = 0.4  # cache version
+        try:
+            np.save(path, x)  # save cache for next time
+            path.with_suffix('.cache.npy').rename(path)  # remove .npy suffix
+            print(f'{prefix}New cache created: {path}')
+        except Exception as e:
+            print(f'{prefix}WARNING: Cache directory {path.parent} is not writeable: {e}')  # path not writeable
         return x
 
     def __len__(self):
@@ -999,3 +1004,58 @@ def create_folder(path='./new'):
     if os.path.exists(path):
         shutil.rmtree(path)  # delete output folder
     os.makedirs(path)  # make new output folder
+
+# yolov5------------------------------------------------------------------------------------------------------------------
+def verify_image_label(args):
+    # Verify one image-label pair
+    im_file, lb_file, prefix = args
+    nm, nf, ne, nc = 0, 0, 0, 0  # number missing, found, empty, corrupt
+    try:
+        # verify images
+        im = Image.open(im_file)
+        im.verify()  # PIL verify
+        shape = exif_size(im)  # image size
+        assert (shape[0] > 9) & (shape[1] > 9), f'image size {shape} <10 pixels'
+        assert im.format.lower() in IMG_FORMATS, f'invalid image format {im.format}'
+        if im.format.lower() in ('jpg', 'jpeg'):
+            with open(im_file, 'rb') as f:
+                f.seek(-2, 2)
+                assert f.read() == b'\xff\xd9', 'corrupted JPEG'
+
+        # verify labels
+        segments = []  # instance segments
+        if os.path.isfile(lb_file):
+            nf = 1  # label found
+            with open(lb_file, 'r') as f:
+                l = [x.split() for x in f.read().strip().splitlines() if len(x)]
+                if any([len(x) > 8 for x in l]):  # is segment
+                    classes = np.array([x[0] for x in l], dtype=np.float32)
+                    segments = [np.array(x[1:], dtype=np.float32).reshape(-1, 2) for x in l]  # (cls, xy1...)
+                    l = np.concatenate((classes.reshape(-1, 1), segments2boxes(segments)), 1)  # (cls, xywh)
+                l = np.array(l, dtype=np.float32)
+            if len(l):
+                assert l.shape[1] == 5, 'labels require 5 columns each'
+                assert (l >= 0).all(), 'negative labels'
+                assert (l[:, 1:] <= 1).all(), 'non-normalized or out of bounds coordinate labels'
+                assert np.unique(l, axis=0).shape[0] == l.shape[0], 'duplicate labels'
+            else:
+                ne = 1  # label empty
+                l = np.zeros((0, 5), dtype=np.float32)
+        else:
+            nm = 1  # label missing
+            l = np.zeros((0, 5), dtype=np.float32)
+        return im_file, l, shape, segments, nm, nf, ne, nc, ''
+    except Exception as e:
+        nc = 1
+        msg = f'{prefix}WARNING: Ignoring corrupted image and/or label {im_file}: {e}'
+        return [None, None, None, None, nm, nf, ne, nc, msg]
+
+
+def segments2boxes(segments):
+    # Convert segment labels to box labels, i.e. (cls, xy1, xy2, ...) to (cls, xywh)
+    boxes = []
+    for s in segments:
+        x, y = s.T  # segment xy
+        boxes.append([x.min(), y.min(), x.max(), y.max()])  # cls, xyxy
+    return xyxy2xywh(np.array(boxes))  # cls, xywh
+

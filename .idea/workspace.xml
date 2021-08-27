@@ -4,18 +4,7 @@
     <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/tranformers/functional.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tranformers/functional.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/tranformers/transforms.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tranformers/transforms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/experimental.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/experimental.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/evolve.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/gcp.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/general.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/general.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/google_utils.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -193,13 +182,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626763600078</updated>
-    </task>
-    <task id="LOCAL-00003" summary="read nms code">
-      <created>1627183139108</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1627183139108</updated>
     </task>
     <task id="LOCAL-00004" summary="read detect.py">
       <created>1627183723877</created>
@@ -537,7 +519,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629966393012</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="update">
+      <created>1630025914654</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1630025914654</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

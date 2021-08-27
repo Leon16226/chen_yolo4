@@ -62,7 +62,7 @@ def fill_duck(data):
                 except:
                     continue
 
-        print("roadmap sucess")
+        # print("roadmap sucess")
 
         # ss = img.numpy()
         # for i, n in enumerate(annos_n):
