@@ -5,7 +5,6 @@ import PIL
 import numpy as np
 from . import functional as F
 from torch.nn.functional import interpolate
-from utils.metrics.metrics import bbox_iou
 
 
 class ToHeatmap(object):

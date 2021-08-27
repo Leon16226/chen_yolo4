@@ -25,11 +25,11 @@ from utils.general import (
     check_img_size, torch_distributed_zero_first, labels_to_class_weights, plot_labels, check_anchors,
     labels_to_image_weights, compute_loss, plot_images, fitness, strip_optimizer, plot_results,
     get_latest_run, check_git_status, check_file, increment_dir, print_mutation, plot_evolution)
-from utils.google_utils import attempt_download
 from utils.torch_utils import init_seeds, ModelEMA, select_device, intersect_dicts, de_parallel
 
 
 def train(hyp, opt, device, tb_writer=None):
+    # init--------------------------------------------------------------------------------------------------------------
     print(f'Hyperparameters {hyp}')
     log_dir = Path(tb_writer.log_dir) if tb_writer else Path(opt.logdir) / 'evolve'  # logging directory
     wdir = str(log_dir / 'weights') + os.sep  # weights directory
@@ -217,9 +217,8 @@ def train(hyp, opt, device, tb_writer=None):
             with amp.autocast(enabled=cuda):
 
                 pred = model(imgs)
-                loss, loss_items, dynamic = compute_loss(pred, targets.to(device), model)
-                # print("smloss:", dynamic)
-                # hyp['dynamic'] = dynamic
+                loss, loss_items = compute_loss(pred, targets.to(device), model)
+
                 if rank != -1:
                     loss *= opt.world_size
 

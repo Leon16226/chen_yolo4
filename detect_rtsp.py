@@ -150,6 +150,7 @@ def detect(opt):
     names = opt.name
     labels = load_classes(names)
     print('labels:', labels)
+    assert len(labels) > 0, "label file load fail"
 
     # init
     t0, t1 = 0., 0.
@@ -180,14 +181,15 @@ def detect(opt):
         # 模型推理-------------------------------------------------------------------------------------------------------
         t = time.time()
         infer_output = model.execute(resized_img)
-        print(np.array(infer_output).shape)
+        assert infer_output.shape[1] > 0, "model no output, please check"
         infer_output = infer_output[0]
         t0 += time.time() - t
 
         # 1.根据模型的输出以及对检测网络的认知，可以知道：---------------------------------------------------------------------
+        nc = len(labels)
         MODEL_OUTPUT_BOXNUM = infer_output.shape[1]
         result_box = infer_output[:, :, 0:6].reshape((-1, 6)).astype('float32')
-        list_class = infer_output[:, :, 5:8].reshape((-1, 3)).astype('float32')
+        list_class = infer_output[:, :, 5:5+nc].reshape((-1, 3)).astype('float32')
         list_max = list_class.argmax(axis=1)
         list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
         result_box[:, 5] = list_max[:, 0]
@@ -210,7 +212,7 @@ def detect(opt):
 
         # filter strategy-----------------------------------------------------------------------------------------------
 
-        # 1. unique area
+        # 1. in detect area
         opt_point1 = opt.area
         opt_point1 = opt_point1.split(',')
         toplx, toply = int(opt_point1[0]), int(opt_point1[1])
@@ -256,7 +258,6 @@ def detect(opt):
             nf_thres = 0
             nf_thres = nf_thres + nf if nf_thres < 120 else nf_thres
             threshold = 1 if nf_thres < 120 and threshold == 1 else 2
-            threshold_frame = 30 if nf_thres < 120 and threshold == 30 else 15
             if(iou_p1 >= 0.5 and niou < 5):
                 coords_in_area.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y,
                                        detect_result[4], detect_result[5]))
@@ -290,7 +291,7 @@ def detect(opt):
 
         # wait key------------------------------------------------------------------------------------------------------
 
-        # detect area
+        # show detect area
         if(opt.show):
             point1 = point1.reshape((-1, 1, 2))
             cv2.polylines(im0s, [point1], True, (0, 255, 255))
@@ -387,7 +388,7 @@ if __name__ == '__main__':
     parser.add_argument('--rtsp', type=str, default='rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0')
     parser.add_argument('--post', type=str, default='http://192.168.1.19:8080/v1/app/interface/uploadEvent')
     parser.add_argument('--point', type=str, default='10.17.1.20')
-    parser.add_argument('--om', type=str, default='weights/company.om')
+    parser.add_argument('--om', type=str, default='weights/company-sim.om')
     parser.add_argument('--name', type=str, default='./data/material.names')
     parser.add_argument('--show', action='store_true')
     opt = parser.parse_args()
