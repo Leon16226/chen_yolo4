@@ -74,6 +74,70 @@ def fill_duck(data):
     except Exception as e:
         return data[0], data[1]
 
+def fill_duck_normal(data):
+    try:
+        img, annos, roadmap = data
+        img = torch.tensor(img)
+        roadmap = torch.tensor(roadmap)
+
+        # constrain-----------------------------------------------------------------------------------------------------
+        ch, cw= roadmap.shape
+        sh = int(ch * 0.2)
+        sw = int(cw * 0.2)
+        roadmap[0:ch, 0:sw] = 0
+        roadmap[0:ch, cw-sw:cw] = 0
+        roadmap[0:sh, 0:cw] = 0
+        # cv2.imwrite("/home/chen/Desktop/dd/" + str(annos[0][1]) + 'ss.jpg', roadmap.numpy())
+
+        # I. Get valid area.--------------------------------------------------------------------------------------------
+        valid_idx = roadmap.view(-1)
+        idx = torch.nonzero(valid_idx).view(-1)
+        if idx.size(0) == 0:
+            return img, annos
+
+        # valid xy
+        xs = idx % roadmap.size(1)
+        ys = idx // roadmap.size(1)
+        coor = torch.stack((xs, ys), dim=1)
+
+        # ann
+        annos_n = [s for s in annos]
+
+        # II Calculate scale -------------------------------------------------------------------------------------------
+        scale_factor = [1.25, 0.75]
+        (h, w, _) = img.shape
+        for i, an in enumerate(annos):
+            tx, ty = int((an[1] - an[3]/2) * w), int((an[2] - an[4]/2) * h)
+            bx, by = int((an[1] + an[3]/2) * w), int((an[2] + an[4]/2) * h)
+            img_an = img[ty:by, tx:bx, :]
+            idxs = torch.randint(low=0, high=coor.shape[0], size=(2,))
+
+            for j, scale in enumerate(scale_factor):
+                (ah, aw, _) = img_an.shape
+                rh, rw = int(ah*scale), int(aw*scale)
+                img_scale = cv2.resize(img_an.numpy(), (rw, rh), interpolation=cv2.INTER_LINEAR)
+                coorxy = coor[idxs[j]]
+                rtx, rty = int(coorxy[0].numpy()), int(coorxy[1].numpy())
+                rbx, rby = rtx + rw, rty + rh
+
+                try:
+                    img[rty:rby, rtx:rbx, :] = torch.from_numpy(img_scale)
+                    annos_n.append([an[0], (rtx + rbx) / 2.0 / w, (rty + rby) / 2.0 / h, rw/w, rh/h])
+                except:
+                    continue
+
+        # print("roadmap sucess")
+
+        # ss = img.numpy()
+        # for i, n in enumerate(annos_n):
+        #     tx, ty = int((n[1] - n[3] / 2) * w), int((n[2] - n[4] / 2) * h)
+        #     bx, by = int((n[1] + n[3] / 2) * w), int((n[2] + n[4] / 2) * h)
+        #     cv2.rectangle(ss, (tx, ty), (bx, by), (0, 255, 0), 1)
+        # cv2.imwrite("/home/chen/Desktop/ss/" + str(annos_n[0][1]) + 'ss.jpg', ss)
+        return img.numpy(), np.array(annos_n)
+    except Exception as e:
+        return data[0], data[1]
+
 # yolov5 albumentation--------------------------------------------------------------------------------------------------
 class Albumentations:
     # YOLOv5 Albumentations class (optional, only used if package is installed)

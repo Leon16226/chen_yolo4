@@ -261,7 +261,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
         # mosaic--------------------------------------------------------------------------------------------------------
         if self.mosaic:
-            img, labels = load_mosaic(self, index)
+            img, labels = load_mosaic_v5(self, index)
             shapes = None
 
             # mixup-----------------------------------------------------------------------------------------------------
@@ -634,6 +634,17 @@ def load_mosaic(self, index):
             data = (img, x, roadmap)
             img, x = fill_duck(data)
 
+        elif len(x) <= 3:
+             # copy and paste in own image if label < 3
+             h0, w0 = img.shape[:2]  # orig hw
+             r = self.img_size / max(h0, w0)
+             if r != 1:
+                 roadmap = np.random.randint(0, 1, (int(w0 * r), int(h0 * r)))
+
+             data = (img, x, roadmap)
+             img, x = fill_duck(data)
+
+
         # place img in img4
         if i == 0:  # top left
             img4 = np.full((s * 2, s * 2, img.shape[2]), 114, dtype=np.uint8)  # base image with 4 tiles
@@ -689,7 +700,7 @@ def load_mosaic_v5(self, index):
     labels4, segments4 = [], []
     s = self.img_size
     yc, xc = [int(random.uniform(-x, 2 * s + x)) for x in self.mosaic_border]  # mosaic center x, y
-    indices = indices = [index] + [random.randint(0, len(self.labels) - 1) for _ in range(3)]
+    indices = [index] + [random.randint(0, len(self.labels) - 1) for _ in range(3)]
     for i, index in enumerate(indices):
         # Load image
         img, _, (h, w) = load_image(self, index)
