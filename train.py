@@ -25,7 +25,6 @@ from utils.general import (
     check_img_size, torch_distributed_zero_first, labels_to_class_weights, plot_labels, check_anchors,
     labels_to_image_weights, compute_loss, plot_images, fitness, strip_optimizer, plot_results,
     get_latest_run, check_git_status, check_file, increment_dir, print_mutation, plot_evolution)
-from utils.google_utils import attempt_download
 from utils.torch_utils import init_seeds, ModelEMA, select_device, intersect_dicts, de_parallel
 
 
@@ -254,7 +253,7 @@ def train(hyp, opt, device, tb_writer=None):
                 pred = model(imgs)
 
                 # Loss
-                loss, loss_items = compute_loss(pred, targets.to(device), model)  # scaled by batch_size
+                loss, loss_items, k = compute_loss(pred, targets.to(device), model)  # scaled by batch_size
                 if rank != -1:
                     loss *= opt.world_size  # gradient averaged between devices in DDP mode
 
@@ -369,13 +368,13 @@ def train(hyp, opt, device, tb_writer=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='./cfg/yolov4-s.cfg', help='model.yaml path')
+    parser.add_argument('--cfg', type=str, default='./cfg/yolov4-s-f.cfg', help='model.yaml path')
     parser.add_argument('--weights', type=str, default='', help='initial weights path')
     parser.add_argument('--hyp', type=str, default='./data/hyp.material.yaml', help='hyperparameters path')
     parser.add_argument('--data', type=str, default='./data/material.yaml', help='data.yaml path')
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[480, 480], help='train,test sizes')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[416, 416], help='train,test sizes')
     parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     # optional
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')

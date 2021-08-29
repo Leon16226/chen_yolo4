@@ -81,7 +81,7 @@ def fill_duck_normal(data):
         roadmap = torch.tensor(roadmap)
 
         # constrain-----------------------------------------------------------------------------------------------------
-        ch, cw= roadmap.shape
+        ch, cw = roadmap.shape
         sh = int(ch * 0.2)
         sw = int(cw * 0.2)
         roadmap[0:ch, 0:sw] = 0

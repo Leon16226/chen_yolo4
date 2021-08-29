@@ -140,7 +140,7 @@ def Cal_area_2poly(point1,point2):
 
 # Detect----------------------------------------------------------------------------------------------------------------
 def detect(opt):
-    # opt
+    # opt---------------------------------------------------------------------------------------------------------------
     rtsp = opt.rtsp
     MODEL_PATH = os.path.join(SRC_PATH, opt.om)
     print('rtsp:', rtsp)
@@ -159,7 +159,7 @@ def detect(opt):
     threshold = 1
     threshold_box = 30
 
-    # Initialize
+    # dir
     if os.path.exists(out):
         shutil.rmtree(out)
     os.makedirs(out)
@@ -172,7 +172,7 @@ def detect(opt):
     # Load dataset----------------------------------------------------------------------------------------------------
     dataset = LoadStreams(rtsp, img_size=(MODEL_WIDTH, MODEL_HEIGHT))
 
-    # iter
+    # do
     for i, (path, img, im0s, vid_cap) in enumerate(dataset):
         orig_shape = im0s.shape[:2]
         resized_img = img.astype(np.float32)
@@ -181,18 +181,31 @@ def detect(opt):
         # 模型推理-------------------------------------------------------------------------------------------------------
         t = time.time()
         infer_output = model.execute(resized_img)
-        assert infer_output.shape[1] > 0, "model no output, please check"
-        infer_output = infer_output[0]
+        assert infer_output[0].shape[1] > 0, "model no output, please check"
+        infer_output_size = len(infer_output)
+        if(infer_output_size == 1):
+            infer_output = infer_output[0]
+        elif(infer_output_size == 2):
+            infer_output_0 = infer_output[0]
+            infer_output_1 = infer_output[1].reshape((1, -1, 4)).astype('float32')
+            infer_output_2 = np.ones([1, infer_output_1.shape[1], 1])
+            infer_output = np.concatenate((infer_output_1, infer_output_2, infer_output_0), axis=2)
+        print(infer_output.shape)
         t0 += time.time() - t
 
         # 1.根据模型的输出以及对检测网络的认知，可以知道：---------------------------------------------------------------------
         nc = len(labels)
         MODEL_OUTPUT_BOXNUM = infer_output.shape[1]
         result_box = infer_output[:, :, 0:6].reshape((-1, 6)).astype('float32')
-        list_class = infer_output[:, :, 5:5+nc].reshape((-1, 3)).astype('float32')
+        list_class = infer_output[:, :, 5:5+nc].reshape((-1, nc)).astype('float32')
         list_max = list_class.argmax(axis=1)
         list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
         result_box[:, 5] = list_max[:, 0]
+        if(infer_output_size == 2):
+            list_max = list_class.max(axis=1)
+            list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
+            result_box[:, 4] = list_max[:, 0]
+
 
         # 2.整合
         boxes = np.zeros(shape=(MODEL_OUTPUT_BOXNUM, 6), dtype=np.float32)  # 创建一个
@@ -238,7 +251,7 @@ def detect(opt):
             point = np.array(point).reshape(4, 2)
             inter_area = Cal_area_2poly(point1, point)
             pred_area = (bottom_x - top_x) * (bottom_y - top_y)
-            iou_p1 = inter_area / pred_area
+            iou_p1 = inter_area / pred_area if pred_area != 0 else 0
 
             # plan2-----------------------------------------------------------------------------------------------------
             if(iou_p1 >= 0.5):
@@ -384,12 +397,12 @@ def push(opt, frame, coords):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--area', type=str, default='752,555,1342,608,392,928,1304,1066', help='detection area')
+    parser.add_argument('--area', type=str, default='752,555,1342,608,392,928,1304,1066', help='lt rt lb rb')
     parser.add_argument('--rtsp', type=str, default='rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0')
     parser.add_argument('--post', type=str, default='http://192.168.1.19:8080/v1/app/interface/uploadEvent')
     parser.add_argument('--point', type=str, default='10.17.1.20')
-    parser.add_argument('--om', type=str, default='weights/company-sim.om')
-    parser.add_argument('--name', type=str, default='./data/material.names')
+    parser.add_argument('--om', type=str, default='weights/highway-sim.om')
+    parser.add_argument('--name', type=str, default='./data/highway.names')
     parser.add_argument('--show', action='store_true')
     opt = parser.parse_args()
 

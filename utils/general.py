@@ -485,15 +485,17 @@ def compute_loss(p, targets, model):  # predictions, targets, model
             lbox += (1.0 - giou).mean()  # giou loss
 
             # small proportion------------------------------------------------------------------------------------------
-            # pbox_small, tbox_small = [], []
-            # small_thresh = 0.0841
-            # for j, box in enumerate(pbox):
-            #     if(box[2] < small_thresh and box[3] < small_thresh):
-            #         pbox_small.append(box)
-            #         tbox_small.append(tbox[i][j])
-            # if(len(pbox_small) > 0):
-            #     giou_small = bbox_iou(pbox_small.T, tbox_small[i], x1y1x2y2=False, CIoU=True)
-            #     lbox_s += (1.0 - giou_small).mean()
+            pbox_small, tbox_small = [], []
+            small_thresh = 0.0500
+            for j, box in enumerate(ps[:, 2:4]):
+                if(box[0] < small_thresh and box[1] < small_thresh):
+                    pbox_small.append(pbox[j].cpu().detach().numpy())
+                    tbox_small.append(tbox[i][j].cpu().detach().numpy())
+            if(len(pbox_small) > 0):
+                pbox_small = torch.tensor(pbox_small).cuda()
+                tbox_small = torch.tensor(tbox_small).cuda()
+                giou_small = bbox_iou(pbox_small.T, tbox_small, x1y1x2y2=False, CIoU=True)
+                lbox_s += (1.0 - giou_small).mean()
 
 
             # Objectness
@@ -510,12 +512,13 @@ def compute_loss(p, targets, model):  # predictions, targets, model
     s = 3 / np  # output count scaling
 
     lbox *= h['giou'] * s
+    lbox_s *= h['giou'] * s
     lobj *= h['obj'] * s * (1.4 if np == 4 else 1.)
     lcls *= h['cls'] * s
     bs = tobj.shape[0]  # batch size
 
     loss = lbox + lobj + lcls
-    return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
+    return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach(), 1 - lbox_s / lbox
 
 # targets
 def build_targets(p, targets, model):

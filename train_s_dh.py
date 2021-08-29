@@ -112,7 +112,7 @@ def train(hyp, opt, device, tb_writer=None):
     # 1.Trainloader-------------------------------------------------------------------------------------------------------
     dataloader, dataset = create_dataloader(train_path, imgsz, batch_size, gs, opt, hyp=hyp, augment=True,
                                             cache=opt.cache_images, rect=opt.rect, local_rank=rank,
-                                            world_size=opt.world_size)
+                                            world_size=opt.world_size,  prefix=colorstr('train: '))
     mlc = np.concatenate(dataset.labels, 0)[:, 0].max()
     nb = len(dataloader)
     assert mlc < nc, 'Label class %g exceeds nc=%g in %s. Possible class labels are 0-%g' % (mlc, nc, opt.data, nc - 1)
@@ -121,7 +121,9 @@ def train(hyp, opt, device, tb_writer=None):
     if rank in [-1, 0]:
         ema.updates = start_epoch * nb // accumulate
         testloader = create_dataloader(test_path, imgsz_test, batch_size, gs, opt, hyp=hyp, augment=False,
-                                       cache=opt.cache_images, rect=True, local_rank=-1, world_size=opt.world_size)[0]
+                                       cache=opt.cache_images, rect=True, local_rank=-1,
+                                       world_size=opt.world_size,
+                                       prefix=colorstr('val: '))[0]
 
     # Model parameters
     hyp['cls'] *= nc / 3.  # scale coco-tuned hyp['cls'] to current dataset
@@ -217,7 +219,9 @@ def train(hyp, opt, device, tb_writer=None):
             with amp.autocast(enabled=cuda):
 
                 pred = model(imgs)
-                loss, loss_items = compute_loss(pred, targets.to(device), model)
+                loss, loss_items, sp = compute_loss(pred, targets.to(device), model)
+                # print('sp:', sp)
+                hyp['sp'] = 0 if sp < 0.05 else 1
 
                 if rank != -1:
                     loss *= opt.world_size

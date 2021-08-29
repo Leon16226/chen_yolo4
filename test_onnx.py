@@ -91,7 +91,7 @@ def to_numpy(tensor):
     return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
 
 labels = ['on_mask', 'mask']
-r_model_path = "./weights/masksim.onnx"
+r_model_path = "/home/chen/pytorch-YOLOv4-sss/weights/highway.onnx"
 # -------------------end onnx---------------------------
 
 
@@ -169,13 +169,16 @@ def test(data,
             # onnx
             inf_out = model.forward(to_numpy(img))
             inf_out = torch.from_numpy(inf_out[0])
-            print(inf_out if t0 == 0 else "")
+            print(len([inf_out]))
+            print("onnx:", inf_out[0].shape)
+            print("onnx:", inf_out[1].shape)
+            # print(inf_out if t0 == 0 else "")
             t0 += time_synchronized() - t
 
             # Run NMS
             t = time_synchronized()
             output = non_max_suppression(inf_out, conf_thres=conf_thres, iou_thres=iou_thres, merge=merge)
-            print(output if t1 == 0 else "")
+            # print(output if t1 == 0 else "")
             t1 += time_synchronized() - t
 
         # Statistics per image
@@ -267,7 +270,7 @@ if __name__ == '__main__':
     parser.add_argument('--weights', nargs='+', type=str, default='./weights/mask.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='data/mask.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=1, help='size of each image batch')
-    parser.add_argument('--img-size', type=int, default=416, help='inference size (pixels)')
+    parser.add_argument('--img-size', type=int, default=608, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.6, help='object confidence threshold')  # 0.001
     parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS')
     parser.add_argument('--save-json', action='store_true', help='save a cocoapi-compatible JSON results file')

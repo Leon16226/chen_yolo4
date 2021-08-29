@@ -1,6 +1,6 @@
-train: /home/chen/chen_yolo4/datasets/Mask/images/train
-val: /home/chen/chen_yolo4/datasets/Mask/images/val
-test: /home/chen/chen_yolo4/datasets/Mask/images/val
+train: /home/chen/chen_p/chen_yolo4/datasets/Mask/images/train
+val: /home/chen/chen_p/chen_yolo4/datasets/Mask/images/val
+test: /home/chen/chen_p/chen_yolo4/datasets/Mask/images/val
 
 nc: 2
 
