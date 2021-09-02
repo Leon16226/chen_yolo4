@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="copy and paste">
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="detect rtsp sucess">
+      <change afterPath="$PROJECT_DIR$/utils/datatools.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/loss.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/hyp.material.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/hyp.material.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/mask.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/mask.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/tranformers/functional.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/tranformers/functional.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/evolve.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_onnx.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_onnx.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_s_dh.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/general.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/general.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yolox/core/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/yolox/core/trainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -193,13 +191,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626763600078</updated>
-    </task>
-    <task id="LOCAL-00006" summary="test om success">
-      <created>1627373978389</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1627373978389</updated>
     </task>
     <task id="LOCAL-00007" summary="rtsp detect sucess">
       <created>1627440945878</created>
@@ -537,7 +528,14 @@
       <option name="project" value="LOCAL" />
       <updated>1630028878495</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="detect rtsp sucess">
+      <created>1630210734122</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1630210734122</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -583,7 +581,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="yolo4-s-dh" />
     <MESSAGE value="yolo4-s-dh success" />
     <MESSAGE value="yolo4-s-dh success turely" />
     <MESSAGE value="http push" />
@@ -608,7 +605,8 @@
     <MESSAGE value="update" />
     <MESSAGE value="yolo5 cache" />
     <MESSAGE value="copy and paste" />
-    <option name="LAST_COMMIT_MESSAGE" value="copy and paste" />
+    <MESSAGE value="detect rtsp sucess" />
+    <option name="LAST_COMMIT_MESSAGE" value="detect rtsp sucess" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -688,13 +686,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/detect_rtsp.py</url>
-          <line>402</line>
+          <line>415</line>
           <option name="timeStamp" value="52" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/detect_rtsp.py</url>
-          <line>196</line>
+          <line>197</line>
           <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/yolox/data/data_augment.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="57" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

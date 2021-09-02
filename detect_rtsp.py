@@ -92,6 +92,7 @@ class LoadStreams:
     def __len__(self):
         return 0  # 1E12 frames = 32 streams at 30 FPS for 30 years
 
+
 # nms
 def func_nms(boxes, nms_threshold):
         b_x = boxes[:, 0]
@@ -187,7 +188,7 @@ def detect(opt):
             infer_output = infer_output[0]
         elif(infer_output_size == 2):
             infer_output_0 = infer_output[0]
-            infer_output_1 = infer_output[1].reshape((1, -1, 4)).astype('float32')
+            infer_output_1 = infer_output[1].reshape((1, -1, 4))
             infer_output_2 = np.ones([1, infer_output_1.shape[1], 1])
             infer_output = np.concatenate((infer_output_1, infer_output_2, infer_output_0), axis=2)
         print(infer_output.shape)
@@ -207,12 +208,16 @@ def detect(opt):
             result_box[:, 4] = list_max[:, 0]
 
 
+
         # 2.整合
         boxes = np.zeros(shape=(MODEL_OUTPUT_BOXNUM, 6), dtype=np.float32)  # 创建一个
         boxes[:, :4] = result_box[:, :4]
         boxes[:, 4] = result_box[:, 5]
         boxes[:, 5] = result_box[:, 4]
         all_boxes = boxes[boxes[:, 5] >= CLASS_SCORE_CONST]
+        # only people---------------------------------------------------------------------------------------------------
+        if(infer_output_size == 2):
+            all_boxes = boxes[boxes[:, 4] == 8]
 
         # 3.nms
         t = time.time()
@@ -382,7 +387,7 @@ def push(opt, frame, coords):
         coordinate.append(Coordinate("material", coord[0], coord[1], coord[2], coord[3], coord[4]))
 
     event = Event(ponit_ip, int(round(time.time() * 1000)),
-                  1, "yzw1-dxcd", "throwThings", "", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
+                  1, "yzw1-dxcd", "peopleOrNoVehicles" if opt.om == "weights/highway-sim.om" else "throwThings", "", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
                   "material", 0, 0, 0, 0, 0.75,
                   "", "",
                   "")
@@ -397,12 +402,20 @@ def push(opt, frame, coords):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--area', type=str, default='752,555,1342,608,392,928,1304,1066', help='lt rt lb rb')
-    parser.add_argument('--rtsp', type=str, default='rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0')
-    parser.add_argument('--post', type=str, default='http://192.168.1.19:8080/v1/app/interface/uploadEvent')
-    parser.add_argument('--point', type=str, default='10.17.1.20')
+    # 0,0,1920,0,0,1080,1920,1080
+
+    # 752,555,1342,608,392,928,1304,1066
+    # rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0
+    # http://192.168.1.19:8080/v1/app/interface/uploadEvent
+    # 10.17.1.20
+
+    # 891,480,1130,495,834,1059,1714,1065
+    parser.add_argument('--area', type=str, default='891,480,1130,495,834,1059,1714,1065', help='lt rt lb rb')
+    parser.add_argument('--rtsp', type=str, default='rtsp://admin:xsy12345@33.64.78.178/h265/ch1/main/av_stream')
+    parser.add_argument('--post', type=str, default='http://33.64.78.180:8080/v1/app/interface/uploadEvent')
+    parser.add_argument('--point', type=str, default='33.64.78.178')
     parser.add_argument('--om', type=str, default='weights/highway-sim.om')
-    parser.add_argument('--name', type=str, default='./data/highway.names')
+    parser.add_argument('--name', type=str, default='data/highway.names')
     parser.add_argument('--show', action='store_true')
     opt = parser.parse_args()
 

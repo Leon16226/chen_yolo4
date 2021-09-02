@@ -224,8 +224,8 @@ if __name__ == '__main__':
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--merge', action='store_true', help='use Merge NMS')
     # set
-    parser.add_argument('--cfg', type=str, default='cfg/yolov4-s-cbam.cfg', help='*.cfg path')
-    parser.add_argument('--weights', type=str, default='./weights/material_10_a.pt', help='model.pt path(s)')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov4-s-f.cfg', help='*.cfg path')
+    parser.add_argument('--weights', type=str, default='./weights/material_14_b.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='./data/material.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=1, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=608, help='inference size (pixels)')

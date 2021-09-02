@@ -46,6 +46,7 @@ def fill_duck(data):
             tx, ty = int((an[1] - an[3]/2) * w), int((an[2] - an[4]/2) * h)
             bx, by = int((an[1] + an[3]/2) * w), int((an[2] + an[4]/2) * h)
             img_an = img[ty:by, tx:bx, :]
+            # img_an = cv2.flip(img_an, 1) if np.random.randint(0, 2) == 0 else cv2.flip(img_an, 0)
             idxs = torch.randint(low=0, high=coor.shape[0], size=(2,))
 
             for j, scale in enumerate(scale_factor):
@@ -110,6 +111,7 @@ def fill_duck_normal(data):
             tx, ty = int((an[1] - an[3]/2) * w), int((an[2] - an[4]/2) * h)
             bx, by = int((an[1] + an[3]/2) * w), int((an[2] + an[4]/2) * h)
             img_an = img[ty:by, tx:bx, :]
+            # img_an = cv2.flip(img_an, 1) if np.random.randint(0, 2) == 0 else cv2.flip(img_an, 0)
             idxs = torch.randint(low=0, high=coor.shape[0], size=(2,))
 
             for j, scale in enumerate(scale_factor):
@@ -139,16 +141,32 @@ def fill_duck_normal(data):
         return data[0], data[1]
 
 # yolov5 albumentation--------------------------------------------------------------------------------------------------
+
 class Albumentations:
     # YOLOv5 Albumentations class (optional, only used if package is installed)
+
     def __init__(self):
         self.transform = None
         try:
             import albumentations as A
 
+            weather = [
+                    A.RandomSnow(p=0.1),
+                    A.RandomRain(p=0.1),
+                    A.RandomFog(p=0.1),
+                    A.RandomShadow(p=0.1),
+                    ]
+
+            interfere = [
+                    A.ISONoise(p=0.1),
+                    A.Blur(blur_limit=4, p=0.1),
+                    A.MotionBlur(blur_limit=15, p=0.1),
+                    A.Cutout(num_holes=8, max_h_size=5, max_w_size=5, p=0.1)
+                    ]
+
             self.transform = A.Compose([
-                A.Blur(p=0.1),
-                A.MedianBlur(p=0.1),
+                weather[np.random.randint(0, len(weather))],
+                interfere[np.random.randint(0, len(interfere))],
                 A.ToGray(p=0.01)],
                 bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
 

@@ -221,7 +221,7 @@ def train(hyp, opt, device, tb_writer=None):
                 pred = model(imgs)
                 loss, loss_items, sp = compute_loss(pred, targets.to(device), model)
                 # print('sp:', sp)
-                hyp['sp'] = 0 if sp < 0.05 else 1
+
 
                 if rank != -1:
                     loss *= opt.world_size
