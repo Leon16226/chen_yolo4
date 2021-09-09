@@ -158,20 +158,41 @@ def compute_loss(p, targets, model):  # predictions, targets, model
 
 
 # label encode ---------------------------------------------------------------------------------------------------------
+def build_targets_free(p, targets, model):
+    nt = targets.shape[0]
+    tcls, tbox = [], []
+
+    for i in range(0, 2):
+        pi = p[i]
+        grid = (pi.shape[3], pi.shape[2])
+        pxy = torch.zeros_like((grid[0], grid[1], 4))
+        pclass = torch.zeros_like(((grid[0], grid[1], 1)))
+        for j, t in enumerate(targets):
+            txy = (t[2], t[3])
+            txy_index = (txy[0] // 0.1, txy[1] // 0.1)
+            txy_tl = (txy[0] / 0.1, txy[1] / 0.1)
+            txy_relative_tl = txy_tl - txy_index
+            pxy[txy_index[0], txy_index[1], 0:2] = txy_relative_tl
+            pxy[txy_index[0], txy_index[1], 2:4] = [t[4], t[5]]
+            pclass[txy_index[0], txy_index[1], 0] = t[1]
+
+
+
 def build_targets_yolox(p, targets, model):
+    # p : [[16, 3, 52, 52, 8].....]
+    # t : [185, 6]
 
     # p : [[16, 3, 52, 52, 3], [16, 3, 26, 26, 3]]
-    # targets: [[[0, cx, cy, w, h],....],
-    #           [[0, cx, cy, w, h],....]]
+    # targets: [[0, cx, cy, w, h]....]
 
     # init -------------------------------------------------------------------------------------------------------------
-    nt = targets.shape[0]
+    nt = targets.shape[0]  # 185
     tcls, tbox, indices, anch = [], [], [], []
     gain = torch.ones(6, device=targets.device)
     off = torch.tensor([[1, 0], [0, 1], [-1, 0], [0, -1]], device=targets.device).float()  # overlap offsets
     g = 0.5  # offset
 
-    # do
+    # do----------------------------------------------------------------------------------------------------------------
     for i, jj in enumerate(model.yolo_layers):
         # [[10,20],.....]
         anchors = model.module_list[jj].anchor_vec  # list
@@ -197,9 +218,17 @@ def build_targets_yolox(p, targets, model):
             #
             #         [[1.8000, 1.6000],
             #          [4.8000, 3.6000]]])
+
+            # r : [3, 155, 2]
             r = t[None, :, 4:6] / anchors[:, None]  # wh ratio
+
             # 每个位置取最大值 filter-------------------------------------------------------------------------------------
+            # j : [3, 155]
+            # 标签通过最长边来判断分配到那一层
             j = torch.max(r, 1. / r).max(2)[0] < model.hyp['anchor_t']  # compare
+            # a : 某个位置的at为正样本
+            # at : [3, 155]
+            # t : [155, 6]
             a, t = at[j], t.repeat(na, 1, 1)[j]  # filter
 
             # overlaps

@@ -287,7 +287,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                                                      perspective=hyp['perspective'])
 
         # copy-paste----------------------------------------------------------------------------------------------------
-        # index_c = np.random.randint(0, labels.shape[0], size=(3,))
+        # index_c = np.random.randint(0, labels.shape[0], size=(labels.shape[0] if labels.shape[0] < 3 else 3,))
         # x = np.array([labels[l] for l in index_c])
         # h0, w0 = img.shape[:2]  # orig hw
         # roadmap = np.random.randint(0, 2, (h0, w0))
@@ -297,10 +297,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         #
         # data = (img, x, roadmap)
         # img, x = fill_duck_normal(data)
-        # for xx in x:
-        #     labels.append(xx) # ??????
-
-
+        # labels += x
 
 
         # nl------------------------------------------------------------------------------------------------------------
@@ -610,6 +607,15 @@ class LoadImages:  # for inference
             self.count += 1
             # img0 = cv2.imread(path,)  # opencv -> BGR
             img0 = cv2.imread(path, cv2.IMREAD_COLOR + cv2.IMREAD_IGNORE_ORIENTATION)
+            # img0 = cv2.equalizeHist(img0)
+            # img0x = cv2.Sobel(img0, cv2.CV_16S, 1, 0, ksize=3)
+            # img0y = cv2.Sobel(img0, cv2.CV_16S, 0, 1, ksize=3)
+            # imgx_uint8 = cv2.convertScaleAbs(img0x)
+            # img0y_uint8 = cv2.convertScaleAbs(img0y)
+            # img0 = cv2.addWeighted(imgx_uint8, 0.5, img0y_uint8, 0.5 ,0)
+
+            # kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]], np.float32)
+            # img0 = cv2.filter2D(img0, -1, kernel=kernel)
             assert img0 is not None, 'Image Not Found ' + path
             print('image %g/%g %s: ' % (self.count, self.nf, path), end='')
 
@@ -618,7 +624,9 @@ class LoadImages:  # for inference
         # img = cv2.resize(img0, [self.img_size, self.img_size])
 
         # Convert
+        # img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+
         img = np.ascontiguousarray(img)
 
         # cv2.imwrite(path + '.letterbox.jpg', 255 * img.transpose((1, 2, 0))[:, :, ::-1])  # save letterbox image

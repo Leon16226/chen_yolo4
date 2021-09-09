@@ -451,6 +451,10 @@ def compute_loss(p, targets, model):  # predictions, targets, model
     device = targets.device
     lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
     tcls, tbox, indices, anchors = build_targets(p, targets, model)  # targets
+    # print("tcls:", len(tcls))
+    # print("tbox:", len(tbox))
+    # print("indices:", len(indices))
+    # print("anchors:", len(anchors))
     h = model.hyp
 
     # small proportion -------------------------------------------------------------------------------------------------
@@ -522,6 +526,13 @@ def compute_loss(p, targets, model):  # predictions, targets, model
 
 # targets
 def build_targets(p, targets, model):
+
+    # p : [16, 3, 52, 52, 8]
+    # t : [185, 6]
+
+    # print("p:", p[0].shape)
+    # print("t:", targets.shape)
+
     nt = targets.shape[0]  # number of anchors, targets
     tcls, tbox, indices, anch = [], [], [], []
     gain = torch.ones(6, device=targets.device)  # normalized to gridspace gain
@@ -533,6 +544,7 @@ def build_targets(p, targets, model):
     for i, jj in enumerate(model.module.yolo_layers if multi_gpu else model.yolo_layers):
         # get number of grid points and anchor vec for this yolo layer
         anchors = model.module.module_list[jj].anchor_vec if multi_gpu else model.module_list[jj].anchor_vec  # list
+
         gain[2:] = torch.tensor(p[i].shape)[[3, 2, 3, 2]]  # xyxy gain
 
         # Match targets to anchors
@@ -541,8 +553,10 @@ def build_targets(p, targets, model):
             na = anchors.shape[0]  # number of anchors
             at = torch.arange(na).view(na, 1).repeat(1, nt)  # anchor tensor, same as .repeat_interleave(nt)
             r = t[None, :, 4:6] / anchors[:, None]  # wh ratio
+            # print("r:", r.shape)
             j = torch.max(r, 1. / r).max(2)[0] < model.hyp['anchor_t']  # compare
             # j = wh_iou(anchors, t[:, 4:6]) > model.hyp['iou_t']  # iou(3,n) = wh_iou(anchors(3,2), gwh(n,2))
+            # print("j:", j.shape)
             a, t = at[j], t.repeat(na, 1, 1)[j]  # filter
 
             # overlaps
