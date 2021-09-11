@@ -22,8 +22,6 @@ MODEL_WIDTH = 608
 MODEL_HEIGHT = 608
 NMS_THRESHOLD_CONST = 0.65
 CLASS_SCORE_CONST = 0.6
-MODEL_OUTPUT_BOXNUM = 10647
-
 vfps = 0
 
 # Tools-----------------------------------------------------------------------------------------------------------------
@@ -229,8 +227,8 @@ def detect(opt):
         boxes[:, 5] = result_box[:, 4]
         all_boxes = boxes[boxes[:, 5] >= CLASS_SCORE_CONST]
         # only people---------------------------------------------------------------------------------------------------
-        if(infer_output_size == 2):
-            all_boxes = all_boxes[all_boxes[:, 4] == (8 or 2 or 3 or 4 or 5 or 6 or 7)]
+        # if(infer_output_size == 2):
+        #     all_boxes = all_boxes[all_boxes[:, 4] == (8 or 2 or 3 or 4 or 5 or 6 or 7)]
 
         # 3.nms
         t = time.time()
@@ -286,9 +284,7 @@ def detect(opt):
                     print("iou", p_iou)
                     niou = niou + 1 if p_iou >= 0.9 else niou
                 print("niou:", niou)
-                if(niou < threshold):
-                    print(point2[int(detect_result[4])])
-                    print((top_x, top_y, bottom_x - top_x, bottom_y - top_y, detect_result[4], detect_result[5]))
+
 
             # cv2
             nf_thres = 0
@@ -439,11 +435,11 @@ if __name__ == '__main__':
     # 33.64.78.178
     # weights/highway-sim.om
     # data/highway.names
-    parser.add_argument('--area', type=str, default='870,480,1135,495,830,1059,1719,1065', help='lt rt lb rb')
+    parser.add_argument('--area', type=str, default='0,0,1920,0,0,1080,1920,1080', help='lt rt lb rb')
     parser.add_argument('--rtsp', type=str, default='test.mp4')
     parser.add_argument('--post', type=str, default='http://192.168.1.19:8080/v1/app/interface/uploadEvent')
     parser.add_argument('--point', type=str, default='10.17.1.20')
-    parser.add_argument('--om', type=str, default='weights/deepsort_mars.om')
+    parser.add_argument('--om', type=str, default='weights/highway-sim.om')
     parser.add_argument('--name', type=str, default='data/highway.names')
     parser.add_argument('--show', action='store_true')
     opt = parser.parse_args()

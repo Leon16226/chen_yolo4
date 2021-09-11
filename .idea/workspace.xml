@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="weather">
-      <change afterPath="$PROJECT_DIR$/detect_rtsp_deepsort.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/export_deepsort.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="export_deepsort success">
+      <change afterPath="$PROJECT_DIR$/ydeepsort/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ydeepsort/config.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ydeepsort/push.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ydeepsort/strategy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ydeepsort/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ydeepsort/utils_deepsort.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_s_dh.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_s_dh.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/datasets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/general.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/general.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/loss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/detect_rtsp_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp_deepsort.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -189,13 +188,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626763600078</updated>
-    </task>
-    <task id="LOCAL-00008" summary="train_evolve.py init">
-      <created>1627529078765</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1627529078765</updated>
     </task>
     <task id="LOCAL-00009" summary="train_evolve.py finish">
       <created>1627541323326</created>
@@ -533,7 +525,14 @@
       <option name="project" value="LOCAL" />
       <updated>1630546248042</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="export_deepsort success">
+      <created>1631155247478</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1631155247479</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -579,7 +578,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="yolo4-s-dh success turely" />
     <MESSAGE value="http push" />
     <MESSAGE value="http push sucess" />
     <MESSAGE value="double head really success" />
@@ -604,7 +602,8 @@
     <MESSAGE value="copy and paste" />
     <MESSAGE value="detect rtsp sucess" />
     <MESSAGE value="weather" />
-    <option name="LAST_COMMIT_MESSAGE" value="weather" />
+    <MESSAGE value="export_deepsort success" />
+    <option name="LAST_COMMIT_MESSAGE" value="export_deepsort success" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -684,12 +683,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/detect_rtsp.py</url>
-          <line>443</line>
+          <line>439</line>
           <option name="timeStamp" value="52" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/detect_rtsp.py</url>
-          <line>212</line>
+          <line>210</line>
           <option name="timeStamp" value="54" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

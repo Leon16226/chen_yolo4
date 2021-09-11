@@ -1,0 +1,12 @@
+AREA: 0,0,1920,0,0,1080,1920,1080
+RTSP: ss.mp4
+POST: http://192.168.1.19:8080/v1/app/interface/uploadEvent
+POINT: 10.17.1.20
+OM: weights/highway-sim.om
+EX: weights/ckpt.om
+NAME: data/highway.names
+
+MODEL_WIDTH: 608
+MODEL_HEIGHT: 608
+NMS_THRESHOLD_CONST: 0.65
+CLASS_SCORE_CONST: 0.6
