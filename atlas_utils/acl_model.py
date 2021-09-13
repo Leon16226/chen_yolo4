@@ -26,12 +26,14 @@ class Model(object):
     Attributes:
         model_path: om offline mode file path
     """
-    def __init__(self, model_path):
+    def __init__(self, model_path, model=""):
         self._run_mode, ret = acl.rt.get_run_mode()
         utils.check_ret("acl.rt.get_run_mode", ret)
         self._copy_policy = const.ACL_MEMCPY_DEVICE_TO_DEVICE
         if self._run_mode == const.ACL_HOST:
             self._copy_policy = const.ACL_MEMCPY_DEVICE_TO_HOST
+
+        self.model = model
 
         self._model_path = model_path    # string
         self._model_id = None            # pointer
@@ -41,6 +43,7 @@ class Model(object):
         self._output_dataset = None
         self._model_desc = None          # pointer when using
         self._output_size = 0
+        # init resource-------------------------------------------------------------------------------------------------
         self._init_resource()
         self._is_destroyed = False
         resource_list.register(self)        
@@ -51,11 +54,15 @@ class Model(object):
             log_error("model_path failed, please check. model_path=%s" % self._model_path)
             return const.FAILED
 
+        # load model
         self._model_id, ret = acl.mdl.load_from_file(self._model_path)
         utils.check_ret("acl.mdl.load_from_file", ret)
+
+        # model desc
         self._model_desc = acl.mdl.create_desc()
         ret = acl.mdl.get_desc(self._model_desc, self._model_id)
         utils.check_ret("acl.mdl.get_desc", ret)
+
         #get outputs num of model
         self._output_size = acl.mdl.get_num_outputs(self._model_desc)
         #create output dataset
@@ -67,6 +74,7 @@ class Model(object):
 
         return const.SUCCESS    
 
+    # output dataset----------------------------------------------------------------------------------------------------
     def _gen_output_dataset(self, ouput_num):
         log_info("[Model] create model output dataset:")
         dataset = acl.mdl.create_dataset()
@@ -93,34 +101,43 @@ class Model(object):
             self._input_buffer.append(item)
 
     def _gen_input_dataset(self, input_list):
+
+        # check---------------------------------------------------------------------------------------------------------
         ret = const.SUCCESS
         if len(input_list) != self._input_num:
             log_error("Current input data num %d unequal to model "
                       "input num %d" % (len(input_list), self._input_num))
             return const.FAILED
 
+        # create_dataset------------------------------------------------------------------------------------------------
         self._input_dataset = acl.mdl.create_dataset()
         for i in range(self._input_num):
             item = input_list[i]
-            data, size = self._parse_input_data(item, i)            
+            data, size = self._parse_input_data(item, i)
+
             if (data is None) or (size == 0):
                 ret = const.FAILED
                 log_error("The %d input is invalid" % (i))
                 break
+
+            # create data buffer----------------------------------------------------------------------------------------
             dataset_buffer = acl.create_data_buffer(data, size)
-            _, ret = acl.mdl.add_dataset_buffer(self._input_dataset,
-                                                dataset_buffer)
+            _, ret = acl.mdl.add_dataset_buffer(self._input_dataset, dataset_buffer)
+
             if ret:
                 log_error("Add input dataset buffer failed")
                 acl.destroy_data_buffer(self._input_dataset)
                 ret = const.FAILED
                 break
+
+
         if ret == const.FAILED:
             self._release_dataset(self._input_dataset)
             self._input_dataset = None
 
         return ret
 
+    # parse input data -------------------------------------------------------------------------------------------------
     def _parse_input_data(self, input_data, index):
         data = None
         size = 0
@@ -128,6 +145,7 @@ class Model(object):
             size = input_data.size
             data = input_data.data()
         elif isinstance(input_data, np.ndarray):
+            # get size and data-----------------------------------------------------------------------------------------
             ptr = acl.util.numpy_to_ptr(input_data)
             size = input_data.size * input_data.itemsize
             data = self._copy_input_to_device(ptr, size, index)
@@ -146,7 +164,11 @@ class Model(object):
     def _copy_input_to_device(self, input_ptr, size, index):
         buffer_item = self._input_buffer[index]
         data = None
-        if buffer_item['addr'] is None:
+
+        # if self.model == "deepsort":
+        #     buffer_item['addr'] = None
+
+        if buffer_item['addr'] is None :
             data = utils.copy_data_device_to_device(input_ptr, size)
             if data is None:
                 log_error("Malloc memory and copy model %dth "
@@ -162,6 +184,16 @@ class Model(object):
                 log_error("Copy model %dth input to device failed" % (index))
                 return None
             data = buffer_item['addr']
+        elif size != buffer_item['size']:
+            print("input size changed")
+            data = utils.copy_data_device_to_device(input_ptr, size)
+            if data is None:
+                log_error("Malloc memory and copy model %dth "
+                          "input to device failed" % (index))
+                return None
+            buffer_item['addr'] = data
+            buffer_item['size'] = size
+
         else:
             log_error("The model %dth input size %d is change,"
                   " before is %d" % (index, size, buffer_item['size']))
@@ -169,7 +201,8 @@ class Model(object):
 
         return data
 
-    def execute(self, input_list):
+    # execute ----------------------------------------------------------------------------------------------------------
+    def execute(self, input_list, model=''):
         """
         inference input data
         Args:
@@ -179,11 +212,25 @@ class Model(object):
             inference result data, which is a numpy array list,
             each corresponse to a model output
         """
+
         ret = self._gen_input_dataset(input_list)
         if ret == const.FAILED:
             log_error("Gen model input dataset failed")
             return None
-        
+
+        # set dynamic batch---------------------------------------------------------------------------------------------
+        if model == 'deepsort':
+            # self.model = model
+            # index
+            # self._init_input_buffer()
+            print("batch change")
+            self.index, ret = acl.mdl.get_input_index_by_name(self._model_desc, "ascend_mbatch_shape_data")
+            print("index:", self.index)
+            utils.check_ret("index", ret)
+            acl.mdl.set_dynamic_batch_size(self._model_id, self._input_dataset, self.index, input_list[1].shape[0])
+
+
+        # execute-------------------------------------------------------------------------------------------------------
         ret = acl.mdl.execute(self._model_id,
                               self._input_dataset,
                               self._output_dataset)

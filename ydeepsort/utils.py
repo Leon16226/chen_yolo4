@@ -6,7 +6,13 @@ import time
 import yaml
 from .push import push
 from .strategy import todo
-
+from .utils_deepsort import _preprocess
+from .utils_deepsort import _xywh_to_xyxy
+from .utils_deepsort import scale_coords
+from .utils_deepsort import *
+from pathlib import Path
+from atlas_utils.acl_model import Model
+import acl
 
 # Tools-----------------------------------------------------------------------------------------------------------------
 def load_classes(path):
@@ -70,9 +76,9 @@ def readyaml():
 
 
 # postprocess-----------------------------------------------------------------------------------------------------------
-def postprocess(labels, infer_output, infer_output_size, CLASS_SCORE_CONST,NMS_THRESHOLD_CONST,
+def postprocess(labels, infer_output, CLASS_SCORE_CONST,NMS_THRESHOLD_CONST,
                 orig_shape, MODEL_HEIGHT, MODEL_WIDTH,
-                point2, im0s, opt, threshold_box, point1):
+                point2, im0s, opt, threshold_box, point1, path, img, MODEL_PATH_EX, model_extractor):
 
     # init
     nc = len(labels)
@@ -84,10 +90,10 @@ def postprocess(labels, infer_output, infer_output_size, CLASS_SCORE_CONST,NMS_T
     list_max = list_class.argmax(axis=1)
     list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
     result_box[:, 5] = list_max[:, 0]
-    if (infer_output_size == 2):
-        list_max = list_class.max(axis=1)
-        list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
-        result_box[:, 4] = list_max[:, 0]
+    # conf
+    list_max = list_class.max(axis=1)
+    list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
+    result_box[:, 4] = list_max[:, 0]
 
     # 2.整合
     boxes = np.zeros(shape=(MODEL_OUTPUT_BOXNUM, 6), dtype=np.float32)
@@ -133,6 +139,10 @@ def postprocess(labels, infer_output, infer_output_size, CLASS_SCORE_CONST,NMS_T
                 "material": in_area_box[in_area_box[:, 4] == (2 or 3 or 4 or 5 or 6 or 7)]}
 
         todo(c_box)
+
+
+
+
 
 
 
@@ -197,4 +207,9 @@ def postprocess(labels, infer_output, infer_output_size, CLASS_SCORE_CONST,NMS_T
     #     if (len(coords) > 0):
     #         print("push one")
     #         push(opt, im0s, coords)
+
+
+
+
+
 

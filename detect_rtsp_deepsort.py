@@ -1,7 +1,9 @@
 import argparse
 import os
 import shutil
-from pathlib import Path
+
+import numpy as np
+
 from atlas_utils.acl_model import Model
 from atlas_utils.acl_resource import AclResource
 from ydeepsort.utils import *
@@ -128,7 +130,7 @@ def detect(opt):
     acl_resource = AclResource()
     acl_resource.init()
     model = Model(MODEL_PATH)
-    # model_extractor = Model(MODEL_PATH_EX)
+    model_extractor = Model(MODEL_PATH_EX)
 
     # Load dataset------------------------------------------------------------------------------------------------------
     dataset = LoadStreams(rtsp, img_size=(MODEL_WIDTH, MODEL_HEIGHT))
@@ -151,73 +153,113 @@ def detect(opt):
         resized_img /= 255.0
 
         # 模型推理-------------------------------------------------------------------------------------------------------
-        infer_output = model.execute(resized_img)
+        infer_output = model.execute([resized_img])
         assert infer_output[0].shape[1] > 0, "model no output, please check"
-
-        infer_output_size = len(infer_output)
-        if (infer_output_size == 1):
-            infer_output = infer_output[0]
-        elif (infer_output_size == 2):
-            infer_output_0 = infer_output[0]
-            infer_output_1 = infer_output[1].reshape((1, -1, 4))
-            infer_output_2 = np.ones([1, infer_output_1.shape[1], 1])
-            infer_output = np.concatenate((infer_output_1, infer_output_2, infer_output_0), axis=2)
+        infer_output_0 = infer_output[0]
+        infer_output_1 = infer_output[1].reshape((1, -1, 4))
+        infer_output_2 = np.ones([1, infer_output_1.shape[1], 1])
+        infer_output = np.concatenate((infer_output_1, infer_output_2, infer_output_0), axis=2)
 
 
 
         # postprocess---------------------------------------------------------------------------------------------------
 
-        thread_post = Thread(target=postprocess, args=(labels, copy.deepcopy(infer_output), infer_output_size,
+        thread_post = Thread(target=postprocess, args=(labels, copy.deepcopy(infer_output),
                                                        CLASS_SCORE_CONST, NMS_THRESHOLD_CONST,
                                                        orig_shape, MODEL_HEIGHT, MODEL_WIDTH,
                                                        point2, copy.deepcopy(im0s), opt,
-                                                       threshold_box, point1))
+                                                       threshold_box, point1, path,
+                                                       copy.deepcopy(img), MODEL_PATH_EX, model_extractor), )
         thread_post.start()
 
-
-
-
+        # features = model_extractor.execute([np.array([5]), np.random.random([5, 3, 128, 64])], 'deepsort')
+        # print(np.array(features).shape)
 
         # Deepsort-----------------------------------------------------------------------------------------------------
-        #
-        # det = np.array(real_box)
-        # det = det * 608
-        # p, s, im0 = path, '', im0s
-        # s += '%g%g' % img.shape[2:]
-        # save_path = str(Path(out) / Path(p).name)
-        #
-        # if det is not None and len(det):
-        #     det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-        #
-        #     for c in np.unique(det[:, -2]):
-        #         n = (det[:, -2] == c).sum()
-        #         # s += '%g %ss, ' % (n, names[int(c)])
-        #
-        #     xywhs = xyxy2xywh(det[:, 0:4])
-        #     confs = det[:, 5]
-        #     clss = det[:, 4]
-        #
-        #     # pass detections to deepsort-------------------------------------------------------------------------------
-        #     height, width = im0.shape[:2]
-        #     im_crops = []
-        #     for box in xywhs:
-        #         x1, y1, x2, y2 = _xywh_to_xyxy(box, height, width)
-        #         im = im0[y1:y2, x1:x2]
-        #         if (im.shape[0] != 0) and (im.shape[1] != 0):
-        #             print("im:", im.shape)
-        #             im_crops.append(im)
-        #
-        #     if im_crops:
-        #         print("deepsort extractor")
-        #         im_batch = _preprocess(im_crops)
-        #         # extractor
-        #         model_extractor = Model(MODEL_PATH_EX)
-        #         features = model_extractor.execute([im_batch])
-        #         model_extractor.destroy()
-        #     else:
-        #         features = np.array([])
-        #
-        #     print("features:", np.array(features).shape)
+
+        # init
+        nc = len(labels)
+        MODEL_OUTPUT_BOXNUM = infer_output.shape[1]
+
+        # 1.process：-------------------------------------------------------------------------------------------------------
+        result_box = infer_output[:, :, 0:6].reshape((-1, 6)).astype('float32')
+        list_class = infer_output[:, :, 5:5 + nc].reshape((-1, nc)).astype('float32')
+        list_max = list_class.argmax(axis=1)
+        list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
+        result_box[:, 5] = list_max[:, 0]
+        # conf
+        list_max = list_class.max(axis=1)
+        list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
+        result_box[:, 4] = list_max[:, 0]
+
+        # 2.整合
+        boxes = np.zeros(shape=(MODEL_OUTPUT_BOXNUM, 6), dtype=np.float32)
+        boxes[:, :4] = result_box[:, :4]
+        boxes[:, 4] = result_box[:, 5]
+        boxes[:, 5] = result_box[:, 4]
+        all_boxes = boxes[boxes[:, 5] >= CLASS_SCORE_CONST]
+
+        # filter
+        # only car---------------------------------------------------------------------------------------------------
+        all_boxes = all_boxes[all_boxes[:, 4] == (0 or 1)]
+
+        if all_boxes.shape[0] > 0:
+            # 3.nms
+            real_box = func_nms(np.array(all_boxes), NMS_THRESHOLD_CONST)
+
+            # 4.scale
+            x_scale = orig_shape[1] / MODEL_HEIGHT
+            y_scale = orig_shape[0] / MODEL_WIDTH
+
+            top_x = (real_box[:, 0] * 608 * x_scale).astype(int)
+            top_y = (real_box[:, 1] * 608 * y_scale).astype(int)
+            bottom_x = (real_box[:, 2] * 608 * x_scale).astype(int)
+            bottom_y = (real_box[:, 3] * 608 * y_scale).astype(int)
+
+            # if in detect area
+            point = np.array([x for x in zip(top_x, top_y, top_x, bottom_y,
+                                             bottom_x, bottom_y, bottom_x, top_y)]).reshape([-1, 4, 2])
+            inter_area = np.array([Cal_area_2poly(point1, p) for p in point])
+            in_area_box = real_box[inter_area > 5 * 5]
+
+            # deepsort--------------------------------------------------------------------------------------------------
+            det = in_area_box  # gener [x1, y1, x2, y2, cls, confs]
+            p, s, im0 = path, '', im0s
+            s += '%g%g' % img.shape[2:]
+            # save_path = str(Path(out) / Path(p).name)
+
+            if det is not None and len(det):
+                print("det:", det[:, :4])
+                det[:, :4] = scale_coords(img.shape[2:], det[:, :4] * 608, im0.shape).round()
+
+                for c in np.unique(det[:, -2]):
+                    n = (det[:, -2] == c).sum()
+                    # s += '%g %ss, ' % (n, names[int(c)])
+
+                xywhs = xyxy2xywh(det[:, 0:4])
+                confs = det[:, 5]
+                clss = det[:, 4]
+
+                # pass detections to deepsort---------------------------------------------------------------------------
+                height, width = im0.shape[:2]
+                im_crops = []
+                for box in xywhs:
+                    x1, y1, x2, y2 = _xywh_to_xyxy(box, height, width)
+                    im = im0[y1:y2, x1:x2]
+                    if (im.shape[0] != 0) and (im.shape[1] != 0):
+                        print("im:", im.shape)
+                        im_crops.append(im)
+
+                if im_crops:
+                    print("deepsort extractor")
+                    im_batch = _preprocess(im_crops)
+                    print("im_batch:", im_batch.shape)
+                    # extractor-----------------------------------------------------------------------------------------
+                    features = model_extractor.execute([np.array([im_batch.shape[0]]), im_batch], 'deepsort')
+                else:
+                    features = np.array([])
+
+                print("features:", np.array(features).shape)
 
 
         # fps-----------------------------------------------------------------------------------------------------------

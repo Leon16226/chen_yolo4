@@ -84,5 +84,6 @@ def _preprocess(im_crops):
     def _resize(im, size):
         return cv2.resize(im.astype(np.float32) / 255., size)
 
-    im_batch = np.concatenate([np.expand_dims(norm(_resize(im, size)), axis=0) for im in im_crops], axis=0)
+    im_batch = np.concatenate([np.expand_dims(norm(_resize(im, size)).transpose(2, 0, 1), axis=0) for im in im_crops], axis=0)
+    # im_batch = [np.expand_dims(norm(_resize(im, size)), axis=0) for im in im_crops]
     return im_batch
