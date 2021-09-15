@@ -43,6 +43,7 @@ def copy_data_device_to_device(device_data, data_size):
     """
     Copy device data to device
     """
+    # malloc device memory----------------------------------------------------------------------------------------------
     device_buffer, ret = acl.rt.malloc(data_size, constants.ACL_MEM_MALLOC_NORMAL_ONLY)
     if ret != constants.ACL_ERROR_NONE:
         log_error("Malloc device memory failed, error: ", ret)

@@ -75,15 +75,18 @@ class Model(object):
         return const.SUCCESS    
 
     # output dataset----------------------------------------------------------------------------------------------------
+
+    # output_dataset----------------------------------------------------------------------------------------------------
     def _gen_output_dataset(self, ouput_num):
         log_info("[Model] create model output dataset:")
         dataset = acl.mdl.create_dataset()
         for i in range(ouput_num):
-            #malloc device memory for output
+            # malloc device memory for output
             size = acl.mdl.get_output_size_by_index(self._model_desc, i)
+            print("output size:", size)
             buf, ret = acl.rt.malloc(size, const.ACL_MEM_MALLOC_NORMAL_ONLY)
             utils.check_ret("acl.rt.malloc", ret)
-            #crate oputput data buffer
+            # crate oputput data buffer
             dataset_buffer = acl.create_data_buffer(buf, size)
             _, ret = acl.mdl.add_dataset_buffer(dataset, dataset_buffer)
             log_info("malloc output %d, size %d" % (i, size))
@@ -100,6 +103,7 @@ class Model(object):
             item = {"addr":None, "size":0}
             self._input_buffer.append(item)
 
+    # input_dataset-----------------------------------------------------------------------------------------------------
     def _gen_input_dataset(self, input_list):
 
         # check---------------------------------------------------------------------------------------------------------
@@ -147,7 +151,9 @@ class Model(object):
         elif isinstance(input_data, np.ndarray):
             # get size and data-----------------------------------------------------------------------------------------
             ptr = acl.util.numpy_to_ptr(input_data)
-            size = input_data.size * input_data.itemsize
+            # size
+            size = acl.mdl.get_input_size_by_index(self._model_desc, index)
+            # size = input_data.size * input_data.itemsize
             data = self._copy_input_to_device(ptr, size, index)
             if data is None:
                 size = 0
@@ -227,7 +233,13 @@ class Model(object):
             self.index, ret = acl.mdl.get_input_index_by_name(self._model_desc, "ascend_mbatch_shape_data")
             print("index:", self.index)
             utils.check_ret("index", ret)
-            acl.mdl.set_dynamic_batch_size(self._model_id, self._input_dataset, self.index, input_list[1].shape[0])
+            print("batch:",  input_list[0].shape[0])
+            acl.mdl.set_dynamic_batch_size(self._model_id, self._input_dataset, self.index, input_list[0].shape[0])
+            # get outputs num of model
+            #self._output_size = acl.mdl.get_num_outputs(self._model_desc)
+            #print("output_sizeL:", self._output_size)
+            # create output dataset
+            #self._gen_output_dataset(self._output_size)
 
 
         # execute-------------------------------------------------------------------------------------------------------

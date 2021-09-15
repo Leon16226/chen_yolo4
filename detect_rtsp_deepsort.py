@@ -1,7 +1,9 @@
 import argparse
 import os
 import shutil
+import copy
 
+import cv2
 import numpy as np
 
 from atlas_utils.acl_model import Model
@@ -10,8 +12,16 @@ from ydeepsort.utils import *
 from ydeepsort.utils_deepsort import *
 from ydeepsort.utils_deepsort import _preprocess
 from ydeepsort.utils_deepsort import _xywh_to_xyxy
+from ydeepsort.utils_deepsort import _xywh_to_tlwh
+from ydeepsort.utils_deepsort import compute_color_for_id
+from ydeepsort.utils_deepsort import plot_one_box
+from ydeepsort.utils_deepsort import _tlwh_to_xyxy
 from ydeepsort.push import *
-import copy
+from ydeepsort.sort.nn_matching import NearestNeighborDistanceMetric
+from ydeepsort.sort.tracker import Tracker
+from ydeepsort.sort.detection import Detection
+
+
 
 
 
@@ -26,6 +36,15 @@ NMS_THRESHOLD_CONST = y['NMS_THRESHOLD_CONST']
 CLASS_SCORE_CONST = y['CLASS_SCORE_CONST']
 MODEL_OUTPUT_BOXNUM = 10647
 vfps = 0
+
+# deepsort config
+MAX_DIST = 0.2
+MIN_CONFIDENCE = 0.3
+NMS_MAX_OVERLAP = 0.5
+MAX_IOU_DISTANCE = 0.7
+MAX_AGE = 70
+N_INIT = 3
+NN_BUDGET = 100
 
 # fps
 def showfps():
@@ -145,6 +164,12 @@ def detect(opt):
     point1 = [toplx, toply, bottomlx, bottomly, bottomrx, bottomry, toprx, topry]
     point1 = np.array(point1).reshape(4, 2)
 
+    # deepsort init-----------------------------------------------------------------------------------------------------
+    max_cosine_distance = MAX_DIST
+    metric = NearestNeighborDistanceMetric("cosine", max_cosine_distance, NN_BUDGET)
+    tracker = Tracker(metric, max_iou_distance=max_cosine_distance, max_age=MAX_AGE, n_init=N_INIT)
+
+
     # do
     for i, (path, img, im0s, vid_cap) in enumerate(dataset):
 
@@ -222,30 +247,29 @@ def detect(opt):
             inter_area = np.array([Cal_area_2poly(point1, p) for p in point])
             in_area_box = real_box[inter_area > 5 * 5]
 
-            # deepsort--------------------------------------------------------------------------------------------------
+
+            # do deepsort-----------------------------------------------------------------------------------------------
             det = in_area_box  # gener [x1, y1, x2, y2, cls, confs]
-            p, s, im0 = path, '', im0s
-            s += '%g%g' % img.shape[2:]
-            # save_path = str(Path(out) / Path(p).name)
+            # im0 = im0s
 
             if det is not None and len(det):
                 print("det:", det[:, :4])
-                det[:, :4] = scale_coords(img.shape[2:], det[:, :4] * 608, im0.shape).round()
-
-                for c in np.unique(det[:, -2]):
-                    n = (det[:, -2] == c).sum()
-                    # s += '%g %ss, ' % (n, names[int(c)])
+                # det[:, :4] = scale_coords(img.shape[2:], det[:, :4] * 608, im0.shape).round()
+                det[:, [0, 2]] = (det[:, [0, 2]] * 608 * x_scale).round()
+                det[:, [1, 3]] = (det[:, [1, 3]] * 608 * y_scale).round()
+                print("det f:", det[:, :4])
 
                 xywhs = xyxy2xywh(det[:, 0:4])
                 confs = det[:, 5]
                 clss = det[:, 4]
+                print("xywhs:", xywhs)
 
                 # pass detections to deepsort---------------------------------------------------------------------------
-                height, width = im0.shape[:2]
+                height, width = im0s.shape[:2]
                 im_crops = []
                 for box in xywhs:
                     x1, y1, x2, y2 = _xywh_to_xyxy(box, height, width)
-                    im = im0[y1:y2, x1:x2]
+                    im = im0s[y1:y2, x1:x2]
                     if (im.shape[0] != 0) and (im.shape[1] != 0):
                         print("im:", im.shape)
                         im_crops.append(im)
@@ -255,11 +279,67 @@ def detect(opt):
                     im_batch = _preprocess(im_crops)
                     print("im_batch:", im_batch.shape)
                     # extractor-----------------------------------------------------------------------------------------
-                    features = model_extractor.execute([np.array([im_batch.shape[0]]), im_batch], 'deepsort')
+                    features = model_extractor.execute([im_batch, np.array(im_batch.shape)], 'deepsort')
+                    features = features[0][0:im_batch.shape[0], :]
                 else:
                     features = np.array([])
 
                 print("features:", np.array(features).shape)
+
+
+                if features.shape[0] > 0 :
+                    # do track----------------------------------------------------------------------------------------------
+                    bbox_tlwh = _xywh_to_tlwh(xywhs)
+                    detections = [Detection(bbox_tlwh[i], conf, features[i]) for i, conf in enumerate(
+                                    confs) if conf > MIN_CONFIDENCE]
+
+                    # update tracker ---------------------------------------------------------------------------------------
+                    tracker.predict()
+                    tracker.update(detections, clss)
+
+                    # output bbox identities
+                    outputs = []
+                    for track in tracker.tracks:
+                        if not track.is_confirmed() or track.time_since_update > 1:
+                            continue
+                        box = track.to_tlwh()
+                        x1, y1, x2, y2 = _tlwh_to_xyxy(box, height, width)
+                        track_id = track.track_id
+                        class_id = track.class_id
+                        outputs.append(np.array([x1, y1, x2, y2, track_id, class_id], dtype=np.int))
+                    if len(outputs) > 0:
+                        outputs = np.stack(outputs, axis=0)
+
+
+                    # draw boxes for visualization--------------------------------------------------------------------------
+                    if len(outputs) > 0:
+                        for j, (output, conf) in enumerate(zip(outputs, confs)):
+                            bboxes = output[0:4]
+                            id = output[4]
+                            cls = output[5]
+
+                            c = int(cls)
+                            label = f'{id} {labels[c]} {conf:.2f}'
+                            color = compute_color_for_id(id)
+                            plot_one_box(bboxes, im0s, label=label, color=color, line_thickness=2)
+            else:
+                tracker.increment_ages()
+
+
+        # show
+        if opt.show:
+            point_s = point1.reshape((-1, 1, 2))
+            cv2.polylines(im0s, [point_s], True, (0, 255, 255))
+
+            cv2.imshow("deepsort", im0s)
+            if cv2.waitKey(1) == ord('q'):
+                cv2.destroyAllWindows()
+                model.destroy()
+                model_extractor.destroy()
+                print('quit')
+                break
+
+
 
 
         # fps-----------------------------------------------------------------------------------------------------------

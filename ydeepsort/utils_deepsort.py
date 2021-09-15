@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 # rescale boxes
 def scale_coords(img1_shape, coords, img0_shape, ratio_pad=None):
     # Rescale coords (xyxy) from img1_shape to img0_shape
@@ -53,6 +54,54 @@ def _xywh_to_xyxy(bbox_xywh, height, width):
         y1 = max(int(y - h / 2), 0)
         y2 = min(int(y + h / 2), height - 1)
         return x1, y1, x2, y2
+
+
+# xc_yc_w_h to xtl_ytl_w_h
+def _xywh_to_tlwh(bbox_xywh):
+        bbox_tlwh = bbox_xywh.copy()
+        bbox_tlwh[:, 0] = bbox_xywh[:, 0] - bbox_xywh[:, 2] / 2.
+        bbox_tlwh[:, 1] = bbox_xywh[:, 1] - bbox_xywh[:, 3] / 2.
+        return bbox_tlwh
+
+
+def _tlwh_to_xyxy(bbox_tlwh, height, width):
+        """
+        TODO:
+            Convert bbox from xtl_ytl_w_h to xc_yc_w_h
+        Thanks JieChen91@github.com for reporting this bug!
+        """
+        x, y, w, h = bbox_tlwh
+        x1 = max(int(x), 0)
+        x2 = min(int(x+w), width - 1)
+        y1 = max(int(y), 0)
+        y2 = min(int(y+h), height - 1)
+        return x1, y1, x2, y2
+
+
+
+def compute_color_for_id(label):
+    """
+    Simple function that adds fixed color depending on the id
+    """
+    palette = (2 ** 11 - 1, 2 ** 15 - 1, 2 ** 20 - 1)
+
+    color = [int((p * (label ** 2 - label + 1)) % 255) for p in palette]
+    return tuple(color)
+
+
+def plot_one_box(x, im, color=None, label=None, line_thickness=3):
+    # Plots one bounding box on image 'im' using OpenCV
+    assert im.data.contiguous, 'Image not contiguous. Apply np.ascontiguousarray(im) to plot_on_box() input image.'
+    tl = line_thickness or round(0.002 * (im.shape[0] + im.shape[1]) / 2) + 1  # line/font thickness
+    color = color or [np.random.randint(0, 255) for _ in range(3)]
+    c1, c2 = (int(x[0]), int(x[1])), (int(x[2]), int(x[3]))
+    cv2.rectangle(im, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
+    if label:
+        tf = max(tl - 1, 1)  # font thickness
+        t_size = cv2.getTextSize(label, 0, fontScale=tl / 3, thickness=tf)[0]
+        c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
+        cv2.rectangle(im, c1, c2, color, -1, cv2.LINE_AA)  # filled
+        cv2.putText(im, label, (c1[0], c1[1] - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
 
 
 # preprocess

@@ -131,6 +131,7 @@ def postprocess(labels, infer_output, CLASS_SCORE_CONST,NMS_THRESHOLD_CONST,
         point = np.array([x for x in zip(top_x, top_y, top_x, bottom_y,
                                      bottom_x, bottom_y, bottom_x, top_y)]).reshape([-1, 4, 2])
         inter_area = np.array([Cal_area_2poly(point1, p) for p in point])
+        # print("inter_area:", inter_area)
         in_area_box = real_box[inter_area > 5*5]
 
         # select strategy
