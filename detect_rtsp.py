@@ -99,29 +99,34 @@ class LoadStreams:
 def func_nms(boxes, nms_threshold):
         b_x = boxes[:, 0]
         b_y = boxes[:, 1]
-        b_w = boxes[:, 2]
-        b_h = boxes[:, 3]
-        scores = boxes[:, 5]
-        areas = (b_w + 1) * (b_h + 1)
+        b_w = boxes[:, 2] - boxes[:, 0]
+        b_h = boxes[:, 3] - boxes[:, 1]
 
+        areas = b_w * b_h
+
+        scores = boxes[:, 5]
         order = scores.argsort()[::-1]
-        keep = []  # keep box
+
+        keep = []
         while order.size > 0:
             i = order[0]
-            keep.append(i)  # keep max score
+            keep.append(i)
+
+            i_other = order[1:]
+
             # inter area  : left_top   right_bottom
-            xx1 = np.maximum(b_x[i], b_x[order[1:]])
-            yy1 = np.maximum(b_y[i], b_y[order[1:]])
-            xx2 = np.minimum(b_x[i] + b_w[i], b_x[order[1:]] + b_w[order[1:]])
-            yy2 = np.minimum(b_y[i] + b_h[i], b_y[order[1:]] + b_h[order[1:]])
+            xx1 = np.maximum(b_x[i], b_x[i_other])
+            yy1 = np.maximum(b_y[i], b_y[i_other])
+            xx2 = np.minimum(b_x[i] + b_w[i], b_x[i_other] + b_w[i_other])
+            yy2 = np.minimum(b_y[i] + b_h[i], b_y[i_other] + b_h[i_other])
             # inter area
-            w = np.maximum(0.0, xx2 - xx1 + 1)
-            h = np.maximum(0.0, yy2 - yy1 + 1)
-            inter = w * h
-            # union area : area1 + area2 - inter
-            union = areas[i] + areas[order[1:]] - inter
+            w = np.maximum(0.0, xx2 - xx1)
+            h = np.maximum(0.0, yy2 - yy1)
             # calc IoU
+            inter = w * h
+            union = areas[i] + areas[order[1:]] - inter
             IoU = inter / union
+
             inds = np.where(IoU <= nms_threshold)[0]
             order = order[inds + 1]
 
@@ -226,14 +231,21 @@ def detect(opt):
         boxes[:, 4] = result_box[:, 5]
         boxes[:, 5] = result_box[:, 4]
         all_boxes = boxes[boxes[:, 5] >= CLASS_SCORE_CONST]
+
+        print("all_boxes:", all_boxes)
+
         # only people---------------------------------------------------------------------------------------------------
         # if(infer_output_size == 2):
         #     all_boxes = all_boxes[all_boxes[:, 4] == (8 or 2 or 3 or 4 or 5 or 6 or 7)]
 
+        # print("all_boxes:", all_boxes)
+
         # 3.nms
-        t = time.time()
+        # t = time.time()
         real_box = func_nms(np.array(all_boxes), NMS_THRESHOLD_CONST)
-        t1 += time.time() - t
+        print("real_box:", real_box)
+        # t1 += time.time() - t
+        # real_box = all_boxes
 
         # 4.scale
         x_scale = orig_shape[1] / MODEL_HEIGHT
@@ -267,37 +279,37 @@ def detect(opt):
             bottom_x = int((detect_result[2]) * 608 * x_scale)
             bottom_y = int((detect_result[3]) * 608 * y_scale)
 
-            # plan1-----------------------------------------------------------------------------------------------------
-            point = [top_x, top_y, top_x, bottom_y, bottom_x, bottom_y, bottom_x, top_y]
-            point = np.array(point).reshape(4, 2)
-            inter_area = Cal_area_2poly(point1, point)
-            pred_area = (bottom_x - top_x) * (bottom_y - top_y)
-            iou_p1 = inter_area / pred_area if pred_area != 0 else 0
-
-            # plan2-----------------------------------------------------------------------------------------------------
-            if(iou_p1 >= 0.5):
-                niou = 0
-                for i, p in enumerate(point2[int(detect_result[4])]):
-                    p = np.array(p).reshape(4, 2)
-                    inter_area = Cal_area_2poly(point, p)
-                    p_iou = inter_area / pred_area
-                    print("iou", p_iou)
-                    niou = niou + 1 if p_iou >= 0.9 else niou
-                print("niou:", niou)
-
-
-            # cv2
-            nf_thres = 0
-            nf_thres = nf_thres + nf if nf_thres < 120 else nf_thres
-            threshold = 1 if nf_thres < 120 and threshold == 1 else 2
-            if(iou_p1 >= 0.5 and niou < 5):
-                coords_in_area.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y,
-                                       detect_result[4], detect_result[5]))
-            if(iou_p1 >= 0.5 and niou < threshold):
-                cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 3)
-                cv2.putText(im0s, labels[int(detect_result[4])] + " " + str(detect_result[5]), (top_x, top_y - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 255), 2)
-                coords.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y, detect_result[4], detect_result[5]))
+            # # plan1-----------------------------------------------------------------------------------------------------
+            # point = [top_x, top_y, top_x, bottom_y, bottom_x, bottom_y, bottom_x, top_y]
+            # point = np.array(point).reshape(4, 2)
+            # inter_area = Cal_area_2poly(point1, point)
+            # pred_area = (bottom_x - top_x) * (bottom_y - top_y)
+            # iou_p1 = inter_area / pred_area if pred_area != 0 else 0
+            #
+            # # plan2-----------------------------------------------------------------------------------------------------
+            # if(iou_p1 >= 0.5):
+            #     niou = 0
+            #     for i, p in enumerate(point2[int(detect_result[4])]):
+            #         p = np.array(p).reshape(4, 2)
+            #         inter_area = Cal_area_2poly(point, p)
+            #         p_iou = inter_area / pred_area
+            #         print("iou", p_iou)
+            #         niou = niou + 1 if p_iou >= 0.9 else niou
+            #     print("niou:", niou)
+            #
+            #
+            # # cv2
+            # nf_thres = 0
+            # nf_thres = nf_thres + nf if nf_thres < 120 else nf_thres
+            # threshold = 1 if nf_thres < 120 and threshold == 1 else 2
+            # if(iou_p1 >= 0.5 and niou < 5):
+            #     coords_in_area.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y,
+            #                            detect_result[4], detect_result[5]))
+            # if(iou_p1 >= 0.5 and niou < threshold):
+            cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 3)
+            cv2.putText(im0s, labels[int(detect_result[4])] + " " + str(detect_result[5]), (top_x, top_y - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 255), 2)
+            coords.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y, detect_result[4], detect_result[5]))
 
         # before push---------------------------------------------------------------------------------------------------
         if len(coords_in_area) > 0:
@@ -319,7 +331,7 @@ def detect(opt):
         # push----------------------------------------------------------------------------------------------------------
         if(len(coords) > 0):
             print("push one")
-            push(opt, im0s, coords)
+            # push(opt, im0s, coords)
 
         # wait key------------------------------------------------------------------------------------------------------
 
@@ -436,7 +448,7 @@ if __name__ == '__main__':
     # weights/highway-sim.om
     # data/highway.names
     parser.add_argument('--area', type=str, default='0,0,1920,0,0,1080,1920,1080', help='lt rt lb rb')
-    parser.add_argument('--rtsp', type=str, default='test.mp4')
+    parser.add_argument('--rtsp', type=str, default='ss.mp4')
     parser.add_argument('--post', type=str, default='http://192.168.1.19:8080/v1/app/interface/uploadEvent')
     parser.add_argument('--point', type=str, default='10.17.1.20')
     parser.add_argument('--om', type=str, default='weights/highway-sim.om')

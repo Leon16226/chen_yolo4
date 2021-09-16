@@ -1,5 +1,6 @@
 AREA: 0,0,1920,0,0,1080,1920,1080
-RTSP: ss.mp4
+# AREA: 460,158,570,160,20,715,580,708
+RTSP: rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0
 POST: http://192.168.1.19:8080/v1/app/interface/uploadEvent
 POINT: 10.17.1.20
 OM: weights/highway-sim.om
@@ -9,4 +10,4 @@ NAME: data/highway.names
 MODEL_WIDTH: 608
 MODEL_HEIGHT: 608
 NMS_THRESHOLD_CONST: 0.65
-CLASS_SCORE_CONST: 0.6
+CLASS_SCORE_CONST: 0.4

@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="daymic input sucess">
-      <change afterPath="$PROJECT_DIR$/ydeepsort/sort/detection.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ydeepsort/sort/iou_matching.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ydeepsort/sort/kalman_filter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ydeepsort/sort/linear_assignment.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ydeepsort/sort/nn_matching.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ydeepsort/sort/track.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ydeepsort/sort/tracker.py" afterDir="false" />
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="deepsort success">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/atlas_utils/acl_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/atlas_utils/acl_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/atlas_utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/atlas_utils/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp_deepsort.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_onnx.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_onnx.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ydeepsort/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/config.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ydeepsort/utils_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/utils_deepsort.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,7 +61,7 @@
       <recent name="$PROJECT_DIR$/data/trans" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.export_deepsort">
+  <component name="RunManager" selected="Python.test_onnx">
     <configuration name="export_deepsort" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -90,7 +83,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="label_analyze" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="test_onnx" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PyTorch_YOLOv4s" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -98,11 +91,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data/tran" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/tran/label_analyze.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_onnx.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -176,11 +169,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.test_onnx" />
         <item itemvalue="Python.export_deepsort" />
         <item itemvalue="Python.train_s_dh" />
         <item itemvalue="Python.test_s_dh" />
         <item itemvalue="Python.trans_material" />
-        <item itemvalue="Python.label_analyze" />
       </list>
     </recent_temporary>
   </component>
@@ -192,13 +185,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626763600078</updated>
-    </task>
-    <task id="LOCAL-00011" summary="yolof encoder reader endt">
-      <created>1627549001540</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1627549001540</updated>
     </task>
     <task id="LOCAL-00012" summary="yolof decoder reader endt">
       <created>1627550839840</created>
@@ -536,7 +522,14 @@
       <option name="project" value="LOCAL" />
       <updated>1631523505537</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="deepsort success">
+      <created>1631693108564</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1631693108564</updated>
+    </task>
+    <option name="localTasksCounter" value="61" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -582,7 +575,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="double head really success" />
     <MESSAGE value="yolov4-s-f sucess" />
     <MESSAGE value="read datasets" />
     <MESSAGE value="onnx mish export sucess" />
@@ -607,7 +599,8 @@
     <MESSAGE value="export_deepsort success" />
     <MESSAGE value="success rtsp reconstruct" />
     <MESSAGE value="daymic input sucess" />
-    <option name="LAST_COMMIT_MESSAGE" value="daymic input sucess" />
+    <MESSAGE value="deepsort success" />
+    <option name="LAST_COMMIT_MESSAGE" value="deepsort success" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -687,12 +680,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/detect_rtsp.py</url>
-          <line>439</line>
+          <line>451</line>
           <option name="timeStamp" value="52" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/detect_rtsp.py</url>
-          <line>210</line>
+          <line>215</line>
           <option name="timeStamp" value="54" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

@@ -25,29 +25,34 @@ def load_classes(path):
 def func_nms(boxes, nms_threshold):
     b_x = boxes[:, 0]
     b_y = boxes[:, 1]
-    b_w = boxes[:, 2]
-    b_h = boxes[:, 3]
-    scores = boxes[:, 5]
-    areas = (b_w + 1) * (b_h + 1)
+    b_w = boxes[:, 2] - boxes[:, 0]
+    b_h = boxes[:, 3] - boxes[:, 1]
 
+    areas = b_w * b_h
+
+    scores = boxes[:, 5]
     order = scores.argsort()[::-1]
-    keep = []  # keep box
+
+    keep = []
     while order.size > 0:
         i = order[0]
-        keep.append(i)  # keep max score
+        keep.append(i)
+
+        i_other = order[1:]
+
         # inter area  : left_top   right_bottom
-        xx1 = np.maximum(b_x[i], b_x[order[1:]])
-        yy1 = np.maximum(b_y[i], b_y[order[1:]])
-        xx2 = np.minimum(b_x[i] + b_w[i], b_x[order[1:]] + b_w[order[1:]])
-        yy2 = np.minimum(b_y[i] + b_h[i], b_y[order[1:]] + b_h[order[1:]])
+        xx1 = np.maximum(b_x[i], b_x[i_other])
+        yy1 = np.maximum(b_y[i], b_y[i_other])
+        xx2 = np.minimum(b_x[i] + b_w[i], b_x[i_other] + b_w[i_other])
+        yy2 = np.minimum(b_y[i] + b_h[i], b_y[i_other] + b_h[i_other])
         # inter area
-        w = np.maximum(0.0, xx2 - xx1 + 1)
-        h = np.maximum(0.0, yy2 - yy1 + 1)
-        inter = w * h
-        # union area : area1 + area2 - inter
-        union = areas[i] + areas[order[1:]] - inter
+        w = np.maximum(0.0, xx2 - xx1)
+        h = np.maximum(0.0, yy2 - yy1)
         # calc IoU
+        inter = w * h
+        union = areas[i] + areas[order[1:]] - inter
         IoU = inter / union
+
         inds = np.where(IoU <= nms_threshold)[0]
         order = order[inds + 1]
 

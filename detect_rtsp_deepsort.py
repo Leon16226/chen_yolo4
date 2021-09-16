@@ -106,13 +106,12 @@ class LoadStreams:
         img0 = self.imgs.copy()
         print("get a img-----------------------------------------------------:", img0.shape)
 
-        # Letterbox
+        # resize
         img = cv2.resize(img0, self.img_size)
         img = img[np.newaxis, :]
-
-        # Convert
         img = img[:, :, :, ::-1].transpose(0, 3, 1, 2)
         img = np.ascontiguousarray(img)
+
 
         return self.source, img, img0, self.cap
 
@@ -186,19 +185,16 @@ def detect(opt):
         infer_output = np.concatenate((infer_output_1, infer_output_2, infer_output_0), axis=2)
 
 
-
         # postprocess---------------------------------------------------------------------------------------------------
 
-        thread_post = Thread(target=postprocess, args=(labels, copy.deepcopy(infer_output),
-                                                       CLASS_SCORE_CONST, NMS_THRESHOLD_CONST,
-                                                       orig_shape, MODEL_HEIGHT, MODEL_WIDTH,
-                                                       point2, copy.deepcopy(im0s), opt,
-                                                       threshold_box, point1, path,
-                                                       copy.deepcopy(img), MODEL_PATH_EX, model_extractor), )
-        thread_post.start()
+        # thread_post = Thread(target=postprocess, args=(labels, copy.deepcopy(infer_output),
+        #                                                CLASS_SCORE_CONST, NMS_THRESHOLD_CONST,
+        #                                                orig_shape, MODEL_HEIGHT, MODEL_WIDTH,
+        #                                                point2, copy.deepcopy(im0s), opt,
+        #                                                threshold_box, point1, path,
+        #                                                copy.deepcopy(img), MODEL_PATH_EX, model_extractor), )
+        # thread_post.start()
 
-        # features = model_extractor.execute([np.array([5]), np.random.random([5, 3, 128, 64])], 'deepsort')
-        # print(np.array(features).shape)
 
         # Deepsort-----------------------------------------------------------------------------------------------------
 
@@ -224,13 +220,19 @@ def detect(opt):
         boxes[:, 5] = result_box[:, 4]
         all_boxes = boxes[boxes[:, 5] >= CLASS_SCORE_CONST]
 
+
         # filter
         # only car---------------------------------------------------------------------------------------------------
-        all_boxes = all_boxes[all_boxes[:, 4] == (0 or 1)]
+
+        # all_boxes = all_boxes[(all_boxes[:, 4] == 0)]
+
+
+
 
         if all_boxes.shape[0] > 0:
             # 3.nms
             real_box = func_nms(np.array(all_boxes), NMS_THRESHOLD_CONST)
+            print("real_box:", real_box.shape)
 
             # 4.scale
             x_scale = orig_shape[1] / MODEL_HEIGHT
@@ -257,12 +259,12 @@ def detect(opt):
                 # det[:, :4] = scale_coords(img.shape[2:], det[:, :4] * 608, im0.shape).round()
                 det[:, [0, 2]] = (det[:, [0, 2]] * 608 * x_scale).round()
                 det[:, [1, 3]] = (det[:, [1, 3]] * 608 * y_scale).round()
-                print("det f:", det[:, :4])
+                print("det f:", det[:, :4].shape)
 
                 xywhs = xyxy2xywh(det[:, 0:4])
                 confs = det[:, 5]
                 clss = det[:, 4]
-                print("xywhs:", xywhs)
+                print("xywhs:", xywhs.shape)
 
                 # pass detections to deepsort---------------------------------------------------------------------------
                 height, width = im0s.shape[:2]
