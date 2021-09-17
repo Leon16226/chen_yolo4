@@ -1,6 +1,7 @@
-AREA: 0,0,1920,0,0,1080,1920,1080
-# AREA: 460,158,570,160,20,715,580,708
-RTSP: rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0
+# AREA: 100,100,1800,0,0,1000,1800,1000
+AREA: 480,100,570,150,20,715,580,708
+# RTSP: rtsp://admin:xsy12345@192.168.1.89:554/cam/realmonitor?channel=1&subtype=0
+RTSP: ss.mp4
 POST: http://192.168.1.19:8080/v1/app/interface/uploadEvent
 POINT: 10.17.1.20
 OM: weights/highway-sim.om

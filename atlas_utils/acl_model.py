@@ -106,6 +106,8 @@ class Model(object):
     # input_dataset-----------------------------------------------------------------------------------------------------
     def _gen_input_dataset(self, input_list):
 
+        print("gen input")
+
         # check---------------------------------------------------------------------------------------------------------
         ret = const.SUCCESS
         if len(input_list) != self._input_num:

@@ -282,6 +282,7 @@ def detect(opt):
                     print("im_batch:", im_batch.shape)
                     # extractor-----------------------------------------------------------------------------------------
                     features = model_extractor.execute([im_batch, np.array(im_batch.shape)], 'deepsort')
+                    print("features:", features[0].shape)
                     features = features[0][0:im_batch.shape[0], :]
                 else:
                     features = np.array([])

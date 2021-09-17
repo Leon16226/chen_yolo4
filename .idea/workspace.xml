@@ -3,11 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="deepsort success">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/atlas_utils/acl_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/atlas_utils/acl_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp_deepsort.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_onnx.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_onnx.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/config.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ydeepsort/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,13 +183,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626763600078</updated>
-    </task>
-    <task id="LOCAL-00012" summary="yolof decoder reader endt">
-      <created>1627550839840</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1627550839840</updated>
     </task>
     <task id="LOCAL-00013" summary="tran">
       <created>1627896475178</created>
@@ -529,7 +520,14 @@
       <option name="project" value="LOCAL" />
       <updated>1631693108564</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="deepsort success">
+      <created>1631771391481</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1631771391481</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
