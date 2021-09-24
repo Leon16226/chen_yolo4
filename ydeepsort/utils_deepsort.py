@@ -1,6 +1,28 @@
 import cv2
 import numpy as np
 
+# id pool
+def filter_pool(pool):
+    pool = pool[len(pool) - 30:-1] if len(pool) > 30 else pool
+    return pool
+
+# iou
+def iou(box1, box2):
+    print(box1[0])
+    x1, y1, x2, y2 = box1[0], box1[1], box1[2], box1[3]
+    xa, ya, xb, yb = box2[0], box2[1], box2[2], box2[3]
+
+    inter = (np.minimum(x2, xb) - np.maximum(x1, xa)) * (np.minimum(y2, yb) - np.maximum(y1, ya))
+
+    # Union Area
+    w1, h1 = x2 - x1, y2 - y1
+    w2, h2 = xb - xa, yb - ya
+    union = (w1 * h1 + 1e-16) + w2 * h2 - inter
+
+    iou = inter / union  # iou
+
+    return iou
+
 
 # rescale boxes
 def scale_coords(img1_shape, coords, img0_shape, ratio_pad=None):

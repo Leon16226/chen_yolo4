@@ -62,7 +62,7 @@ def func_nms(boxes, nms_threshold):
 
 # shapley
 def Cal_area_2poly(point1, point2):
-    poly1 = Polygon(point1).convex_hull  # Polygon：多边形对象
+    poly1 = Polygon(point1).convex_hull
     poly2 = Polygon(point2).convex_hull
 
     if not poly1.intersects(poly2):
@@ -78,6 +78,26 @@ def readyaml():
     cont = f.read()
     x = yaml.load(cont)
     return x
+
+# track-----------------------------------------------------------------------------------------------------------------
+def postprocess_track(outputs,
+                      car_id_pool, people_id_pool, material_id_pool,
+                      opt, im0s):
+
+    in_track_box = np.array(outputs)
+
+    c_box = {0: in_track_box[(in_track_box[:, 5].astype('int') == 0) + (in_track_box[:, 5].astype('int') == 1)],
+             1: in_track_box[in_track_box[:, 5].astype('int') == 9],
+             2: in_track_box[in_track_box[:, 5].astype('int') == 2]}
+
+
+    pool = [car_id_pool, people_id_pool, material_id_pool]
+    todo(c_box, pool, opt, im0s)
+
+
+
+
+
 
 
 # postprocess-----------------------------------------------------------------------------------------------------------

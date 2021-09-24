@@ -279,37 +279,37 @@ def detect(opt):
             bottom_x = int((detect_result[2]) * 608 * x_scale)
             bottom_y = int((detect_result[3]) * 608 * y_scale)
 
-            # # plan1-----------------------------------------------------------------------------------------------------
-            # point = [top_x, top_y, top_x, bottom_y, bottom_x, bottom_y, bottom_x, top_y]
-            # point = np.array(point).reshape(4, 2)
-            # inter_area = Cal_area_2poly(point1, point)
-            # pred_area = (bottom_x - top_x) * (bottom_y - top_y)
-            # iou_p1 = inter_area / pred_area if pred_area != 0 else 0
-            #
-            # # plan2-----------------------------------------------------------------------------------------------------
-            # if(iou_p1 >= 0.5):
-            #     niou = 0
-            #     for i, p in enumerate(point2[int(detect_result[4])]):
-            #         p = np.array(p).reshape(4, 2)
-            #         inter_area = Cal_area_2poly(point, p)
-            #         p_iou = inter_area / pred_area
-            #         print("iou", p_iou)
-            #         niou = niou + 1 if p_iou >= 0.9 else niou
-            #     print("niou:", niou)
-            #
-            #
-            # # cv2
-            # nf_thres = 0
-            # nf_thres = nf_thres + nf if nf_thres < 120 else nf_thres
-            # threshold = 1 if nf_thres < 120 and threshold == 1 else 2
-            # if(iou_p1 >= 0.5 and niou < 5):
-            #     coords_in_area.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y,
-            #                            detect_result[4], detect_result[5]))
-            # if(iou_p1 >= 0.5 and niou < threshold):
-            cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 3)
-            cv2.putText(im0s, labels[int(detect_result[4])] + " " + str(detect_result[5]), (top_x, top_y - 5),
+            # plan1-----------------------------------------------------------------------------------------------------
+            point = [top_x, top_y, top_x, bottom_y, bottom_x, bottom_y, bottom_x, top_y]
+            point = np.array(point).reshape(4, 2)
+            inter_area = Cal_area_2poly(point1, point)
+            pred_area = (bottom_x - top_x) * (bottom_y - top_y)
+            iou_p1 = inter_area / pred_area if pred_area != 0 else 0
+
+            # plan2-----------------------------------------------------------------------------------------------------
+            if(iou_p1 >= 0.5):
+                niou = 0
+                for i, p in enumerate(point2[int(detect_result[4])]):
+                    p = np.array(p).reshape(4, 2)
+                    inter_area = Cal_area_2poly(point, p)
+                    p_iou = inter_area / pred_area
+                    print("iou", p_iou)
+                    niou = niou + 1 if p_iou >= 0.9 else niou
+                print("niou:", niou)
+
+
+            # cv2
+            nf_thres = 0
+            nf_thres = nf_thres + nf if nf_thres < 120 else nf_thres
+            threshold = 1 if nf_thres < 120 and threshold == 1 else 2
+            if(iou_p1 >= 0.5 and niou < 5):
+                coords_in_area.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y,
+                                       detect_result[4], detect_result[5]))
+            if(iou_p1 >= 0.5 and niou < threshold):
+                cv2.rectangle(im0s, (top_x, top_y), (bottom_x, bottom_y), (0, 255, 0), 3)
+                cv2.putText(im0s, labels[int(detect_result[4])] + " " + str(detect_result[5]), (top_x, top_y - 5),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 255), 2)
-            coords.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y, detect_result[4], detect_result[5]))
+                coords.append((top_x, top_y, bottom_x - top_x, bottom_y - top_y, detect_result[4], detect_result[5]))
 
         # before push---------------------------------------------------------------------------------------------------
         if len(coords_in_area) > 0:
@@ -331,7 +331,7 @@ def detect(opt):
         # push----------------------------------------------------------------------------------------------------------
         if(len(coords) > 0):
             print("push one")
-            # push(opt, im0s, coords)
+            push(opt, im0s, coords)
 
         # wait key------------------------------------------------------------------------------------------------------
 
@@ -417,11 +417,13 @@ def push(opt, frame, coords):
         coordinate.append(Coordinate("material", coord[0], coord[1], coord[2], coord[3], coord[4]))
 
     event = Event(ponit_ip, int(round(time.time() * 1000)),
-                  1, "yzw1-dxcd", "peopleOrNoVehicles" if opt.om == "weights/highway-sim.om" else "throwThings", "", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
+                  1, "yzw1-dxcd", "peopleOrNoVehicles" if opt.om == "weights/highway-sim.om" else "throwThings", "", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, '',
                   "material", 0, 0, 0, 0, 0.75,
                   "", "",
                   "")
     event = json.dumps(event, default=lambda obj: obj.__dict__, sort_keys=True, indent=4)
+    print("json")
+    print(event)
 
     # post -------------------------------------------------------------------------------------------------------------
     url = post_url
@@ -447,8 +449,10 @@ if __name__ == '__main__':
     # 33.64.78.178
     # weights/highway-sim.om
     # data/highway.names
+
+    # rtsp://192.168.1.20/hangshaotai_test1.avi
     parser.add_argument('--area', type=str, default='0,0,1920,0,0,1080,1920,1080', help='lt rt lb rb')
-    parser.add_argument('--rtsp', type=str, default='ss.mp4')
+    parser.add_argument('--rtsp', type=str, default='xr.mp4')
     parser.add_argument('--post', type=str, default='http://192.168.1.19:8080/v1/app/interface/uploadEvent')
     parser.add_argument('--point', type=str, default='10.17.1.20')
     parser.add_argument('--om', type=str, default='weights/highway-sim.om')

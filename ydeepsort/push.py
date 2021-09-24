@@ -55,7 +55,7 @@ class Coordinate(object):
         self.prob = prob
 
 
-def push(opt, frame, coords):
+def push(opt, frame, event):
     # opt
     post_url = opt.post
     ponit_ip = opt.point
@@ -66,12 +66,8 @@ def push(opt, frame, coords):
     img = str(img)
     img = img[2:]
 
-    coordinate = []
-    for i, coord in enumerate(coords):
-        coordinate.append(Coordinate("material", coord[0], coord[1], coord[2], coord[3], coord[4]))
-
     event = Event(ponit_ip, int(round(time.time() * 1000)),
-                  1, "yzw1-dxcd", "peopleOrNoVehicles" if opt.om == "weights/highway-sim.om" else "throwThings", "",
+                  1, "yzw1-dxcd", event, "",
                   datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
                   "material", 0, 0, 0, 0, 0.75,
                   "", "",

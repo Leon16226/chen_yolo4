@@ -16,10 +16,12 @@ from ydeepsort.utils_deepsort import _xywh_to_tlwh
 from ydeepsort.utils_deepsort import compute_color_for_id
 from ydeepsort.utils_deepsort import plot_one_box
 from ydeepsort.utils_deepsort import _tlwh_to_xyxy
+from ydeepsort.utils_deepsort import filter_pool
 from ydeepsort.push import *
 from ydeepsort.sort.nn_matching import NearestNeighborDistanceMetric
 from ydeepsort.sort.tracker import Tracker
 from ydeepsort.sort.detection import Detection
+
 
 
 
@@ -38,13 +40,20 @@ MODEL_OUTPUT_BOXNUM = 10647
 vfps = 0
 
 # deepsort config
-MAX_DIST = 0.2
-MIN_CONFIDENCE = 0.3
-NMS_MAX_OVERLAP = 0.5
-MAX_IOU_DISTANCE = 0.7
-MAX_AGE = 70
-N_INIT = 3
-NN_BUDGET = 100
+MAX_DIST = y['MAX_DIST']
+MIN_CONFIDENCE = y['MIN_CONFIDENCE']
+NMS_MAX_OVERLAP = y['NMS_MAX_OVERLAP']
+MAX_IOU_DISTANCE = y['MAX_IOU_DISTANCE']
+MAX_AGE = y['MAX_AGE']
+N_INIT = y['N_INIT']
+NN_BUDGET = y['NN_BUDGET']
+
+# pool
+id_thres = 20
+car_id_pool = []
+people_id_pool = []
+material_id_pool = []
+
 
 # fps
 def showfps():
@@ -92,7 +101,7 @@ class LoadStreams:
             n += 1
             cap.grab()
             # fps = 25--------------------------------------------------------------------------------------------------
-            if n == 1:
+            if n == 2:
                 _, self.imgs = cap.retrieve()
                 n = 0
             time.sleep(0.01)
@@ -111,7 +120,8 @@ class LoadStreams:
         img = img[np.newaxis, :]
         img = img[:, :, :, ::-1].transpose(0, 3, 1, 2)
         img = np.ascontiguousarray(img)
-
+        img = img.astype(np.float32)
+        img /= 255.0
 
         return self.source, img, img0, self.cap
 
@@ -138,11 +148,17 @@ def detect(opt):
     point2 = [[] for i in labels]
     threshold_box = 30
     global vfps
+    nc = len(labels)
 
     # dir
     if os.path.exists(out):
         shutil.rmtree(out)
     os.makedirs(out)
+
+    # pool
+    global car_id_pool
+    global people_id_pool
+    global material_id_pool
 
     # Load model--------------------------------------------------------------------------------------------------------
     acl_resource = AclResource()
@@ -172,17 +188,14 @@ def detect(opt):
     # do
     for i, (path, img, im0s, vid_cap) in enumerate(dataset):
 
-        orig_shape = im0s.shape[:2]
-        resized_img = img.astype(np.float32)
-        resized_img /= 255.0
-
         # 模型推理-------------------------------------------------------------------------------------------------------
-        infer_output = model.execute([resized_img])
+        infer_output = model.execute([img])
         assert infer_output[0].shape[1] > 0, "model no output, please check"
-        infer_output_0 = infer_output[0]
         infer_output_1 = infer_output[1].reshape((1, -1, 4))
         infer_output_2 = np.ones([1, infer_output_1.shape[1], 1])
-        infer_output = np.concatenate((infer_output_1, infer_output_2, infer_output_0), axis=2)
+        infer_output = np.concatenate((infer_output_1,
+                                       infer_output_2,
+                                       infer_output[0]), axis=2)
 
 
         # postprocess---------------------------------------------------------------------------------------------------
@@ -196,69 +209,54 @@ def detect(opt):
         # thread_post.start()
 
 
-        # Deepsort-----------------------------------------------------------------------------------------------------
+        # Deepsort------------------------------------------------------------------------------------------------------
 
         # init
-        nc = len(labels)
         MODEL_OUTPUT_BOXNUM = infer_output.shape[1]
 
-        # 1.process：-------------------------------------------------------------------------------------------------------
+        # 1.process：---------------------------------------------------------------------------------------------------
         result_box = infer_output[:, :, 0:6].reshape((-1, 6)).astype('float32')
         list_class = infer_output[:, :, 5:5 + nc].reshape((-1, nc)).astype('float32')
-        list_max = list_class.argmax(axis=1)
-        list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
-        result_box[:, 5] = list_max[:, 0]
-        # conf
-        list_max = list_class.max(axis=1)
-        list_max = list_max.reshape((MODEL_OUTPUT_BOXNUM, 1))
+        # class
+        list_max = list_class.argmax(axis=1).reshape((MODEL_OUTPUT_BOXNUM, 1))
         result_box[:, 4] = list_max[:, 0]
-
-        # 2.整合
-        boxes = np.zeros(shape=(MODEL_OUTPUT_BOXNUM, 6), dtype=np.float32)
-        boxes[:, :4] = result_box[:, :4]
-        boxes[:, 4] = result_box[:, 5]
-        boxes[:, 5] = result_box[:, 4]
-        all_boxes = boxes[boxes[:, 5] >= CLASS_SCORE_CONST]
+        # conf
+        list_max = list_class.max(axis=1).reshape((MODEL_OUTPUT_BOXNUM, 1))
+        result_box[:, 5] = list_max[:, 0]
+        all_boxes = result_box[result_box[:, 5] >= CLASS_SCORE_CONST]
 
 
         # filter
         # only car---------------------------------------------------------------------------------------------------
-
-        # all_boxes = all_boxes[(all_boxes[:, 4] == 0)]
-
-
-
+        # all_boxes = all_boxes[(all_boxes[:, 4] == 0) + (all_boxes[:, 4] == 1)]
 
         if all_boxes.shape[0] > 0:
-            # 3.nms
-            real_box = func_nms(np.array(all_boxes), NMS_THRESHOLD_CONST)
+            # nms
+            real_box = func_nms(all_boxes, NMS_THRESHOLD_CONST)
             print("real_box:", real_box.shape)
 
-            # 4.scale
+            # scale
+            orig_shape = im0s.shape[:2]
             x_scale = orig_shape[1] / MODEL_HEIGHT
             y_scale = orig_shape[0] / MODEL_WIDTH
 
-            top_x = (real_box[:, 0] * 608 * x_scale).astype(int)
-            top_y = (real_box[:, 1] * 608 * y_scale).astype(int)
-            bottom_x = (real_box[:, 2] * 608 * x_scale).astype(int)
-            bottom_y = (real_box[:, 3] * 608 * y_scale).astype(int)
+            top_x = (real_box[:, 0] * MODEL_WIDTH * x_scale).astype(int)
+            top_y = (real_box[:, 1] * MODEL_HEIGHT * y_scale).astype(int)
+            bottom_x = (real_box[:, 2] * MODEL_WIDTH * x_scale).astype(int)
+            bottom_y = (real_box[:, 3] * MODEL_HEIGHT * y_scale).astype(int)
 
             # if in detect area
             point = np.array([x for x in zip(top_x, top_y, top_x, bottom_y,
                                              bottom_x, bottom_y, bottom_x, top_y)]).reshape([-1, 4, 2])
             inter_area = np.array([Cal_area_2poly(point1, p) for p in point])
-            in_area_box = real_box[inter_area > 5 * 5]
+            det = real_box[inter_area > 5 * 5]  # gener [x1, y1, x2, y2, cls, confs]
 
 
             # do deepsort-----------------------------------------------------------------------------------------------
-            det = in_area_box  # gener [x1, y1, x2, y2, cls, confs]
-            # im0 = im0s
 
             if det is not None and len(det):
-                print("det:", det[:, :4])
-                # det[:, :4] = scale_coords(img.shape[2:], det[:, :4] * 608, im0.shape).round()
-                det[:, [0, 2]] = (det[:, [0, 2]] * 608 * x_scale).round()
-                det[:, [1, 3]] = (det[:, [1, 3]] * 608 * y_scale).round()
+                det[:, [0, 2]] = (det[:, [0, 2]] * MODEL_WIDTH * x_scale).round()
+                det[:, [1, 3]] = (det[:, [1, 3]] * MODEL_HEIGHT * y_scale).round()
                 print("det f:", det[:, :4].shape)
 
                 xywhs = xyxy2xywh(det[:, 0:4])
@@ -267,7 +265,7 @@ def detect(opt):
                 print("xywhs:", xywhs.shape)
 
                 # pass detections to deepsort---------------------------------------------------------------------------
-                height, width = im0s.shape[:2]
+                height, width = orig_shape
                 im_crops = []
                 for box in xywhs:
                     x1, y1, x2, y2 = _xywh_to_xyxy(box, height, width)
@@ -314,7 +312,7 @@ def detect(opt):
                         outputs = np.stack(outputs, axis=0)
 
 
-                    # draw boxes for visualization--------------------------------------------------------------------------
+                    # draw boxes for visualization----------------------------------------------------------------------
                     if len(outputs) > 0:
                         for j, (output, conf) in enumerate(zip(outputs, confs)):
                             bboxes = output[0:4]
@@ -325,11 +323,26 @@ def detect(opt):
                             label = f'{id} {labels[c]} {conf:.2f}'
                             color = compute_color_for_id(id)
                             plot_one_box(bboxes, im0s, label=label, color=color, line_thickness=2)
+
+
+                    # post----------------------------------------------------------------------------------------------
+                    if len(outputs) > 0:
+                        # pool
+                        car_id_pool = filter_pool(car_id_pool)
+                        people_id_pool = filter_pool(people_id_pool)
+                        material_id_pool = filter_pool(material_id_pool)
+
+                        thread_post = Thread(target=postprocess_track, args=(outputs,
+                                                                             car_id_pool, people_id_pool, material_id_pool,
+                                                                             opt, im0s))
+                        thread_post.start()
             else:
                 tracker.increment_ages()
 
+        # fps-----------------------------------------------------------------------------------------------------------
+        vfps += 1
 
-        # show
+        # show----------------------------------------------------------------------------------------------------------
         if opt.show:
             point_s = point1.reshape((-1, 1, 2))
             cv2.polylines(im0s, [point_s], True, (0, 255, 255))
@@ -343,11 +356,6 @@ def detect(opt):
                 break
 
 
-
-
-        # fps-----------------------------------------------------------------------------------------------------------
-
-        vfps += 1
 
 
 
