@@ -6,9 +6,9 @@ def filter_pool(pool):
     pool = pool[len(pool) - 30:-1] if len(pool) > 30 else pool
     return pool
 
+
 # iou
 def iou(box1, box2):
-    print(box1[0])
     x1, y1, x2, y2 = box1[0], box1[1], box1[2], box1[3]
     xa, ya, xb, yb = box2[0], box2[1], box2[2], box2[3]
 
@@ -22,6 +22,41 @@ def iou(box1, box2):
     iou = inter / union  # iou
 
     return iou
+
+
+# iou ndarray
+def calc_iou(bbox1, bbox2):
+    if not isinstance(bbox1, np.ndarray):
+        bbox1 = np.array(bbox1)
+    if not isinstance(bbox2, np.ndarray):
+        bbox2 = np.array(bbox2)
+    xmin1, ymin1, xmax1, ymax1, = np.split(bbox1, 4, axis=-1)
+    xmin2, ymin2, xmax2, ymax2, = np.split(bbox2, 4, axis=-1)
+
+    area1 = (xmax1 - xmin1) * (ymax1 - ymin1)
+    area2 = (xmax2 - xmin2) * (ymax2 - ymin2)
+
+    ymin = np.maximum(ymin1, np.squeeze(ymin2, axis=-1))
+    xmin = np.maximum(xmin1, np.squeeze(xmin2, axis=-1))
+    ymax = np.minimum(ymax1, np.squeeze(ymax2, axis=-1))
+    xmax = np.minimum(xmax1, np.squeeze(xmax2, axis=-1))
+
+    h = np.maximum(ymax - ymin, 0)
+    w = np.maximum(xmax - xmin, 0)
+    intersect = h * w
+
+    union = area1 + np.squeeze(area2, axis=-1) - intersect
+    return intersect / union
+
+# angle
+def calc_angle(car_c, people_c):
+    if not isinstance(car_c, np.ndarray):
+        car_c = np.array(car_c)
+    if not isinstance(people_c, np.ndarray):
+        people_c = np.array(people_c)
+
+    relative_p = people_c - car_c.reshape((-1, 1))
+
 
 
 # rescale boxes

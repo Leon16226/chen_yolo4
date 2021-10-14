@@ -5,6 +5,7 @@ import datetime
 import json
 import requests
 
+
 # Event  Post-----------------------------------------------------------------------------------------------------------
 class Event(object):
     def __init__(self, cameraIp, timestamp,
@@ -55,7 +56,7 @@ class Coordinate(object):
         self.prob = prob
 
 
-def push(opt, frame, event):
+def push(opt, frame, events):
     # opt
     post_url = opt.post
     ponit_ip = opt.point
@@ -67,15 +68,17 @@ def push(opt, frame, event):
     img = img[2:]
 
     event = Event(ponit_ip, int(round(time.time() * 1000)),
-                  1, "yzw1-dxcd", event, "",
+                  0, "路段2", events, "",
                   datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,
-                  "material", 0, 0, 0, 0, 0.75,
+                  "People", 0, 0, 0, 0, 0.75,
                   "", "",
-                  "")
+                  "1")
     event = json.dumps(event, default=lambda obj: obj.__dict__, sort_keys=True, indent=4)
+
 
     # post -------------------------------------------------------------------------------------------------------------
     url = post_url
     headers = {"content-type": "application/json"}
     ret = requests.post(url, data=event, headers=headers)
-    print(ret.text)
+    print("post result:")
+    print(ret.text + "###################################################")

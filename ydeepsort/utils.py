@@ -1,18 +1,9 @@
-import cv2
 import numpy as np
-from threading import Thread
 from shapely.geometry import Polygon
-import time
 import yaml
-from .push import push
 from .strategy import todo
-from .utils_deepsort import _preprocess
-from .utils_deepsort import _xywh_to_xyxy
-from .utils_deepsort import scale_coords
-from .utils_deepsort import *
-from pathlib import Path
-from atlas_utils.acl_model import Model
-import acl
+
+
 
 # Tools-----------------------------------------------------------------------------------------------------------------
 def load_classes(path):
@@ -84,10 +75,11 @@ def postprocess_track(outputs,
                       car_id_pool, people_id_pool, material_id_pool,
                       opt, im0s):
 
+    # box : [x1, y1, x2, y2, id, cls, conf]
     in_track_box = np.array(outputs)
 
     c_box = {0: in_track_box[(in_track_box[:, 5].astype('int') == 0) + (in_track_box[:, 5].astype('int') == 1)],
-             1: in_track_box[in_track_box[:, 5].astype('int') == 9],
+             1: in_track_box[(in_track_box[:, 5].astype('int') == 8) + (in_track_box[:, 5].astype('int') == 0)],
              2: in_track_box[in_track_box[:, 5].astype('int') == 2]}
 
 

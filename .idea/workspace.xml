@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="deepsort success hehe">
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="deepsort postprocess scuess">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detect_rtsp.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp_deepsort.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/config.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/push.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/push.py" afterDir="false" />
@@ -187,13 +186,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626763600078</updated>
-    </task>
-    <task id="LOCAL-00014" summary="trans_material success">
-      <created>1627954665565</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1627954665565</updated>
     </task>
     <task id="LOCAL-00015" summary="material run">
       <created>1627983603931</created>
@@ -531,7 +523,14 @@
       <option name="project" value="LOCAL" />
       <updated>1631862365205</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="deepsort postprocess scuess">
+      <created>1632442605726</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1632442605726</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -577,7 +576,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="read datasets" />
     <MESSAGE value="onnx mish export sucess" />
     <MESSAGE value="rtsp" />
     <MESSAGE value="rnnet init" />
@@ -602,7 +600,8 @@
     <MESSAGE value="daymic input sucess" />
     <MESSAGE value="deepsort success" />
     <MESSAGE value="deepsort success hehe" />
-    <option name="LAST_COMMIT_MESSAGE" value="deepsort success hehe" />
+    <MESSAGE value="deepsort postprocess scuess" />
+    <option name="LAST_COMMIT_MESSAGE" value="deepsort postprocess scuess" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

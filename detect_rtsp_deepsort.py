@@ -5,6 +5,7 @@ import copy
 
 import cv2
 import numpy as np
+from threading import Thread
 
 from atlas_utils.acl_model import Model
 from atlas_utils.acl_resource import AclResource
@@ -13,14 +14,14 @@ from ydeepsort.utils_deepsort import *
 from ydeepsort.utils_deepsort import _preprocess
 from ydeepsort.utils_deepsort import _xywh_to_xyxy
 from ydeepsort.utils_deepsort import _xywh_to_tlwh
-from ydeepsort.utils_deepsort import compute_color_for_id
-from ydeepsort.utils_deepsort import plot_one_box
 from ydeepsort.utils_deepsort import _tlwh_to_xyxy
 from ydeepsort.utils_deepsort import filter_pool
 from ydeepsort.push import *
 from ydeepsort.sort.nn_matching import NearestNeighborDistanceMetric
 from ydeepsort.sort.tracker import Tracker
 from ydeepsort.sort.detection import Detection
+
+
 
 
 
@@ -51,7 +52,7 @@ NN_BUDGET = y['NN_BUDGET']
 # pool
 id_thres = 20
 car_id_pool = []
-people_id_pool = []
+people_id_pool = {}
 material_id_pool = []
 
 
@@ -197,18 +198,6 @@ def detect(opt):
                                        infer_output_2,
                                        infer_output[0]), axis=2)
 
-
-        # postprocess---------------------------------------------------------------------------------------------------
-
-        # thread_post = Thread(target=postprocess, args=(labels, copy.deepcopy(infer_output),
-        #                                                CLASS_SCORE_CONST, NMS_THRESHOLD_CONST,
-        #                                                orig_shape, MODEL_HEIGHT, MODEL_WIDTH,
-        #                                                point2, copy.deepcopy(im0s), opt,
-        #                                                threshold_box, point1, path,
-        #                                                copy.deepcopy(img), MODEL_PATH_EX, model_extractor), )
-        # thread_post.start()
-
-
         # Deepsort------------------------------------------------------------------------------------------------------
 
         # init
@@ -308,21 +297,23 @@ def detect(opt):
                         track_id = track.track_id
                         class_id = track.class_id
                         outputs.append(np.array([x1, y1, x2, y2, track_id, class_id], dtype=np.int))
-                    if len(outputs) > 0:
-                        outputs = np.stack(outputs, axis=0)
+                    # if len(outputs) > 0:
+                    #     outputs = np.stack(outputs, axis=0)
+                    #     confs = np.array(confs).reshape(-1, 1)
+                    #     outputs = np.concatenate((outputs, confs), axis=1)
 
 
-                    # draw boxes for visualization----------------------------------------------------------------------
-                    if len(outputs) > 0:
-                        for j, (output, conf) in enumerate(zip(outputs, confs)):
-                            bboxes = output[0:4]
-                            id = output[4]
-                            cls = output[5]
-
-                            c = int(cls)
-                            label = f'{id} {labels[c]} {conf:.2f}'
-                            color = compute_color_for_id(id)
-                            plot_one_box(bboxes, im0s, label=label, color=color, line_thickness=2)
+                    # # draw boxes for visualization----------------------------------------------------------------------
+                    # if len(outputs) > 0:
+                    #     for j, (output, conf) in enumerate(zip(outputs, confs)):
+                    #         bboxes = output[0:4]
+                    #         id = output[4]
+                    #         cls = output[5]
+                    #
+                    #         c = int(cls)
+                    #         label = f'{id} {labels[c]} {conf:.2f}'
+                    #         color = compute_color_for_id(id)
+                    #         plot_one_box(bboxes, im0s, label=label, color=color, line_thickness=2)
 
 
                     # post----------------------------------------------------------------------------------------------
