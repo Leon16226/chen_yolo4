@@ -67,6 +67,12 @@ def push(opt, frame, events):
     img = str(img)
     img = img[2:]
 
+    # UTC -> CST
+    now_date = (datetime.datetime.now() + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+    now_stamp = int(time.mktime(time.strptime(now_date, '%Y-%m-%d %H:%M:%S'))) * 1000   # 毫秒级时间戳
+
+
+
     event = Event(ponit_ip, int(round(time.time() * 1000)),
                   0, "路段2", events, "",
                   datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 1, [1], 30, img,

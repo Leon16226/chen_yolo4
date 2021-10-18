@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="deepsort postprocess scuess">
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="post review">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp_deepsort.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ydeepsort/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/config.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/push.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/push.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ydeepsort/sort/nn_matching.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/sort/nn_matching.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/strategy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ydeepsort/utils_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/utils_deepsort.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -186,13 +185,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626763600078</updated>
-    </task>
-    <task id="LOCAL-00015" summary="material run">
-      <created>1627983603931</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1627983603931</updated>
     </task>
     <task id="LOCAL-00016" summary="only cup train">
       <created>1628150391492</created>
@@ -530,7 +522,14 @@
       <option name="project" value="LOCAL" />
       <updated>1632442605726</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="post review">
+      <created>1634173162505</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1634173162505</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -576,7 +575,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="onnx mish export sucess" />
     <MESSAGE value="rtsp" />
     <MESSAGE value="rnnet init" />
     <MESSAGE value="rnnet sucess" />
@@ -601,7 +599,8 @@
     <MESSAGE value="deepsort success" />
     <MESSAGE value="deepsort success hehe" />
     <MESSAGE value="deepsort postprocess scuess" />
-    <option name="LAST_COMMIT_MESSAGE" value="deepsort postprocess scuess" />
+    <MESSAGE value="post review" />
+    <option name="LAST_COMMIT_MESSAGE" value="post review" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -693,6 +692,11 @@
           <url>file://$PROJECT_DIR$/yolox/data/data_augment.py</url>
           <line>1</line>
           <option name="timeStamp" value="57" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ydeepsort/sort/tracker.py</url>
+          <line>98</line>
+          <option name="timeStamp" value="58" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

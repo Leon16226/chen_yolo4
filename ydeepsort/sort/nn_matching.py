@@ -163,7 +163,7 @@ class NearestNeighborDistanceMetric(object):
             A list of targets to match the given `features` against.
 
         Returns
-        -------
+        ---------
         ndarray
             Returns a cost matrix of shape len(targets), len(features), where
             element (i, j) contains the closest squared distance between

@@ -52,7 +52,7 @@ NN_BUDGET = y['NN_BUDGET']
 # pool
 id_thres = 20
 car_id_pool = []
-people_id_pool = {}
+people_id_pool = []
 material_id_pool = []
 
 
@@ -156,7 +156,7 @@ def detect(opt):
         shutil.rmtree(out)
     os.makedirs(out)
 
-    # pool
+    # pool 用于跟踪逻辑策略
     global car_id_pool
     global people_id_pool
     global material_id_pool
@@ -186,7 +186,7 @@ def detect(opt):
     tracker = Tracker(metric, max_iou_distance=max_cosine_distance, max_age=MAX_AGE, n_init=N_INIT)
 
 
-    # do
+    # 开始取流检测
     for i, (path, img, im0s, vid_cap) in enumerate(dataset):
 
         # 模型推理-------------------------------------------------------------------------------------------------------
@@ -198,12 +198,10 @@ def detect(opt):
                                        infer_output_2,
                                        infer_output[0]), axis=2)
 
-        # Deepsort------------------------------------------------------------------------------------------------------
-
-        # init
+        # 模型输出box的数量
         MODEL_OUTPUT_BOXNUM = infer_output.shape[1]
 
-        # 1.process：---------------------------------------------------------------------------------------------------
+        # 转换处理并根据置信度门限过滤box
         result_box = infer_output[:, :, 0:6].reshape((-1, 6)).astype('float32')
         list_class = infer_output[:, :, 5:5 + nc].reshape((-1, nc)).astype('float32')
         # class
@@ -215,12 +213,9 @@ def detect(opt):
         all_boxes = result_box[result_box[:, 5] >= CLASS_SCORE_CONST]
 
 
-        # filter
-        # only car---------------------------------------------------------------------------------------------------
-        # all_boxes = all_boxes[(all_boxes[:, 4] == 0) + (all_boxes[:, 4] == 1)]
 
         if all_boxes.shape[0] > 0:
-            # nms
+            # 根据nms过滤box
             real_box = func_nms(all_boxes, NMS_THRESHOLD_CONST)
             print("real_box:", real_box.shape)
 
@@ -234,14 +229,14 @@ def detect(opt):
             bottom_x = (real_box[:, 2] * MODEL_WIDTH * x_scale).astype(int)
             bottom_y = (real_box[:, 3] * MODEL_HEIGHT * y_scale).astype(int)
 
-            # if in detect area
+            # 保留在检测区域内的box
             point = np.array([x for x in zip(top_x, top_y, top_x, bottom_y,
                                              bottom_x, bottom_y, bottom_x, top_y)]).reshape([-1, 4, 2])
             inter_area = np.array([Cal_area_2poly(point1, p) for p in point])
             det = real_box[inter_area > 5 * 5]  # gener [x1, y1, x2, y2, cls, confs]
 
 
-            # do deepsort-----------------------------------------------------------------------------------------------
+            # 开始跟踪的处理-----------------------------------------------------------------------------------------------
 
             if det is not None and len(det):
                 det[:, [0, 2]] = (det[:, [0, 2]] * MODEL_WIDTH * x_scale).round()
@@ -253,7 +248,7 @@ def detect(opt):
                 clss = det[:, 4]
                 print("xywhs:", xywhs.shape)
 
-                # pass detections to deepsort---------------------------------------------------------------------------
+                # 从原图im0s中截取目标区域，准备抽取特征---------------------------------------------------------------------
                 height, width = orig_shape
                 im_crops = []
                 for box in xywhs:
@@ -263,6 +258,7 @@ def detect(opt):
                         print("im:", im.shape)
                         im_crops.append(im)
 
+                # deepsort框架抽取特征------------------------------------------------------------------------------------
                 if im_crops:
                     print("deepsort extractor")
                     im_batch = _preprocess(im_crops)
@@ -316,13 +312,19 @@ def detect(opt):
                     #         plot_one_box(bboxes, im0s, label=label, color=color, line_thickness=2)
 
 
-                    # post----------------------------------------------------------------------------------------------
+                    
+
+                    # 新开一个线程取做处理---------------------------------------------------------------------------------
                     if len(outputs) > 0:
-                        # pool
+                        # 保持pool为一定大小否则内存溢出
                         car_id_pool = filter_pool(car_id_pool)
                         people_id_pool = filter_pool(people_id_pool)
                         material_id_pool = filter_pool(material_id_pool)
 
+                        # 参数：
+                        # outputs item结构为[x1, y1, x2, y2, id, cls]
+                        # opt 配置参数
+                        # im0s 原图
                         thread_post = Thread(target=postprocess_track, args=(outputs,
                                                                              car_id_pool, people_id_pool, material_id_pool,
                                                                              opt, im0s))

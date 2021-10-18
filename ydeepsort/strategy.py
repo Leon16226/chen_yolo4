@@ -26,6 +26,7 @@ class Strategy(metaclass=abc.ABCMeta):
     def do(in_area_box):
         pass
 
+    # 画标签
     def draw(self):
         # draw boxes for visualization----------------------------------------------------------------------
         for i, box in enumerate(self.boxes):
@@ -44,9 +45,10 @@ class Strategy(metaclass=abc.ABCMeta):
 # Car Park--------------------------------------------------------------------------------------------------------------
 class CarStrategy(Strategy):
 
+    # 策略：同一个id连续三帧iou>0.95则认为是异常停车
     def do(self,):
 
-        # if post depend on iou
+
         for j, box in enumerate(self.boxes):
             # init
             id = box[4]
@@ -72,15 +74,15 @@ class PeopleStrategy(Strategy):
 
     def do(self,):
         # init----------------------------------------------------------------------------------------------------------
-        boxes_people = self.boxes[self.boxes[5].astype('int') == 8]
-        boxes_car = self.boxes[self.boxes[5].astype('int') == 0]
+        # boxes_people = self.boxes[self.boxes[5].astype('int') == 8]
+        # boxes_car = self.boxes[self.boxes[5].astype('int') == 0]
 
         # iou
-        ious = calc_iou(boxes_car[:, 0:4], boxes_people[:, 0:4])
-        b = ious > 0
-        c = b.sum(axis=0)
-        d = (c == 0)
-        boxes_people = boxes_people[d]
+        # ious = calc_iou(boxes_car[:, 0:4], boxes_people[:, 0:4])
+        # b = ious > 0
+        # c = b.sum(axis=0)
+        # d = (c == 0)
+        # boxes_people = boxes_people[d]
         # angle
 
         # center_c = (boxes_car[:, 2:4] - boxes_car[:, 0:2]) / 2
@@ -116,7 +118,7 @@ class PeopleStrategy(Strategy):
 
 
         # if post depend on id------------------------------------------------------------------------------------------
-        for j, box in enumerate(boxes_people):
+        for j, box in enumerate(self.boxes):
             if box[4] not in self.pool:
                 self.pool.append(box[4])
                 print("people push:", box)
@@ -136,6 +138,7 @@ class MaterialStrategy(Strategy):
 
 def todo(c_box, pool, opt, im0s):
 
+    # 不同处理策略集合
     strategies = {
         0: CarStrategy(np.array(c_box[0]), pool[0], opt, im0s),
         1: PeopleStrategy(np.array(c_box[1]), pool[1], opt, im0s),
