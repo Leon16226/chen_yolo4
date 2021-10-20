@@ -75,13 +75,13 @@ def postprocess_track(outputs,
                       car_id_pool, people_id_pool, material_id_pool,
                       opt, im0s):
 
-    # box : [x1, y1, x2, y2, id, cls, conf]
+    # box : [x1, y1, x2, y2, id, cls]
     in_track_box = np.array(outputs)
 
     # 根据cls分流box
-    c_box = {0: in_track_box[(in_track_box[:, 5].astype('int') == 0) + (in_track_box[:, 5].astype('int') == 1)],
-             1: in_track_box[(in_track_box[:, 5].astype('int') == 8)],
-             2: in_track_box[in_track_box[:, 5].astype('int') == 2]}
+    c_box = {0: in_track_box[(in_track_box[:, 5] == 0) + (in_track_box[:, 5] == 1)],
+             1: in_track_box[(in_track_box[:, 5] == 8) + (in_track_box[:, 5] == 0)],
+             2: in_track_box[in_track_box[:, 5] == 2]}
 
     pool = [car_id_pool, people_id_pool, material_id_pool]
     todo(c_box, pool, opt, im0s)

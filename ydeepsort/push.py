@@ -57,6 +57,8 @@ class Coordinate(object):
 
 
 def push(opt, frame, events):
+    print("post a event:" + events)
+
     # opt
     post_url = opt.post
     ponit_ip = opt.point
@@ -68,8 +70,8 @@ def push(opt, frame, events):
     img = img[2:]
 
     # UTC -> CST
-    now_date = (datetime.datetime.now() + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
-    now_stamp = int(time.mktime(time.strptime(now_date, '%Y-%m-%d %H:%M:%S'))) * 1000   # 毫秒级时间戳
+    # now_date = (datetime.datetime.now() + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+    # now_stamp = int(time.mktime(time.strptime(now_date, '%Y-%m-%d %H:%M:%S'))) * 1000   # 毫秒级时间戳
 
 
 

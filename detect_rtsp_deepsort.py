@@ -87,8 +87,8 @@ class LoadStreams:
         _, self.imgs = cap.read()
 
         # thread
-        thread = Thread(target=self.update, args=([cap]), daemon=True)
-        print(' success (%gx%g at %.2f FPS).' % (w, h, fps))
+        thread = Thread(target=self.update, args=([cap,]), daemon=True)
+        print('success (%gx%g at %.2f FPS).' % (w, h, fps))
         thread.start()
 
         thread_fps = Thread(target=showfps, args=(), daemon=True)
@@ -100,34 +100,51 @@ class LoadStreams:
         n = 0
         while cap.isOpened():
             n += 1
-            cap.grab()
-            # fps = 25--------------------------------------------------------------------------------------------------
+            ret, _ = cap.grab()
+
+            # 设置为None
+            if not(ret):
+                self.imgs = []
+
+            # 若没有帧返回，则重新刷新rtsp视频流
+            while not(ret):
+                cap = cv2.VideoCapture(self.source)
+                if not(cap):
+                    continue
+                ret, _ = cap.grab()
+                print("rtsp重新连接中---------------------------")
+
+            # fps = 25
             if n == 2:
                 _, self.imgs = cap.retrieve()
                 n = 0
-            time.sleep(0.01)
+
 
     def __iter__(self):
         self.count = -1
         return self
 
     def __next__(self):
-        self.count += 1
-        img0 = self.imgs.copy()
-        print("get a img-----------------------------------------------------:", img0.shape)
+        if(len(self.imgs) == 0):
+            self.count += 1
+            return [], [], [], []
+        else:
+            self.count += 1
+            img0 = self.imgs.copy()
+            print("get a img-----------------------------------------------------:", img0.shape)
 
-        # resize
-        img = cv2.resize(img0, self.img_size)
-        img = img[np.newaxis, :]
-        img = img[:, :, :, ::-1].transpose(0, 3, 1, 2)
-        img = np.ascontiguousarray(img)
-        img = img.astype(np.float32)
-        img /= 255.0
+            # resize
+            img = cv2.resize(img0, self.img_size)
+            img = img[np.newaxis, :]
+            img = img[:, :, :, ::-1].transpose(0, 3, 1, 2)
+            img = np.ascontiguousarray(img)
+            img = img.astype(np.float32)
+            img /= 255.0
 
-        return self.source, img, img0, self.cap
+            return self.source, img, img0, self.cap
 
     def __len__(self):
-        return 0  # 1E12 frames = 32 streams at 30 FPS for 30 years
+        return 0
 
 
 # Detect----------------------------------------------------------------------------------------------------------------
@@ -186,8 +203,13 @@ def detect(opt):
     tracker = Tracker(metric, max_iou_distance=max_cosine_distance, max_age=MAX_AGE, n_init=N_INIT)
 
 
-    # 开始取流检测
+    # 开始取流检测--------------------------------------------------------------------------------------------------------
     for i, (path, img, im0s, vid_cap) in enumerate(dataset):
+
+        # 如果为None说明取流不成功，跳过这帧
+        if len(img) == 0:
+            print("xxxxxxxxxxxxxxxxx跳过这帧xxxxxxxxxxxxxxxx")
+            continue
 
         # 模型推理-------------------------------------------------------------------------------------------------------
         infer_output = model.execute([img])
@@ -237,7 +259,6 @@ def detect(opt):
 
 
             # 开始跟踪的处理-----------------------------------------------------------------------------------------------
-
             if det is not None and len(det):
                 det[:, [0, 2]] = (det[:, [0, 2]] * MODEL_WIDTH * x_scale).round()
                 det[:, [1, 3]] = (det[:, [1, 3]] * MODEL_HEIGHT * y_scale).round()
