@@ -1,30 +1,33 @@
+import cv2
 import numpy
 import numpy as np
 import abc
 import threading
+import time
 from .utils_deepsort import iou
 from .utils_deepsort import calc_iou
 from .push import push
 from .utils_deepsort import compute_color_for_id
 from .utils_deepsort import plot_one_box
 
-R = threading.Lock()
+
 
 
 class Strategy(metaclass=abc.ABCMeta):
-    def __init__(self, boxes, pool, opt, im0s):
+    def __init__(self, boxes, pool, opt, im0s, threshold, lock):
         self.boxes = boxes
         self.pool = pool
         self.opt = opt
         self.im0s = im0s
         self.pbox = []
+        self.threshold = threshold
+        self.lock = lock
 
         # names
         names = opt.name
         with open(names, 'r') as f:
             names = f.read().split('\n')
         self.labels = list(filter(None, names))
-
 
     @abc.abstractmethod
     def do(in_area_box):
@@ -51,29 +54,36 @@ class Strategy(metaclass=abc.ABCMeta):
 # 2. 已post的id不重复上报
 class CarStrategy(Strategy):
 
-    # 策略：同一个id连续20帧(假设帧率为5fps，4s)iou>0.95则认为是异常停车
     def do(self,):
         for j, box in enumerate(self.boxes):
             # 初始化参数
             id = box[4]
             bboxes = box[0:4]
 
-            # states
+            # lock
+            self.lock.acquire()
             states = 0
             for i, p in enumerate(self.pool[::-1]):
-                if(id == p[0] and p[0] < 20):
-                    o = iou(bboxes, p[0:4])
+                if id == p[0] and p[1] < self.threshold:
+                    o = iou(bboxes, p[2:6])
+                    print("当前p时间：", p[6])
+                    print("iou:", o)
+                    print("thread id:", threading.currentThread().ident)
                     states = p[1] + 1 if o > 0.95 else p[1]
                     break
+                elif id == p[0] and p[1] >= self.threshold:
+                    states = self.threshold + 1
+                    break
 
-            # lock
-            R.acquire()
-            self.pool.append([box[4], states])
-            R.release()
+            print("id:", id)
+            print("当前状态为：", states)
+
+            self.pool.append([box[4], states, box[0], box[1], box[2], box[3], int(round(time.time() * 1000))])
+            self.lock.release()
 
             # post
-            if box[5][1] == 20:
-                self.pbox = box
+            if states == self.threshold:
+                self.pbox = [box]
                 self.draw()
                 push(self.opt, self.im0s, "illegalPark")
 
@@ -85,24 +95,29 @@ class PeopleStrategy(Strategy):
         # init
         cars = self.boxes[self.boxes[:, 5] == 0]
         peoples = self.boxes[self.boxes[:, 5] == 8]
-        ious = calc_iou(peoples, cars)
         self.boxes = peoples
+
+        if(self.boxes.size == 0):
+            return None
+
+        ious = calc_iou(peoples, cars)
 
         for j, box in enumerate(self.boxes):
             # 参数初始化
             id = box[4]
 
-            # states
+            # lock
+            self.lock.acquire()
             states = 0
             quadrant = -1
             for i, p in enumerate(self.pool[::-1]):
-                if(id == p[0] and p[1] < 3):
+                if id == p[0] and p[1] < self.threshold:
                     pious = ious[i]
                     index = np.argmax(pious)
                     car = cars[index]
 
-                    # 如果当前行人box和有1辆车重叠
-                    if(pious[index] > 0):
+                    # 如果当前行人box和有同1辆车重叠
+                    if(pious[index] > 0 and pious[4] == car[4]):
                         o = ((car[0] + car[2])/2, (car[1] + car[3])/2)
                         x = ((box[0] + box[2])/2, (box[1] + box[3])/2)
                         y = x - o
@@ -124,15 +139,16 @@ class PeopleStrategy(Strategy):
                     else:
                         states = p[1] + 1
                     break
+                elif id == p[0] and p[1] >= self.threshold:
+                    states = self.threshold + 1
+                    break
 
-            # lock
-            R.acquire()
             self.pool.append([box[4], states, quadrant])
-            R.release()
+            self.lock.release()
 
             # post
-            if states == 3:
-                self.pbox = box
+            if states == self.threshold:
+                self.pbox = [box]
                 self.draw()
                 push(self.opt, self.im0s, "peopleOrNoVehicles")
 
@@ -148,21 +164,20 @@ class MaterialStrategy(Strategy):
             # 初始化参数
             id = box[4]
 
-            # states
+            # lock
+            self.lock.acquire()
             states = 0
             for i, p in enumerate(self.pool[::-1]):
                 if(id == p[0] and p[1] < 3):
                     states = p[1] + 1
                     break
 
-            # lock
-            R.acquire()
             self.pool.append([box[4], states])
-            R.release()
+            self.lock.release()
 
             # post
             if states == 3:
-                self.pbox = box
+                self.pbox = [box]
                 self.draw()
                 push(self.opt, self.im0s, "throwThings")
 
@@ -172,24 +187,54 @@ class MaterialStrategy(Strategy):
 class illegalDriving(Strategy):
 
     def do(self,):
-        pass
+        for j, box in enumerate(self.boxes):
+            # 初始化参数
+            id = box[4]
+            color = compute_color_for_id(id)
+
+            # lock
+            self.lock.acquire()
+            states = 0
+            points = []
+            for i, p in enumerate(self.pool[::-1]):
+                if id == p[0] and p[1] < self.threshold:
+                    states = p[1] + 1
+                    points = p[2].append(((box[0] + box[2])/2, (box[1] + box[3])/3))
+                    break
+                elif id == p[0] and p[1] == self.threshold:
+                    states = p[1] + 1
+                    break
+
+            self.pool.append([box[4], states, points])
+            self.lock.release()
+
+            # post
+            if states == self.threshold:
+                self.pbox = [box]
+                self.draw()
+
+                # 画点
+                for point in points:
+                    cv2.circle(self.img0s, point, 1, color, 4)
+
+                push(self.opt, self.im0s, "illegalDriving")
 
 
 
-def todo(c_box, pool, opt, im0s):
+def todo(c_box, pool, opt, im0s, lock):
+
+    thresholds = [10, 3, 3, 10]
 
     # 不同处理策略集合
     strategies = {
-        0: CarStrategy(np.array(c_box[0]), pool[0], opt, im0s),
-        1: PeopleStrategy(np.array(c_box[1]), pool[1], opt, im0s),
-        2: MaterialStrategy(np.array(c_box[2]), pool[2], opt, im0s)
+        0: CarStrategy(c_box[0], pool[0], opt, im0s, thresholds[0], lock) if c_box[0].size != 0 else 'no',
+        1: PeopleStrategy(c_box[1], pool[1], opt, im0s, thresholds[1], lock) if c_box[1].size != 0 else 'no',
+        2: MaterialStrategy(c_box[2], pool[2], opt, im0s, thresholds[2], lock) if c_box[2].size != 0 else 'no',
+        # 3: illegalDriving(c_box[3], pool[3], opt, im0s, thresholds[3], lock) if c_box[3].size != 0 else 'no'
     }
 
-    # for v in strategies.values():
-    #    v.do()
-
     for k, v in strategies.items():
-        if c_box[k].size != 0:
+        if v != 'no':
             v.do()
 
 

@@ -6,9 +6,9 @@
 
 # home
 AREA: 0,0,1920,0,0,1080,1920,1080
-RTSP: rtsp://192.168.1.20/playback7.mp4
-POST: http://192.168.1.38:8080/v1/app/interface/uploadEvent
-POINT: 33.64.37.123
+RTSP: rtsp://192.168.1.20/playback11.mp4
+POST: http://192.168.1.30:8080/v1/app/interface/uploadEvent
+POINT: 192.168.1.1
 
 # scene
 # AREA: 1476,199,1815,217,279,823,1640,993

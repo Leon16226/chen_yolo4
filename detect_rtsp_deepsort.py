@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import copy
+import threading
 
 import cv2
 import numpy as np
@@ -54,6 +55,8 @@ id_thres = 20
 car_id_pool = []
 people_id_pool = []
 material_id_pool = []
+illdri_id_pool = []
+lock = threading.Lock()
 
 
 # fps
@@ -100,19 +103,16 @@ class LoadStreams:
         n = 0
         while cap.isOpened():
             n += 1
-            ret, _ = cap.grab()
-
-            # 设置为None
-            if not(ret):
-                self.imgs = []
+            ret = cap.grab()
 
             # 若没有帧返回，则重新刷新rtsp视频流
-            while not(ret):
+            while not ret:
                 cap = cv2.VideoCapture(self.source)
                 if not(cap):
                     continue
                 ret, _ = cap.grab()
                 print("rtsp重新连接中---------------------------")
+                time.sleep(0.5)
 
             # fps = 25
             if n == 2:
@@ -125,23 +125,19 @@ class LoadStreams:
         return self
 
     def __next__(self):
-        if(len(self.imgs) == 0):
-            self.count += 1
-            return [], [], [], []
-        else:
-            self.count += 1
-            img0 = self.imgs.copy()
-            print("get a img-----------------------------------------------------:", img0.shape)
+        self.count += 1
+        img0 = self.imgs.copy()
+        print("get a img-----------------------------------------------------:", img0.shape)
 
-            # resize
-            img = cv2.resize(img0, self.img_size)
-            img = img[np.newaxis, :]
-            img = img[:, :, :, ::-1].transpose(0, 3, 1, 2)
-            img = np.ascontiguousarray(img)
-            img = img.astype(np.float32)
-            img /= 255.0
+        # resize
+        img = cv2.resize(img0, self.img_size)
+        img = img[np.newaxis, :]
+        img = img[:, :, :, ::-1].transpose(0, 3, 1, 2)
+        img = np.ascontiguousarray(img)
+        img = img.astype(np.float32)
+        img /= 255.0
 
-            return self.source, img, img0, self.cap
+        return self.source, img, img0, self.cap
 
     def __len__(self):
         return 0
@@ -202,14 +198,16 @@ def detect(opt):
     metric = NearestNeighborDistanceMetric("cosine", max_cosine_distance, NN_BUDGET)
     tracker = Tracker(metric, max_iou_distance=max_cosine_distance, max_age=MAX_AGE, n_init=N_INIT)
 
-
+    limg = np.random.random([1, 3, 608, 608])
     # 开始取流检测--------------------------------------------------------------------------------------------------------
     for i, (path, img, im0s, vid_cap) in enumerate(dataset):
 
-        # 如果为None说明取流不成功，跳过这帧
-        if len(img) == 0:
+        # 情况1：重复帧
+        if np.sum(limg - img) == 0:
             print("xxxxxxxxxxxxxxxxx跳过这帧xxxxxxxxxxxxxxxx")
             continue
+        limg = img
+
 
         # 模型推理-------------------------------------------------------------------------------------------------------
         infer_output = model.execute([img])
@@ -338,17 +336,16 @@ def detect(opt):
                     # 新开一个线程取做处理---------------------------------------------------------------------------------
                     if len(outputs) > 0:
                         # 保持pool为一定大小否则内存溢出
-                        car_id_pool = filter_pool(car_id_pool)
-                        people_id_pool = filter_pool(people_id_pool)
-                        material_id_pool = filter_pool(material_id_pool)
+                        car_id_pool = filter_pool(car_id_pool, id_thres)
+                        people_id_pool = filter_pool(people_id_pool, id_thres)
+                        material_id_pool = filter_pool(material_id_pool, id_thres)
 
-                        # 参数：
-                        # outputs item结构为[x1, y1, x2, y2, id, cls]
-                        # opt 配置参数
-                        # im0s 原图
+                        # thread
                         thread_post = Thread(target=postprocess_track, args=(outputs,
-                                                                             car_id_pool, people_id_pool, material_id_pool,
-                                                                             opt, im0s))
+                                                                             car_id_pool, people_id_pool,
+                                                                             material_id_pool, illdri_id_pool,
+                                                                             opt, im0s,
+                                                                             lock))
                         thread_post.start()
             else:
                 tracker.increment_ages()

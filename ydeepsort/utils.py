@@ -72,19 +72,47 @@ def readyaml():
 
 # track-----------------------------------------------------------------------------------------------------------------
 def postprocess_track(outputs,
-                      car_id_pool, people_id_pool, material_id_pool,
-                      opt, im0s):
+                      car_id_pool, people_id_pool,
+                      material_id_pool, illdri_id_pool,
+                      opt, im0s,
+                      lock):
 
     # box : [x1, y1, x2, y2, id, cls]
     in_track_box = np.array(outputs)
 
-    # 根据cls分流box
+    # 0 : 异常停车
+    # 1 ： 行人
+    # 2 ： 抛洒物
+    # 3 ： 异常行驶
+
+    # 0:car
+    # 1:truck
+    # 2:cup
+    # 3:cans
+    # 4:bottle
+    # 5:mealbox
+    # 6:box
+    # 7：bag
+    # 8：person
+    # 9: barricade
+    # 10: motorbike
+    # 11: bullbarrels
+    # 12: threebicycle
+    # 13: bus
+    # 14: tanker
+    # 15: bicycle
+    # 16: tzc
+    # 17: trailer
+    # 18: fomabox
+    # 19: fire
     c_box = {0: in_track_box[(in_track_box[:, 5] == 0) + (in_track_box[:, 5] == 1)],
              1: in_track_box[(in_track_box[:, 5] == 8) + (in_track_box[:, 5] == 0)],
-             2: in_track_box[in_track_box[:, 5] == 2]}
+             2: in_track_box[(in_track_box[:, 5] == 2) + (in_track_box[:, 5] == 3) + (in_track_box[:, 5] == 4)
+                            + (in_track_box[:, 5] == 5) + (in_track_box[:, 5] == 6) + (in_track_box[:, 5] == 7)],
+             3: in_track_box[(in_track_box[:, 5] == 0) + (in_track_box[:, 5] == 1)]}
 
-    pool = [car_id_pool, people_id_pool, material_id_pool]
-    todo(c_box, pool, opt, im0s)
+    pool = [car_id_pool, people_id_pool, material_id_pool, illdri_id_pool]
+    todo(c_box, pool, opt, im0s, lock)
 
 
 

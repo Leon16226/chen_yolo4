@@ -2,9 +2,8 @@ import cv2
 import numpy as np
 
 # id pool
-def filter_pool(pool):
-    pool = pool[len(pool) - 30:-1] if len(pool) > 30 else pool
-    return pool
+def filter_pool(pool, threshold):
+    return pool[-threshold:] if len(pool) > threshold else pool
 
 
 # iou

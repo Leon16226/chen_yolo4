@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="date raochen highway 18">
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp_deepsort.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/config.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ydeepsort/push.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/push.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/strategy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ydeepsort/utils_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/utils_deepsort.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,13 +185,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626763600078</updated>
-    </task>
-    <task id="LOCAL-00017" summary="evolve success">
-      <created>1628154573924</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1628154573924</updated>
     </task>
     <task id="LOCAL-00018" summary="yolox">
       <created>1628213066480</created>
@@ -529,7 +522,14 @@
       <option name="project" value="LOCAL" />
       <updated>1634542668366</updated>
     </task>
-    <option name="localTasksCounter" value="66" />
+    <task id="LOCAL-00066" summary="update">
+      <created>1634715576759</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1634715576759</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -587,7 +587,6 @@
     <MESSAGE value="roadmap success" />
     <MESSAGE value="small part" />
     <MESSAGE value="clear project" />
-    <MESSAGE value="update" />
     <MESSAGE value="yolo5 cache" />
     <MESSAGE value="copy and paste" />
     <MESSAGE value="detect rtsp sucess" />
@@ -600,7 +599,8 @@
     <MESSAGE value="deepsort postprocess scuess" />
     <MESSAGE value="post review" />
     <MESSAGE value="date raochen highway 18" />
-    <option name="LAST_COMMIT_MESSAGE" value="date raochen highway 18" />
+    <MESSAGE value="update" />
+    <option name="LAST_COMMIT_MESSAGE" value="update" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
