@@ -110,7 +110,7 @@ class LoadStreams:
                 cap = cv2.VideoCapture(self.source)
                 if not(cap):
                     continue
-                ret, _ = cap.grab()
+                ret = cap.grab()
                 print("rtsp重新连接中---------------------------")
                 time.sleep(0.5)
 
@@ -186,12 +186,22 @@ def detect(opt):
     # init detect area--------------------------------------------------------------------------------------------------
     opt_point1 = opt.area
     opt_point1 = opt_point1.split(',')
-    toplx, toply = int(opt_point1[0]), int(opt_point1[1])
-    toprx, topry = int(opt_point1[2]), int(opt_point1[3])
-    bottomlx, bottomly = int(opt_point1[4]), int(opt_point1[5])
-    bottomrx, bottomry = int(opt_point1[6]), int(opt_point1[7])
-    point1 = [toplx, toply, bottomlx, bottomly, bottomrx, bottomry, toprx, topry]
+    tlx1, tly1 = int(opt_point1[0]), int(opt_point1[1])
+    trx1, try1 = int(opt_point1[2]), int(opt_point1[3])
+    blx1, bly1 = int(opt_point1[4]), int(opt_point1[5])
+    brx1, bry1 = int(opt_point1[6]), int(opt_point1[7])
+    point1 = [tlx1, tly1, blx1, bly1, brx1, bry1, trx1, try1]
     point1 = np.array(point1).reshape(4, 2)
+
+    # init road side----------------------------------------------------------------------------------------------------
+    opt_point2 = opt.side
+    opt_point2 = opt_point2.split(',')
+    tlx2, tly2 = int(opt_point2[0]), int(opt_point2[1])
+    trx2, try2 = int(opt_point2[2]), int(opt_point2[3])
+    blx2, bly2 = int(opt_point2[4]), int(opt_point2[5])
+    brx2, bry2 = int(opt_point2[6]), int(opt_point2[7])
+    point2 = [tlx2, tly2, blx2, bly2, brx2, bry2, trx2, try2]
+    point2 = np.array(point2).reshape(4, 2)
 
     # deepsort init-----------------------------------------------------------------------------------------------------
     max_cosine_distance = MAX_DIST
@@ -235,21 +245,23 @@ def detect(opt):
 
 
         if all_boxes.shape[0] > 0:
-            # 根据nms过滤box
+            # 1.根据nms过滤box
             real_box = func_nms(all_boxes, NMS_THRESHOLD_CONST)
             print("real_box:", real_box.shape)
 
-            # scale
-            orig_shape = im0s.shape[:2]
-            x_scale = orig_shape[1] / MODEL_HEIGHT
-            y_scale = orig_shape[0] / MODEL_WIDTH
+            # 2.scale
+            orig_shape = im0s.shape[:2]  # (h, w, 3)
+            x_scale = orig_shape[1] / MODEL_WIDTH
+            y_scale = orig_shape[0] / MODEL_HEIGHT
+
+            print('im0s:', im0s.shape)
 
             top_x = (real_box[:, 0] * MODEL_WIDTH * x_scale).astype(int)
             top_y = (real_box[:, 1] * MODEL_HEIGHT * y_scale).astype(int)
             bottom_x = (real_box[:, 2] * MODEL_WIDTH * x_scale).astype(int)
             bottom_y = (real_box[:, 3] * MODEL_HEIGHT * y_scale).astype(int)
 
-            # 保留在检测区域内的box
+            # 3.保留在检测区域内的box
             point = np.array([x for x in zip(top_x, top_y, top_x, bottom_y,
                                              bottom_x, bottom_y, bottom_x, top_y)]).reshape([-1, 4, 2])
             inter_area = np.array([Cal_area_2poly(point1, p) for p in point])
@@ -270,12 +282,15 @@ def detect(opt):
                 # 从原图im0s中截取目标区域，准备抽取特征---------------------------------------------------------------------
                 height, width = orig_shape
                 im_crops = []
-                for box in xywhs:
+                for i, box in enumerate(xywhs):
                     x1, y1, x2, y2 = _xywh_to_xyxy(box, height, width)
+                    # ?
+                    if x2 - x1 == 0:
+                        x2 += 1
+                    elif y2 - y1 == 0:
+                        y2 += 1
                     im = im0s[y1:y2, x1:x2]
-                    if (im.shape[0] != 0) and (im.shape[1] != 0):
-                        print("im:", im.shape)
-                        im_crops.append(im)
+                    im_crops.append(im)
 
                 # deepsort框架抽取特征------------------------------------------------------------------------------------
                 if im_crops:
@@ -291,14 +306,12 @@ def detect(opt):
 
                 print("features:", np.array(features).shape)
 
-
-                if features.shape[0] > 0 :
-                    # do track----------------------------------------------------------------------------------------------
+                if features.shape[0] > 0:
+                    # do track------------------------------------------------------------------------------------------
                     bbox_tlwh = _xywh_to_tlwh(xywhs)
-                    detections = [Detection(bbox_tlwh[i], conf, features[i]) for i, conf in enumerate(
-                                    confs) if conf > MIN_CONFIDENCE]
+                    detections = [Detection(bbox_tlwh[i], conf, features[i]) for i, conf in enumerate(confs)]
 
-                    # update tracker ---------------------------------------------------------------------------------------
+                    # update tracker -----------------------------------------------------------------------------------
                     tracker.predict()
                     tracker.update(detections, clss)
 
@@ -345,7 +358,8 @@ def detect(opt):
                                                                              car_id_pool, people_id_pool,
                                                                              material_id_pool, illdri_id_pool,
                                                                              opt, im0s,
-                                                                             lock))
+                                                                             lock,
+                                                                             point2))
                         thread_post.start()
             else:
                 tracker.increment_ages()
@@ -358,6 +372,8 @@ def detect(opt):
             point_s = point1.reshape((-1, 1, 2))
             cv2.polylines(im0s, [point_s], True, (0, 255, 255))
 
+            cv2.namedWindow("deepsort", 0)
+            cv2.resizeWindow("deepsort", 960, 540)
             cv2.imshow("deepsort", im0s)
             if cv2.waitKey(1) == ord('q'):
                 cv2.destroyAllWindows()
@@ -375,6 +391,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--area', type=str, default=y['AREA'], help='lt rt lb rb')
+    parser.add_argument('--side', type=str, default=y['AREA_SIDE'], help='lt rt lb rb')
     parser.add_argument('--rtsp', type=str, default=y['RTSP'])
     parser.add_argument('--post', type=str, default=y['POST'])
     parser.add_argument('--point', type=str, default=y['POINT'])

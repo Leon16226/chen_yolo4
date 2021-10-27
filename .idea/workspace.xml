@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="update">
+    <list default="true" id="1de91fa3-cea5-4b89-8d5b-3b8c629aa0ca" name="Default Changelist" comment="car strategy sucess">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/detect_rtsp_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect_rtsp_deepsort.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/config.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/strategy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ydeepsort/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ydeepsort/utils_deepsort.py" beforeDir="false" afterPath="$PROJECT_DIR$/ydeepsort/utils_deepsort.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,13 +184,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1626763600078</updated>
-    </task>
-    <task id="LOCAL-00018" summary="yolox">
-      <created>1628213066480</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1628213066480</updated>
     </task>
     <task id="LOCAL-00019" summary="yolof.cfg">
       <created>1628233152254</created>
@@ -529,7 +521,14 @@
       <option name="project" value="LOCAL" />
       <updated>1634715576759</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="car strategy sucess">
+      <created>1634871758843</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1634871758843</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -575,7 +574,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="rnnet init" />
     <MESSAGE value="rnnet sucess" />
     <MESSAGE value="erode" />
     <MESSAGE value=" erode sucess" />
@@ -600,7 +598,8 @@
     <MESSAGE value="post review" />
     <MESSAGE value="date raochen highway 18" />
     <MESSAGE value="update" />
-    <option name="LAST_COMMIT_MESSAGE" value="update" />
+    <MESSAGE value="car strategy sucess" />
+    <option name="LAST_COMMIT_MESSAGE" value="car strategy sucess" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -697,6 +696,11 @@
           <url>file://$PROJECT_DIR$/ydeepsort/sort/tracker.py</url>
           <line>98</line>
           <option name="timeStamp" value="58" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ydeepsort/strategy.py</url>
+          <line>127</line>
+          <option name="timeStamp" value="65" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

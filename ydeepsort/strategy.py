@@ -97,10 +97,16 @@ class PeopleStrategy(Strategy):
         peoples = self.boxes[self.boxes[:, 5] == 8]
         self.boxes = peoples
 
-        if(self.boxes.size == 0):
+        if self.boxes.size == 0:
             return None
 
-        ious = calc_iou(peoples, cars)
+        # 加一个空车
+        if cars.size == 0:
+            cars = np.array([[0, 0, 10, 10, -1, -1]])
+
+        # iou
+        ious = calc_iou(peoples[:, 0:4], cars[:, 0:4])
+        print("people ious:", ious)
 
         for j, box in enumerate(self.boxes):
             # 参数初始化
@@ -112,33 +118,36 @@ class PeopleStrategy(Strategy):
             quadrant = -1
             for i, p in enumerate(self.pool[::-1]):
                 if id == p[0] and p[1] < self.threshold:
-                    pious = ious[i]
+
+                    pious = ious[j]
                     index = np.argmax(pious)
                     car = cars[index]
 
-                    # 如果当前行人box和有同1辆车重叠
-                    if(pious[index] > 0 and pious[4] == car[4]):
-                        o = ((car[0] + car[2])/2, (car[1] + car[3])/2)
-                        x = ((box[0] + box[2])/2, (box[1] + box[3])/2)
+                    # 行人格外策略----------------------------------------------------------------------------------------
+                    # 1. 人和车重叠iou > 0
+                    if pious[index] > 0:
+                        o = np.array([(car[0] + car[2])/2, (car[1] + car[3])/2])
+                        x = np.array([(box[0] + box[2])/2, (box[1] + box[3])/2])
                         y = x - o
 
                         # quadrant
                         # (-1, -1)  (1, -1)
                         # (-1,  1)  (1,  1)
-                        if(y[0] < 0 and y[1] < 0):
+                        if y[0] < 0 and y[1] < 0:
                             quadrant = 0
-                        elif(y[0] < 0 and y[1] > 0):
+                        elif y[0] < 0 and y[1] > 0:
                             quadrant = 1
-                        elif(y[0] > 0 and y[1] > 0):
+                        elif y[0] > 0 and y[1] > 0:
                             quadrant = 2
-                        elif(y[0] > 0 and y[1] < 0):
+                        elif y[0] > 0 and y[1] < 0:
                             quadrant = 3
 
-                        if(p[2] != quadrant):
+                        if p[2] != quadrant and quadrant != -1:
                             states = p[1] + 1
                     else:
                         states = p[1] + 1
                     break
+                    # 行人格外策略----------------------------------------------------------------------------------------
                 elif id == p[0] and p[1] >= self.threshold:
                     states = self.threshold + 1
                     break
@@ -153,10 +162,6 @@ class PeopleStrategy(Strategy):
                 push(self.opt, self.im0s, "peopleOrNoVehicles")
 
 
-
-
-
-
 # 2. 抛洒物--------------------------------------------------------------------------------------------------------------
 class MaterialStrategy(Strategy):
     def do(self):
@@ -168,19 +173,23 @@ class MaterialStrategy(Strategy):
             self.lock.acquire()
             states = 0
             for i, p in enumerate(self.pool[::-1]):
-                if(id == p[0] and p[1] < 3):
+                if id == p[0] and p[1] < self.threshold:
+                    print("抛撒物状态加1")
                     states = p[1] + 1
                     break
+                elif id == p[0] and p[1] >= self.threshold:
+                    states = self.threshold + 1
+                    break
+
 
             self.pool.append([box[4], states])
             self.lock.release()
 
             # post
-            if states == 3:
+            if states == self.threshold:
                 self.pbox = [box]
                 self.draw()
                 push(self.opt, self.im0s, "throwThings")
-
 
 
 # 3. 应急车道异常行驶--------------------------------------------------------------------------------------------------------
@@ -195,17 +204,19 @@ class illegalDriving(Strategy):
             # lock
             self.lock.acquire()
             states = 0
-            points = []
+            points = ''
             for i, p in enumerate(self.pool[::-1]):
                 if id == p[0] and p[1] < self.threshold:
                     states = p[1] + 1
-                    points = p[2].append(((box[0] + box[2])/2, (box[1] + box[3])/3))
+                    points = p[2] + str(int((box[0] + box[2])/2)) + ',' + str(int((box[1] + box[3])/2)) + ','
                     break
-                elif id == p[0] and p[1] == self.threshold:
-                    states = p[1] + 1
+                elif id == p[0] and p[1] >= self.threshold:
+                    states = self.threshold + 1
                     break
 
-            self.pool.append([box[4], states, points])
+            print("id:", id)
+            print("当前状态：", states)
+            self.pool.append([box[4], states, points])  # ponits会被程序释放掉
             self.lock.release()
 
             # post
@@ -214,8 +225,14 @@ class illegalDriving(Strategy):
                 self.draw()
 
                 # 画点
-                for point in points:
-                    cv2.circle(self.img0s, point, 1, color, 4)
+                points = points.split(',')
+                mpoints = []
+                for i, p in enumerate(points[0:-1]):
+                    if i % 2 == 0:
+                        mpoints.append((int(p), int(points[i + 1])))
+                for point in mpoints:
+                    print("画点")
+                    cv2.circle(self.im0s, point, 5, color, -1)
 
                 push(self.opt, self.im0s, "illegalDriving")
 
@@ -223,14 +240,14 @@ class illegalDriving(Strategy):
 
 def todo(c_box, pool, opt, im0s, lock):
 
-    thresholds = [10, 3, 3, 10]
+    thresholds = [10, 3, 3, 20]
 
     # 不同处理策略集合
     strategies = {
-        0: CarStrategy(c_box[0], pool[0], opt, im0s, thresholds[0], lock) if c_box[0].size != 0 else 'no',
-        1: PeopleStrategy(c_box[1], pool[1], opt, im0s, thresholds[1], lock) if c_box[1].size != 0 else 'no',
-        2: MaterialStrategy(c_box[2], pool[2], opt, im0s, thresholds[2], lock) if c_box[2].size != 0 else 'no',
-        # 3: illegalDriving(c_box[3], pool[3], opt, im0s, thresholds[3], lock) if c_box[3].size != 0 else 'no'
+        # 0: CarStrategy(c_box[0], pool[0], opt, im0s, thresholds[0], lock) if c_box[0].size != 0 else 'no',
+        # 1: PeopleStrategy(c_box[1], pool[1], opt, im0s, thresholds[1], lock) if c_box[1].size != 0 else 'no',
+        # 2: MaterialStrategy(c_box[2], pool[2], opt, im0s, thresholds[2], lock) if c_box[2].size != 0 else 'no',
+        3: illegalDriving(c_box[3], pool[3], opt, im0s, thresholds[3], lock) if c_box[3].size != 0 else 'no'
     }
 
     for k, v in strategies.items():

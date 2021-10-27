@@ -1,7 +1,9 @@
 import numpy as np
+import shapely.geometry
 from shapely.geometry import Polygon
 import yaml
 from .strategy import todo
+import cv2
 
 
 
@@ -62,6 +64,13 @@ def Cal_area_2poly(point1, point2):
         inter_area = poly1.intersection(poly2).area  # 相交面积
     return inter_area
 
+# 判断box中心是否在检测区域内
+def intersects(point, ploy):
+    point = shapely.geometry.Point(point)
+    poly = Polygon(ploy).convex_hull
+
+    return poly.intersects(point)
+
 
 # yaml
 def readyaml():
@@ -75,41 +84,68 @@ def postprocess_track(outputs,
                       car_id_pool, people_id_pool,
                       material_id_pool, illdri_id_pool,
                       opt, im0s,
-                      lock):
+                      lock,
+                      point2):
+
+    # side
+    point_s = point2.reshape((-1, 1, 2))
+    cv2.polylines(im0s, [point_s], True, (0, 255, 255))
 
     # box : [x1, y1, x2, y2, id, cls]
     in_track_box = np.array(outputs)
 
+
+
     # 0 : 异常停车
-    # 1 ： 行人
+    # 1 ： 行人或非机动车(包括行人、自行车、三轮车、摩托车)
     # 2 ： 抛洒物
     # 3 ： 异常行驶
 
-    # 0:car
-    # 1:truck
+    # 0:car 轿车
+    # 1:truck 卡车
     # 2:cup
     # 3:cans
     # 4:bottle
     # 5:mealbox
     # 6:box
     # 7：bag
-    # 8：person
+    # 8：person ----人------
     # 9: barricade
-    # 10: motorbike
+    # 10: motorbike ----摩托车-----
     # 11: bullbarrels
-    # 12: threebicycle
-    # 13: bus
-    # 14: tanker
-    # 15: bicycle
-    # 16: tzc
-    # 17: trailer
+    # 12: threebicycle -----三轮车-------
+    # 13: bus 汽车
+    # 14: tanker 油罐车
+    # 15: bicycle --------自行车---------
+    # 16: tzc 特种车
+    # 17: trailer 拖车
     # 18: fomabox
     # 19: fire
-    c_box = {0: in_track_box[(in_track_box[:, 5] == 0) + (in_track_box[:, 5] == 1)],
-             1: in_track_box[(in_track_box[:, 5] == 8) + (in_track_box[:, 5] == 0)],
-             2: in_track_box[(in_track_box[:, 5] == 2) + (in_track_box[:, 5] == 3) + (in_track_box[:, 5] == 4)
-                            + (in_track_box[:, 5] == 5) + (in_track_box[:, 5] == 6) + (in_track_box[:, 5] == 7)],
-             3: in_track_box[(in_track_box[:, 5] == 0) + (in_track_box[:, 5] == 1)]}
+
+    vehicles = in_track_box[(in_track_box[:, 5] == 0) + (in_track_box[:, 5] == 1) + (in_track_box[:, 5] == 13)
+                            + (in_track_box[:, 5] == 14) + (in_track_box[:, 5] == 16) + (in_track_box[:, 5] == 17)]
+
+    people_or_novehicles = in_track_box[(in_track_box[:, 5] == 8) + (in_track_box[:, 5] == 10)
+                             + (in_track_box[:, 5] == 12) + (in_track_box[:, 5] == 15)]
+
+    materials = in_track_box[(in_track_box[:, 5] == 2) + (in_track_box[:, 5] == 3) + (in_track_box[:, 5] == 4)
+                            + (in_track_box[:, 5] == 5) + (in_track_box[:, 5] == 6) + (in_track_box[:, 5] == 7)]
+
+    illdris = []
+    for i, ve in enumerate(vehicles):
+        p = np.array([(ve[2] + ve[0])/2, (ve[3] + ve[1])/2])
+        print("车辆中心坐标：", p)
+        if intersects(p, point2):
+            illdris.append(ve)
+            print("硬路肩有车辆通过")
+    illdris = np.array(illdris)
+
+
+    c_box = {
+             0: vehicles,
+             1: np.concatenate((people_or_novehicles, vehicles), axis=0),
+             2: materials,
+             3: illdris}
 
     pool = [car_id_pool, people_id_pool, material_id_pool, illdri_id_pool]
     todo(c_box, pool, opt, im0s, lock)
